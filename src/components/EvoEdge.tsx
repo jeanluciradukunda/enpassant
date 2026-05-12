@@ -6,18 +6,27 @@ import type { EvoEdgeData } from '@/types/model';
 /**
  * Custom React Flow edge.
  *
- * Solid for canonical continuations; dotted for compressed chains.
- * Per-source-Occurrence logical thickness (1..30) is mapped to ~1..3 device
- * pixels by a global multiplier per SPEC §2 Edges block.
+ * Per SPEC §2 Edges + Figure 3 legend:
+ *  - Solid arrow with arrowhead          = one move to the next position.
+ *  - Dotted/ticked arrow with arrowhead  = several moves to the next position
+ *    (a compressed chain from the two-neighbor shortening pass).
+ *  - Trunk-to-trunk edges form a visibly heavier spine.
+ *  - Per-source-Occurrence thickness (logical 1..30 → ~1-3 device px) modulates
+ *    branch edges by relative eval delta.
+ *
+ * Arrowheads are rendered via SVG <marker> defs in `EvoGraph` so every edge
+ * inherits them by reference.
  */
 
-const PX_PER_LOGICAL_UNIT = 0.1; // 1..30 logical → 0.1..3 device px
+const PX_PER_LOGICAL_UNIT = 0.1;
+const TRUNK_EDGE_PX = 2.4;
 
 type Props = EdgeProps & { data?: EvoEdgeData };
 
 function EvoEdgeImpl(props: Props) {
   const { sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, markerEnd } =
     props;
+
   const [path] = getSmoothStepPath({
     sourceX,
     sourceY,
@@ -25,13 +34,26 @@ function EvoEdgeImpl(props: Props) {
     targetY,
     sourcePosition,
     targetPosition,
-    borderRadius: 2,
+    borderRadius: 4,
   });
 
-  const logicalThickness = data?.logicalThickness ?? 3;
-  const widthPx = Math.max(0.6, logicalThickness * PX_PER_LOGICAL_UNIT);
-  const isDotted = data?.variant === 'dotted';
-  const stroke = isDotted ? 'var(--edge-compressed)' : 'var(--edge-canonical)';
+  const isTrunkEdge = data?.kind === 'trunk';
+  const variant = data?.variant ?? 'solid';
+  const isDotted = variant === 'dotted';
+
+  // Trunk edges form the spine: heavy black strokes. Branch edges thin.
+  const widthPx = isTrunkEdge
+    ? TRUNK_EDGE_PX
+    : Math.max(0.7, (data?.logicalThickness ?? 3) * PX_PER_LOGICAL_UNIT);
+
+  const stroke = isTrunkEdge
+    ? 'var(--edge-canonical)'
+    : isDotted
+      ? 'var(--edge-compressed)'
+      : 'var(--edge-canonical)';
+
+  // Tick-style dotted for compressed chains: round dots ending in arrowhead.
+  const dashArray = isDotted ? '1 3' : undefined;
 
   return (
     <BaseEdge
@@ -40,7 +62,8 @@ function EvoEdgeImpl(props: Props) {
       style={{
         stroke,
         strokeWidth: widthPx,
-        strokeDasharray: isDotted ? '3 2' : undefined,
+        strokeDasharray: dashArray,
+        strokeLinecap: isDotted ? 'round' : 'butt',
         fill: 'none',
       }}
     />

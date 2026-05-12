@@ -18,15 +18,22 @@
  * paper-layout engine" remains open if V2's denser engine output exposes
  * cases this doesn't cover (multi-fork chains, transposition cross-links).
  */
-import type { Edge as RfEdge, Node as RfNode } from '@xyflow/react';
-import type { EvoEdgeData, EvoNodeData, GraphData, Occurrence, OccurrenceId } from '@/types/model';
+import { MarkerType, type Edge as RfEdge, type Node as RfNode } from '@xyflow/react';
+import type {
+  EvoEdgeData,
+  EvoNodeData,
+  GraphData,
+  Occurrence,
+  OccurrenceId,
+  PositionEvent,
+} from '@/types/model';
 
 const TRUNK_BASE_X = 80;
 const TRUNK_SPACING = 56;
-const BRANCH_DEPTH_SPACING = 11; // x-distance between successive plies within a branch chain
-const BRANCH_LANE_OFFSET = 20; // y-distance between successive branch lanes from the trunk
+const BRANCH_DEPTH_SPACING = 14; // x-distance between successive plies within a branch chain
+const BRANCH_LANE_OFFSET = 22; // y-distance between successive branch lanes from the trunk
 const TRUNK_NODE_DIAMETER = 18;
-const ALT_NODE_SIDE = 13;
+const ALT_NODE_SIDE = 12;
 const PX_PER_LOGICAL_UNIT = 0.1;
 
 export interface LayoutResult {
@@ -97,7 +104,10 @@ export function layoutGraph(graph: GraphData): LayoutResult {
       sideToMove: position?.sideToMove ?? 'w',
       fill: deriveFill(position),
       borderColor: position?.sideToMove === 'b' ? 'black' : 'white',
-      isCheckmate: position?.isTerminal === 'checkmate',
+      isCheckmate:
+        position?.isTerminal === 'checkmate' ||
+        position?.event === 'mate-by-white' ||
+        position?.event === 'mate-by-black',
       isSelected: occ.id === graph.selectedOccurrenceId,
       classification: occ.classification,
       isAnalyzing: occ.analysisState === 'analyzing',
@@ -193,6 +203,8 @@ function walkChain(graph: GraphData, startId: OccurrenceId, accumulator: Occurre
 }
 
 function buildEdges(graph: GraphData): RfEdge<EvoEdgeData>[] {
+  const trunkSet = new Set(graph.trunkOrder);
+
   const outgoingByParent = new Map<OccurrenceId, OccurrenceId[]>();
   for (const occ of Object.values(graph.occurrences)) {
     if (occ.parentId === null) continue;
@@ -228,16 +240,48 @@ function buildEdges(graph: GraphData): RfEdge<EvoEdgeData>[] {
         const compressed = Math.log(1 + 29 * normalized) / Math.log(30);
         logicalThickness = 1 + Math.round(compressed * 29);
       }
+
+      const isTrunkEdge = trunkSet.has(parentId) && trunkSet.has(cid);
+      // Branch edges in this V0 fixture compress multiple paper-plies into
+      // a single visual step → render as dotted/ticked. Trunk edges and
+      // direct one-ply branch links stay solid.
+      const isDepth1Branch =
+        !isTrunkEdge && trunkSet.has(parentId) && !trunkSet.has(cid);
+      const variant: 'solid' | 'dotted' = isTrunkEdge || isDepth1Branch ? 'solid' : 'dotted';
+
+      const strokeColor = variant === 'dotted' ? '#4b5563' : '#1a1a1a';
+      const strokeWidth = isTrunkEdge
+        ? 2.4
+        : Math.max(0.8, logicalThickness * 0.12);
+
       edges.push({
         id: `${parentId}->${cid}`,
         source: parentId,
         target: cid,
-        type: 'evo',
+        // Trunk edges form a horizontal spine → smoothstep keeps the path
+        // straight. Branch edges arc from trunk anchor down/up to alt nodes
+        // → bezier reproduces the paper's curved connectors (Figure 9).
+        type: isTrunkEdge ? 'smoothstep' : 'default',
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: strokeColor,
+          width: isTrunkEdge ? 14 : 10,
+          height: isTrunkEdge ? 14 : 10,
+          strokeWidth: 1,
+        },
+        style: {
+          stroke: strokeColor,
+          strokeWidth,
+          strokeDasharray: variant === 'dotted' ? '1 3' : undefined,
+          strokeLinecap: variant === 'dotted' ? 'round' : 'butt',
+          fill: 'none',
+        },
         data: {
-          variant: 'solid',
+          kind: isTrunkEdge ? 'trunk' : 'branch',
+          variant,
           logicalThickness,
           evalDeltaCp: delta,
-          compressedPlies: null,
+          compressedPlies: variant === 'dotted' ? 1 : null,
         },
       });
     });
@@ -245,13 +289,28 @@ function buildEdges(graph: GraphData): RfEdge<EvoEdgeData>[] {
   return edges;
 }
 
-function deriveFill(position: { eval: { value: number; type: 'cp' | 'mate' } | null } | undefined) {
-  const v = position?.eval?.value ?? 0;
-  const type = position?.eval?.type ?? 'cp';
-  if (type === 'mate') return v >= 0 ? 'white' : 'black';
-  if (v > 30) return 'white';
-  if (v < -30) return 'black';
-  return 'tie';
+/**
+ * Fill rule per Figure 3 legend — drives the square's visible fill from the
+ * position's *event*, not from eval magnitude. Most positions are
+ * eventless and render as empty (just an outline).
+ */
+function deriveFill(
+  position: { event?: PositionEvent } | undefined,
+): EvoNodeData['fill'] {
+  const event = position?.event ?? null;
+  switch (event) {
+    case 'check-by-white':
+    case 'mate-by-white':
+      return 'white';
+    case 'check-by-black':
+      return 'black';
+    case 'mate-by-black':
+      return 'red';
+    case 'draw':
+      return 'tie';
+    default:
+      return 'empty';
+  }
 }
 
 export const PX_THICKNESS_FACTOR = PX_PER_LOGICAL_UNIT;

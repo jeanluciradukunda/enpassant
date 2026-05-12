@@ -4,18 +4,19 @@
  * Figure 5 of Lu/Wang/Lin 2014.
  *
  * V0 only needs the *shape*, not chess-legal moves. FENs are synthesized
- * placeholders. Evaluations follow the Figure 5 score-chart curve:
- *   - moves 1–5: roughly even
- *   - moves 6–9: small white edge
- *   - moves 10–14: Black equalizes and starts to gain
- *   - moves 15–22: Black slowly grows the advantage
- *   - moves 23–27: Black runaway, mate threats clustering
+ * placeholders. Visual fill is driven by `Position.event` per Figure 3
+ * legend (NOT by eval magnitude). Events are sparse:
+ *   - most positions have `event = null` → empty outline square.
+ *   - ~15% of late-game branches: `check-by-black` → black-fill square.
+ *   - a handful: `check-by-white`, `draw`, `mate-by-white`.
+ *   - terminal leaves at move 27: mostly `mate-by-black` → red-fill +
+ *     crown, with a few `mate-by-white` for variety.
  *
- * Branch density grows with the game (sparse in opening, dense by move 18+).
- * Move 27 carries the terminal fan with ~6 mate crowns clustered on it.
+ * Eval values still follow Figure 5's score chart shape (drives ONLY the
+ * chart, not square fills any more).
  *
- * V1+ replaces this with real PGN → chess.js → Stockfish output through the
- * same Position/Occurrence shape; no consumer changes required.
+ * Chain shapes are intentionally varied (depth 1, 2, 3, 4) so the
+ * silhouette isn't a uniform brick wall in the late game.
  */
 import type {
   Evaluation,
@@ -23,6 +24,7 @@ import type {
   Occurrence,
   OccurrenceId,
   Position,
+  PositionEvent,
   PositionId,
   Side,
 } from '@/types/model';
@@ -60,17 +62,31 @@ function makePosition(
   state: BuildState,
   sideToMove: Side,
   evalCp: number,
-  isCheckmate = false,
+  options: { event?: PositionEvent; isTerminal?: Position['isTerminal'] } = {},
 ): PositionId {
   const id = pid(state.nextPid++);
+  const event = options.event ?? null;
+  const isTerminal =
+    options.isTerminal ??
+    (event === 'mate-by-white' || event === 'mate-by-black'
+      ? 'checkmate'
+      : event === 'draw'
+        ? 'stalemate'
+        : null);
   const pos: Position = {
     id,
     normalizedFen: `${id}-fen`,
     sideToMove,
     legalMovesUci: [],
-    inCheck: false,
-    isTerminal: isCheckmate ? 'checkmate' : null,
-    eval: isCheckmate ? makeEval(sideToMove === 'w' ? -32000 : 32000, 1, 'mate') : makeEval(evalCp),
+    inCheck: event === 'check-by-white' || event === 'check-by-black',
+    isTerminal,
+    event,
+    eval:
+      event === 'mate-by-white'
+        ? makeEval(32000, 1, 'mate')
+        : event === 'mate-by-black'
+          ? makeEval(-32000, 1, 'mate')
+          : makeEval(evalCp),
     cachedAt: NOW,
   };
   state.positions[id] = pos;
@@ -110,110 +126,270 @@ function makeOccurrence(
 
 /**
  * Plaskett-Shipov eval curve (white's perspective). Calibrated to Figure 5.
- * Length 28 (root + 27 moves).
+ * Length 28 (root + 27 moves). Drives the score chart only — square fills
+ * come from `event` now.
  */
 const PLAYED_CP_WHITE: number[] = [
-  0, // root, ply 0
+  0,
   12,
   18,
   -8,
   5,
-  14, // 1..5: roughly even
+  14,
   42,
   56,
   70,
   65,
-  48, // 6..10: white edge then drift
+  48,
   20,
   5,
   -25,
   -55,
-  -90, // 11..15: equalizing → black gaining
+  -90,
   -130,
   -180,
   -220,
   -260,
-  -310, // 16..20
+  -310,
   -360,
   -410,
   -480,
   -570,
-  -680, // 21..25
+  -680,
   -820,
-  -1100, // 26..27: black runaway
+  -1100,
 ];
 
-/** Side to move BEFORE the played move at ply N. White moves on odd plies. */
 function sideAtPly(ply: number): Side {
   return ply % 2 === 1 ? 'w' : 'b';
 }
 
-function buildBranchesAt(
-  state: BuildState,
-  trunkParentId: OccurrenceId,
-  trunkPly: number,
-  count: number,
-  evalSpread: number,
-  options: { depth?: number; mateLeavesAtRightmost?: number } = {},
-): void {
-  const depth = options.depth ?? 2;
-  const mateLeaves = options.mateLeavesAtRightmost ?? 0;
-  const baseCp = PLAYED_CP_WHITE[trunkPly] ?? 0;
-
-  // Each branch starts at ply = trunkPly + 1 and continues for `depth` plies.
-  for (let i = 0; i < count; i++) {
-    const variation = ((i - count / 2) * evalSpread) / Math.max(1, count - 1);
-    let parent = trunkParentId;
-    for (let d = 0; d < depth; d++) {
-      const branchPly = trunkPly + 1 + d;
-      const sideToMove = sideAtPly(branchPly + 1);
-      // Deterministic perturbation — no Math.random (fixture must be repeatable for golden diff).
-      const wobble = ((i * 7 + d * 13) % 23) - 11; // small signed offset in [-11, 11]
-      const branchCp = baseCp + variation * (1 - d * 0.15) + wobble * d;
-      const isLeaf = d === depth - 1;
-      const isMate = isLeaf && i >= count - mateLeaves;
-      const posId = makePosition(state, sideToMove, isMate ? 0 : branchCp, isMate);
-      parent = makeOccurrence(state, posId, parent, branchPly, false);
-    }
-  }
+/**
+ * Each "branch" is now an explicit chain spec: a parent index (which
+ * trunk it attaches to), a depth, a leaf event, and an optional
+ * mid-chain event index. Hand-tuned per ply to vary the silhouette.
+ */
+interface ChainSpec {
+  /** Number of plies in the chain (1..4). */
+  depth: number;
+  /** Event placed on the LEAF Occurrence. */
+  leafEvent: PositionEvent;
+  /** Event placed on the i-th interior Occurrence (0 = first branch node). */
+  midEvent?: { atDepth: number; event: PositionEvent };
 }
 
 /**
- * Branch density per trunk ply, calibrated against Figure 5's growth.
- * Format: [trunkPly] = { count, evalSpread, depth, mateLeaves }
+ * Branch profile per trunk ply: an ordered list of ChainSpecs. Hand-tuned
+ * so density grows but late-game has variety + only ~15% check events +
+ * mate cluster on move 27.
  */
-const BRANCH_PROFILE: Record<
-  number,
-  { count: number; evalSpread: number; depth: number; mateLeaves?: number }
-> = {
-  1: { count: 1, evalSpread: 30, depth: 1 },
-  2: { count: 2, evalSpread: 40, depth: 1 },
-  3: { count: 2, evalSpread: 40, depth: 2 },
-  4: { count: 2, evalSpread: 40, depth: 2 },
-  5: { count: 3, evalSpread: 50, depth: 2 },
-  6: { count: 3, evalSpread: 50, depth: 2 },
-  7: { count: 4, evalSpread: 60, depth: 2 },
-  8: { count: 4, evalSpread: 60, depth: 2 },
-  9: { count: 4, evalSpread: 70, depth: 3 },
-  10: { count: 3, evalSpread: 70, depth: 2 },
-  11: { count: 4, evalSpread: 80, depth: 2 },
-  12: { count: 4, evalSpread: 90, depth: 3 },
-  13: { count: 5, evalSpread: 90, depth: 2 },
-  14: { count: 5, evalSpread: 100, depth: 2 },
-  15: { count: 6, evalSpread: 110, depth: 3 },
-  16: { count: 8, evalSpread: 120, depth: 3 },
-  17: { count: 8, evalSpread: 130, depth: 3 },
-  18: { count: 9, evalSpread: 140, depth: 3 },
-  19: { count: 10, evalSpread: 150, depth: 3 },
-  20: { count: 11, evalSpread: 150, depth: 3 },
-  21: { count: 11, evalSpread: 180, depth: 3 },
-  22: { count: 12, evalSpread: 200, depth: 3 },
-  23: { count: 12, evalSpread: 220, depth: 3, mateLeaves: 1 },
-  24: { count: 13, evalSpread: 240, depth: 3, mateLeaves: 2 },
-  25: { count: 14, evalSpread: 280, depth: 3, mateLeaves: 3 },
-  26: { count: 14, evalSpread: 320, depth: 3, mateLeaves: 5 },
-  27: { count: 16, evalSpread: 360, depth: 2, mateLeaves: 8 },
+const BRANCHES: Record<number, ChainSpec[]> = {
+  1: [{ depth: 1, leafEvent: null }],
+  2: [
+    { depth: 1, leafEvent: null },
+    { depth: 2, leafEvent: null },
+  ],
+  3: [
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  4: [
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: null },
+  ],
+  5: [
+    { depth: 1, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 2, leafEvent: null },
+  ],
+  6: [
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  7: [
+    { depth: 2, leafEvent: null },
+    { depth: 2, leafEvent: 'check-by-white' },
+    { depth: 1, leafEvent: null },
+    { depth: 3, leafEvent: null },
+  ],
+  8: [
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  9: [
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: null },
+    { depth: 1, leafEvent: 'check-by-white' },
+    { depth: 2, leafEvent: null },
+  ],
+  10: [
+    { depth: 2, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  11: [
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: null },
+    { depth: 1, leafEvent: null },
+    { depth: 2, leafEvent: null },
+  ],
+  12: [
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: 'check-by-black' },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  13: [
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  14: [
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  15: [
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 2, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 4, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  16: [
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: null },
+    { depth: 1, leafEvent: 'draw' },
+  ],
+  17: [
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: 'check-by-black' },
+    { depth: 4, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  18: [
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 4, leafEvent: 'check-by-black' },
+    { depth: 1, leafEvent: null },
+  ],
+  19: [
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: 'check-by-black' },
+    { depth: 4, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 1, leafEvent: null },
+  ],
+  20: [
+    { depth: 4, leafEvent: 'check-by-black' },
+    { depth: 2, leafEvent: null },
+    { depth: 3, leafEvent: null },
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: 'draw' },
+  ],
+  21: [
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 4, leafEvent: null },
+    { depth: 2, leafEvent: 'check-by-black' },
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  22: [
+    { depth: 4, leafEvent: 'check-by-black' },
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: 'check-by-black' },
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  23: [
+    { depth: 3, leafEvent: 'mate-by-black' },
+    { depth: 4, leafEvent: 'check-by-black' },
+    { depth: 2, leafEvent: 'check-by-black' },
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  24: [
+    { depth: 4, leafEvent: 'mate-by-black' },
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 2, leafEvent: 'mate-by-black' },
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  25: [
+    { depth: 4, leafEvent: 'mate-by-black' },
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 4, leafEvent: 'mate-by-black' },
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: 'check-by-black' },
+    { depth: 3, leafEvent: null },
+    { depth: 1, leafEvent: 'draw' },
+  ],
+  26: [
+    { depth: 4, leafEvent: 'mate-by-black' },
+    { depth: 3, leafEvent: 'mate-by-black' },
+    { depth: 4, leafEvent: 'mate-by-black' },
+    { depth: 3, leafEvent: 'check-by-black' },
+    { depth: 2, leafEvent: 'mate-by-black' },
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
+  27: [
+    { depth: 2, leafEvent: 'mate-by-black' },
+    { depth: 3, leafEvent: 'mate-by-black' },
+    { depth: 2, leafEvent: 'mate-by-black' },
+    { depth: 3, leafEvent: 'mate-by-black' },
+    { depth: 2, leafEvent: 'mate-by-black' },
+    { depth: 2, leafEvent: 'mate-by-black' },
+    { depth: 1, leafEvent: 'mate-by-white' },
+    { depth: 3, leafEvent: null },
+    { depth: 2, leafEvent: null },
+    { depth: 1, leafEvent: null },
+  ],
 };
+
+function buildChain(
+  state: BuildState,
+  trunkParentId: OccurrenceId,
+  trunkPly: number,
+  spec: ChainSpec,
+  chainIdx: number,
+): void {
+  const baseCp = PLAYED_CP_WHITE[trunkPly] ?? 0;
+  let parent = trunkParentId;
+
+  for (let d = 0; d < spec.depth; d++) {
+    const branchPly = trunkPly + 1 + d;
+    const sideToMove = sideAtPly(branchPly + 1);
+    const isLeaf = d === spec.depth - 1;
+    const wobble = ((chainIdx * 7 + d * 13) % 23) - 11;
+    const branchCp = baseCp + wobble * (d + 1) * 2;
+
+    let event: PositionEvent = null;
+    if (isLeaf) event = spec.leafEvent;
+    if (spec.midEvent && spec.midEvent.atDepth === d) event = spec.midEvent.event;
+
+    const posId = makePosition(state, sideToMove, branchCp, { event });
+    parent = makeOccurrence(state, posId, parent, branchPly, false);
+  }
+}
 
 export function buildPlaskettShipovFixture(): GraphData {
   const state: BuildState = {
@@ -224,12 +400,13 @@ export function buildPlaskettShipovFixture(): GraphData {
     trunk: [],
   };
 
-  // Root + 27 trunk Occurrences.
+  // Root + 27 trunk Occurrences. Trunk events: none in the middle; mate at 27.
   for (let ply = 0; ply <= 27; ply++) {
     const sideToMove = sideAtPly(ply + 1);
     const cp = PLAYED_CP_WHITE[ply] ?? 0;
-    const isMate = ply === 27; // mate at the end per fixture conceit
-    const posId = makePosition(state, sideToMove, cp, isMate);
+    const event: PositionEvent =
+      ply === 27 ? 'mate-by-black' : ply === 22 ? 'check-by-black' : null;
+    const posId = makePosition(state, sideToMove, cp, { event });
     const parentId = ply === 0 ? null : (state.trunk[ply - 1] ?? null);
     const occId = makeOccurrence(
       state,
@@ -242,16 +419,13 @@ export function buildPlaskettShipovFixture(): GraphData {
     state.trunk.push(occId);
   }
 
-  // Branches at each played trunk Occurrence according to the profile.
+  // Branches per trunk ply.
   for (let ply = 1; ply <= 27; ply++) {
-    const profile = BRANCH_PROFILE[ply];
-    if (!profile) continue;
+    const chains = BRANCHES[ply];
+    if (!chains) continue;
     const trunkId = state.trunk[ply];
     if (trunkId === undefined) continue;
-    buildBranchesAt(state, trunkId, ply, profile.count, profile.evalSpread, {
-      depth: profile.depth,
-      mateLeavesAtRightmost: profile.mateLeaves ?? 0,
-    });
+    chains.forEach((spec, idx) => buildChain(state, trunkId, ply, spec, idx));
   }
 
   const lastTrunk = state.trunk[state.trunk.length - 1] ?? state.trunk[0];

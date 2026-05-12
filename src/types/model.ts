@@ -36,6 +36,14 @@ export interface PvLine {
  * are per-Occurrence (game-history-dependent). The engine cache key is
  * position-only because evaluation is path-independent.
  */
+export type PositionEvent =
+  | 'check-by-white'
+  | 'check-by-black'
+  | 'mate-by-white'
+  | 'mate-by-black'
+  | 'draw'
+  | null;
+
 export interface Position {
   id: PositionId;
   /** X-FEN: piece placement, side-to-move, castling, ep. En-passant stripped if unreachable. */
@@ -44,6 +52,12 @@ export interface Position {
   legalMovesUci: string[];
   inCheck: boolean;
   isTerminal: 'checkmate' | 'stalemate' | 'insufficient' | null;
+  /**
+   * Visual event for this position, per Figure 3 legend. Drives fill on
+   * the rendered node. Most positions are `null` and render as an empty-
+   * outline square. Events are sparse — check/mate/draw markers only.
+   */
+  event: PositionEvent;
   eval: Evaluation | null;
   cachedAt: number;
 }
@@ -128,6 +142,11 @@ export interface ImpactFrame {
  * is the rendering payload only — the Occurrence tree is the source of truth.
  */
 export interface EvoEdgeData extends Record<string, unknown> {
+  /**
+   * 'trunk' for played-trunk → played-trunk edges (the visible spine);
+   * 'branch' for everything else. Trunk edges render heavier.
+   */
+  kind: 'trunk' | 'branch';
   /** Solid for canonical continuation, dotted for compressed chain. */
   variant: 'solid' | 'dotted';
   /**
@@ -151,8 +170,15 @@ export interface EvoNodeData extends Record<string, unknown> {
   moveNumber: number | null;
   /** Played-move side for visual cues. */
   sideToMove: Side;
-  /** Fill rule from SPEC §6: white/black/tie. */
-  fill: 'white' | 'black' | 'tie';
+  /** Fill rule from SPEC §6 + Figure 3 legend:
+   *   - 'empty'  → no fill, just border (the default — most positions).
+   *   - 'white'  → White gave check.
+   *   - 'black'  → Black gave check.
+   *   - 'tie'    → draw event (50-move / threefold / stalemate / insufficient).
+   *   - 'red'    → Black gave checkmate to White (paired with `isCheckmate`).
+   *   - 'white-crowned' is implicit: fill = 'white' AND isCheckmate = true.
+   */
+  fill: 'empty' | 'white' | 'black' | 'tie' | 'red';
   /** Border color rule: side-to-move. */
   borderColor: 'white' | 'black';
   /** Mate event → crown overlay. */

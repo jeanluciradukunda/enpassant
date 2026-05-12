@@ -32,6 +32,21 @@ body {
   display: none !important;
 }
 
+/*
+ * React Flow's auto-generated edge markers (markerEnd: { type: MarkerType.* })
+ * sometimes emit the polyline without inherited fill/stroke (observed in
+ * v12 with the @xyflow/system marker symbols). Force them visible.
+ * Trunk-edge arrows are slightly heavier than branch arrows by using a class
+ * on the edge's React Flow wrapper.
+ */
+svg marker polyline,
+svg marker path,
+svg marker polygon {
+  fill: var(--edge-canonical);
+  stroke: var(--edge-canonical);
+  stroke-width: 1;
+}
+
 /* Tabular numerals for any numeric display (evals, etc.) */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
