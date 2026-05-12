@@ -105,6 +105,17 @@ Not goals:
 Feature test: when asking *"should this be in V_x?"* — does it help the user
 understand the shape of *this game* faster? If not, defer.
 
+### Visual priority rule
+
+When paper fidelity conflicts with modern product polish, **paper fidelity
+wins**. This app should feel like an interactive academic visualization, not a
+glossy SaaS dashboard or generic chess review clone. Prefer the paper's flat,
+diagrammatic, slightly austere visual language: darkseagreen canvas,
+thin black connectors, small encoded nodes, translucent score bands, and dense
+global structure. Do not add decorative gradients, hero treatments, oversized
+cards, marketing-style empty states, glassmorphism, bokeh/orbs, or ornamental
+animation that makes the graph less like Figure 5.
+
 ---
 
 ## 2. North star: Figure 5
@@ -1428,4 +1439,6 @@ If the builder encounters ambiguity, re-read the relevant section. If
 still ambiguous, default to the **most conservative interpretation that
 does not violate any other section**, and prefer the gate criteria in
 §24 over implementation prose. Lower-numbered sections take precedence
-over higher-numbered ones when in conflict.
+over higher-numbered ones when in conflict. The visual priority rule in §1 is
+binding: when academic-paper fidelity conflicts with modern polish, choose the
+paper.
