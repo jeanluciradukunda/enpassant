@@ -1,0 +1,44 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+@import 'tailwindcss';
+@import './tokens.css';
+
+/*
+ * Academic / diagrammatic visual posture — see SPEC §1 visual priority rule.
+ * No gradients, no glassmorphism, no hero treatments. Flat color, thin lines.
+ */
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-primary);
+  background: var(--bg-graph);
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* React Flow viewport — drop the default background color so our token wins. */
+.react-flow {
+  background: transparent !important;
+}
+
+.react-flow__attribution {
+  /* Suppress the "React Flow" attribution in dev — paper-fidelity demands no decoration. */
+  display: none !important;
+}
+
+/* Tabular numerals for any numeric display (evals, etc.) */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Monospace stack for SAN notation */
+.mono-san {
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
