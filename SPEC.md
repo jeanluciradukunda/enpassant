@@ -158,9 +158,18 @@ Encoding rules, calibrated against the actual image (not just paper prose):
 - Solid black for canonical continuations.
 - Dotted/dashed black for compressed chains (two-neighbor shortening result).
 - Arrowheads on the target end.
-- Thickness in print: ~1–3 px. **Specify the formula in logical units 1–30
-  and let the renderer scale to device pixels** with a global scale factor;
-  default scale produces ~1–3 px in the dense graph view.
+- Thickness in print: ~1–3 px. Compute logical thickness in `1..30`
+  **per source Occurrence**: among the outgoing sibling edges from parent A,
+  A's best eval delta maps near 30 and A's worst maps near 1. Never compare
+  thickness across unrelated source Occurrences — thickness means "best vs
+  worst within this fork," not absolute strength across the whole game. After
+  local normalization, the renderer may apply a global pixel multiplier so
+  logical `1..30` appears as ~1–3 device px in the dense graph view. This
+  matches the paper-fidelity matrix row on per-fork edge comparison.
+  Implementation detail: for each source A, compute `evalDelta` from the
+  side-to-move perspective for every outgoing edge, map A's local
+  `minDelta..maxDelta` through the log-compressed `1..30` scale, and use a
+  neutral thin value when A has only one outgoing edge.
 
 **Layout**
 
@@ -204,21 +213,22 @@ build contract. It exists to raise confidence with evidence instead of vibes.
 | Edges are solid for single moves and dotted for compressed multiple-move chains. Edge thickness compares gained advantage among sibling moves from the same source only. | Thickness normalization is local to outgoing edges of one source Occurrence. Never compare thickness across unrelated positions. | Unit tests for edge math; V2 visual QA. |
 | The paper uses same-position merging and branch shortening to reduce clutter, while retaining played positions, events, and important branching points. | Use `Position` sharing + `TranspositionLink` for correctness, and branch shortening on the `Occurrence` tree for readability. Preserve all played Occurrences and event/branch endpoints. | §5 data model; V2 branch-shortening tests. |
 | The paper selected four to nine move sequences: if the played move is rank n, keep 1–4 for n≤4, 1–n for 4<n≤8, and 1–8 plus played for n≥9. It cites eight best sequences covering 93.4% of player moves in a 250+ game analysis. | Keep the paper rule as a validation baseline. The product may use the V2 curated keep rule for performance/readability, but V2 must log when it differs from the paper rule and compare node count / readability on the 7 demo games. | V2 curation validation report. |
-| The Plaskett-Shipov case study highlights mistakes at moves 9, 10, 12, 24, and 26, and shows checkmate as unavoidable after move 27. | The Plaskett-Shipov fixture is not just aesthetic. The rendered analysis must surface those moves as thin played arrows / score-chart drops / high-impact alternatives, and terminal mate events after 27. | V2 Plaskett-Shipov checkpoint. |
+| The Plaskett-Shipov case study highlights mistakes at moves 9, 10, 12, 24, and 26, and shows checkmate as unavoidable after move 27. | The Plaskett-Shipov fixture is not just aesthetic. The rendered analysis must surface at least three of those five moves as inspectable turning points, and terminal mate pressure after 27. | V2 Plaskett-Shipov checkpoint. |
 | The paper's user study measured whether users could answer questions about critical moves, tactical advantage, turning defeat into victory, and local events faster/more accurately than with a conventional chess GUI. | V4 must include a small task-based validation, not just screenshot approval. Users should identify turning points and explain one critical branch through the board. | V4 validation script. |
 | The chess-math article frames the impossibility of exhaustive search display: 20 first-ply options, explosive growth by 10 plies, Shannon-scale game counts, and a still-huge "sensible games" estimate. | The app must remain editorial. It shows meaningful continuations, not "all permutations." Every branch needs a reason: near-best, played, forced mate, eval swing, or impact frame. | V2 curation logs; V4 docs. |
 
 ### Confidence-lift gates
 
-These are not marketing numbers; they are engineering stoplights for whether
-the spec is becoming evidence-backed.
+These are qualitative engineering stoplights, not measured probabilities. Do
+not treat them as acceptance metrics; they describe what kind of evidence has
+been collected.
 
-| Evidence collected | Expected confidence |
+| Evidence collected | Confidence label |
 |---|---|
-| Spec only, with paper-derived constraints and chess-math curation rationale. | 80–85% that the direction is right. |
-| V0 static fixture passes golden screenshot and maintainer side-by-side review. | 90%+ visual-direction confidence. |
-| V2 Plaskett-Shipov real Stockfish render surfaces moves 9, 10, 12, 24, 26 and mate pressure after 27. | 93%+ paper-fidelity confidence. |
-| Three to five chess-literate users can find the turning points via chart → graph → board without explanation. | 95%+ product-design confidence. |
+| Spec only, with paper-derived constraints and chess-math curation rationale. | Direction-right. |
+| V0 static fixture passes golden screenshot and maintainer side-by-side review. | Visual-direction-confirmed. |
+| V2 Plaskett-Shipov real Stockfish render surfaces at least three of moves 9, 10, 12, 24, 26 and mate pressure after 27. | Paper-fidelity-confirmed. |
+| Three to five chess-literate users can find the turning points via chart → graph → board without explanation. | Product-design-confirmed. |
 
 If a gate fails, do not "average it out" with other wins. Fix the failing
 dimension directly: layout, curation, visual encoding, score-chart alignment,
@@ -705,9 +715,10 @@ No share links, no Chess.com, no custom paths, no PWA.
 
 - Side-by-side: app rendering Plaskett-Shipov PGN ↔ Figure 5 →
   recognizably the same visual language.
-- Plaskett-Shipov checkpoints: moves 9, 10, 12, 24, and 26 surface as
-  mistakes/turning points, and mate pressure after move 27 is visible via
-  terminal mate events and high-impact reveal.
+- Plaskett-Shipov checkpoints: at least 3 of moves 9, 10, 12, 24, and 26
+  surface as mistakes/turning points (eval drop ≥ 100 cp or classification
+  ≥ mistake), and mate pressure after move 27 is visible via terminal mate
+  events and high-impact reveal.
 - Score-chart click behavior works.
 - 60 fps idle on a 300-node graph; ≥ 30 fps during a layout-freeze-window
   reveal.
@@ -1184,11 +1195,11 @@ Feature detection on boot:
 
 - **Unit (Vitest)**: FEN normalization, X-FEN edge cases, PGN parsing,
   input detection, move parsing (SAN/LAN/UCI/permissive), UCI info
-  parser (20+ real lines), edge thickness math, ImpactFrame derivation
-  (eval swing, confidence, volatility, forced mate), paper-rule selection
-  baseline (4/n/8+played), path computation, **Occurrence-tree invariants**
-  (single parent, no cycles, repetition count correctness), TranspositionLink
-  detection.
+  parser (20+ real lines), per-source edge thickness math, ImpactFrame
+  derivation (eval swing, confidence, volatility, forced mate), paper-rule
+  selection baseline (4/n/8+played), path computation, **Occurrence-tree
+  invariants** (single parent, no cycles, repetition count correctness),
+  TranspositionLink detection.
 - **Integration (Vitest)**: full PGN → Occurrence-tree pipeline with
   mocked Stockfish; Lichess client with MSW mocks.
 - **Component (Testing Library)**: EvoNode states (default, selected,
@@ -1198,10 +1209,10 @@ Feature detection on boot:
   fixture at fixed viewport, screenshot, diff against
   `tests/golden/figure5.png`. ≤15% pixel delta. **This is V0's gate.**
 - **Research fidelity fixtures**: Plaskett-Shipov gets explicit assertions
-  for the paper's cited tactical checkpoints (moves 9, 10, 12, 24, 26 and
-  mate pressure after 27). The test should not require identical Stockfish
-  scores to the 2014 paper, but it must verify the same moves become visually
-  inspectable turning points.
+  for the paper's cited tactical checkpoints. At least 3 of moves 9, 10, 12,
+  24, and 26 must surface as turning points (eval drop ≥ 100 cp or
+  classification ≥ mistake), and mate pressure after 27 must be visible. The
+  test should not require identical Stockfish scores to the 2014 paper.
 - **Accessibility (axe-core via Playwright)**: zero violations on the
   V1/V2/V4 gate scenarios.
 - **Bundle-size (size-limit or bundlewatch)**: enforces §19 budgets.
@@ -1349,8 +1360,8 @@ profiling and the V0/V1 results:
 - [ ] Branch shortening with dotted edges; click-to-expand.
 - [ ] Impact-weighted reveal differentiates quiet sidelines, major eval
       swings, volatile PVs, forcing lines, and mate continuations.
-- [ ] Plaskett-Shipov checkpoints surface: moves 9, 10, 12, 24, 26 as
-      turning points and mate pressure after move 27.
+- [ ] Plaskett-Shipov checkpoints surface: at least 3 of moves 9, 10, 12,
+      24, 26 as turning points and mate pressure after move 27.
 - [ ] Score-chart click jumps graph + board.
 - [ ] Multi-ply board animation works for non-adjacent jumps.
 - [ ] Detail zoom callout responds to selection.
