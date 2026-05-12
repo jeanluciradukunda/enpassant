@@ -19,8 +19,8 @@ import type { EvoNodeData } from '@/types/model';
  * positions. The visual is an absolutely-positioned `<svg>` overlay.
  */
 
-const TRUNK_DIAMETER = 18;
-const ALT_SIDE = 13;
+const TRUNK_DIAMETER = 17;
+const ALT_SIDE = 10;
 const CROWN_WIDTH = 7;
 const CROWN_HEIGHT = 5;
 

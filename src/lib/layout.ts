@@ -1,22 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /**
- * Layout pipeline per SPEC.md §13.
+ * Layout pipeline per SPEC.md §13 with a paper-faithful **global persistent
+ * lane allocator**.
  *
- * After V0's first render exposed that dagre's per-node x was incompatible
- * with our trunk x-pin (branches inherit dagre's small ranksep while trunk
- * gets stretched to ply-based spacing), this version uses a deterministic
- * trunk-anchored algorithm instead of dagre-plus-post-processing.
+ * Critical design choice: lanes are GLOBAL horizontal tracks above and
+ * below the trunk, not per-trunk-anchor stacks. A chain occupies its lane
+ * for a horizontal interval `[startX, endX]`; a later chain whose
+ * `startX > lane.lastEndX + padding` can reuse the same lane. This is what
+ * gives Figure 5 / Figure 9 their characteristic "branches breathe
+ * horizontally" silhouette rather than the column-prone stacking that
+ * per-anchor lane allocation produces.
  *
- * Algorithm:
- *  1. Trunk Occurrences: x = baseX + index × trunkSpacing, y = 0.
- *  2. Walk every branch as a chain starting from its trunk ancestor.
- *  3. For each trunk anchor, sort chains and assign lanes alternating
- *     +1, -1, +2, -2, …  (above/below the trunk y-baseline).
- *  4. Within a chain, x increases with depth from trunk; y is the lane.
- *
- * This is the V0/V1 layout. SPEC §13's escape hatch to a "more general
- * paper-layout engine" remains open if V2's denser engine output exposes
- * cases this doesn't cover (multi-fork chains, transposition cross-links).
+ * Pipeline:
+ *   1. Trunk x-pin: trunk_x = baseX + index × trunkSpacing, y = 0.
+ *   2. Walk every branch as a chain from its trunk ancestor.
+ *   3. Pre-compute each chain's [startX, endX] using a wide
+ *      BRANCH_DEPTH_SPACING so chains sprawl across the canvas.
+ *   4. Allocate each chain to a global lane (above or below the trunk,
+ *      alternating preference). Lane reuse permitted once prior chain
+ *      ended + padding.
+ *   5. Position chain nodes along the lane y-coordinate.
  */
 import { MarkerType, type Edge as RfEdge, type Node as RfNode } from '@xyflow/react';
 import type {
@@ -28,12 +31,18 @@ import type {
   PositionEvent,
 } from '@/types/model';
 
+// Trunk geometry
 const TRUNK_BASE_X = 80;
 const TRUNK_SPACING = 56;
-const BRANCH_DEPTH_SPACING = 14; // x-distance between successive plies within a branch chain
-const BRANCH_LANE_OFFSET = 22; // y-distance between successive branch lanes from the trunk
-const TRUNK_NODE_DIAMETER = 18;
-const ALT_NODE_SIDE = 12;
+const TRUNK_NODE_DIAMETER = 17;
+
+// Branch geometry — much wider step than before so chains sprawl horizontally.
+const ALT_NODE_SIDE = 10;
+const BRANCH_EXIT_X = 18; // gap between trunk anchor and the chain's first node
+const BRANCH_STEP_X = 28; // distance between successive chain nodes
+const BRANCH_LANE_OFFSET = 19; // vertical distance between successive global lanes
+const LANE_PADDING_X = 14; // minimum horizontal gap between two chains sharing a lane
+
 const PX_PER_LOGICAL_UNIT = 0.1;
 
 export interface LayoutResult {
@@ -42,47 +51,138 @@ export interface LayoutResult {
   bounds: { width: number; height: number; minX: number; maxX: number; minY: number; maxY: number };
 }
 
+interface ChainLayout {
+  /** Trunk Occurrence the chain hangs from. */
+  anchorId: OccurrenceId;
+  /** Branch Occurrences in chain order (NOT including the anchor). */
+  nodes: OccurrenceId[];
+  /** x-coordinate of the chain's first branch node. */
+  startX: number;
+  /** x-coordinate of the chain's last branch node. */
+  endX: number;
+  /** Which side of the trunk this chain prefers. */
+  preferredSide: 'above' | 'below';
+}
+
 export function layoutGraph(graph: GraphData): LayoutResult {
   const trunkSet = new Set(graph.trunkOrder);
   const positions = new Map<OccurrenceId, { x: number; y: number; w: number; h: number }>();
 
-  // Pass 1 — pin trunk Occurrences along the horizontal axis at y=0.
+  // Pass 1 — pin trunk Occurrences along y = 0.
+  const trunkXById = new Map<OccurrenceId, number>();
   graph.trunkOrder.forEach((id, idx) => {
+    const x = TRUNK_BASE_X + idx * TRUNK_SPACING;
+    trunkXById.set(id, x);
     positions.set(id, {
-      x: TRUNK_BASE_X + idx * TRUNK_SPACING,
+      x,
       y: 0,
       w: TRUNK_NODE_DIAMETER,
       h: TRUNK_NODE_DIAMETER,
     });
   });
 
-  // Pass 2 — collect branch chains per trunk anchor.
-  const chainsByAnchor = collectBranchChains(graph, trunkSet);
+  // Pass 2 — collect chains per trunk anchor (deterministic ordering for
+  // stable golden screenshots).
+  const chainsByAnchor = new Map<OccurrenceId, OccurrenceId[][]>();
+  for (const trunkId of graph.trunkOrder) {
+    const trunk = graph.occurrences[trunkId];
+    if (!trunk) continue;
+    const chains: OccurrenceId[][] = [];
+    for (const childId of trunk.childIds) {
+      if (trunkSet.has(childId)) continue;
+      const chain: OccurrenceId[] = [];
+      walkChain(graph, childId, chain);
+      chains.push(chain);
+    }
+    if (chains.length > 0) {
+      chains.sort((a, b) => (a[0] ?? '').localeCompare(b[0] ?? ''));
+      chainsByAnchor.set(trunkId, chains);
+    }
+  }
 
-  // Pass 3 — assign lanes (alternating +1, -1, +2, -2, ...) and write
-  // per-Occurrence x,y for every branch node.
-  for (const [anchorId, chains] of chainsByAnchor) {
-    const anchorPos = positions.get(anchorId);
-    if (!anchorPos) continue;
-
-    // Stable ordering: sort chains by their first ply's id so repeated runs
-    // produce identical lane assignments (deterministic for the golden diff).
-    chains.sort((a, b) => (a[0] ?? '').localeCompare(b[0] ?? ''));
+  // Pass 3 — pre-compute chain intervals (startX, endX) and preferred side.
+  const chainLayouts: ChainLayout[] = [];
+  for (let trunkIdx = 0; trunkIdx < graph.trunkOrder.length; trunkIdx++) {
+    const anchorId = graph.trunkOrder[trunkIdx];
+    if (!anchorId) continue;
+    const chains = chainsByAnchor.get(anchorId);
+    if (!chains) continue;
+    const anchorX = trunkXById.get(anchorId) ?? 0;
 
     chains.forEach((chain, chainIdx) => {
-      const lane = (Math.floor(chainIdx / 2) + 1) * (chainIdx % 2 === 0 ? -1 : 1);
-      const y = lane * BRANCH_LANE_OFFSET;
-      chain.forEach((occId, depthFromTrunk) => {
-        // depthFromTrunk: 0 = the trunk anchor itself, 1 = first branch node, ...
-        if (depthFromTrunk === 0) return; // skip the anchor (already placed)
-        positions.set(occId, {
-          x: anchorPos.x + depthFromTrunk * BRANCH_DEPTH_SPACING,
-          y,
-          w: ALT_NODE_SIDE,
-          h: ALT_NODE_SIDE,
-        });
+      const depth = chain.length;
+      if (depth === 0) return;
+      const startX = anchorX + BRANCH_EXIT_X;
+      const endX = startX + (depth - 1) * BRANCH_STEP_X;
+      // Alternate above/below per chain index, with an offset by trunk
+      // parity so the silhouette doesn't have a hard left/right bias.
+      const preferredSide: 'above' | 'below' =
+        (chainIdx + trunkIdx) % 2 === 0 ? 'above' : 'below';
+      chainLayouts.push({
+        anchorId,
+        nodes: chain,
+        startX,
+        endX,
+        preferredSide,
       });
     });
+  }
+
+  // Pass 4 — global persistent lane allocator. Each side tracks an array
+  // of `lastEndX` per lane index. A chain can reuse lane L on its side
+  // iff `lanes[L] + LANE_PADDING_X < chain.startX`. Otherwise allocate a
+  // new lane.
+  const lanesAbove: number[] = []; // lastEndX per lane on the above side
+  const lanesBelow: number[] = [];
+
+  // Order chains for allocation: by startX ascending, then by preferredSide
+  // so we can interleave. This produces a natural left-to-right sweep.
+  const ordered = [...chainLayouts].sort((a, b) => a.startX - b.startX);
+
+  const chainYByAnchor = new Map<string, number>(); // (anchor:chainSig) → y
+  for (const chain of ordered) {
+    const lanes = chain.preferredSide === 'above' ? lanesAbove : lanesBelow;
+    let laneIdx = lanes.findIndex(
+      (lastEnd) => lastEnd + LANE_PADDING_X < chain.startX,
+    );
+    if (laneIdx === -1) {
+      // Try the OTHER side before opening a new lane — keeps the
+      // silhouette balanced when one side fills up faster.
+      const otherLanes = chain.preferredSide === 'above' ? lanesBelow : lanesAbove;
+      const otherLaneIdx = otherLanes.findIndex(
+        (lastEnd) => lastEnd + LANE_PADDING_X < chain.startX,
+      );
+      if (otherLaneIdx !== -1) {
+        // Reuse a lane on the other side.
+        otherLanes[otherLaneIdx] = chain.endX;
+        const sideSign = chain.preferredSide === 'above' ? +1 : -1;
+        // Note: we flipped sides, so sign also flips.
+        const y = -sideSign * (otherLaneIdx + 1) * BRANCH_LANE_OFFSET;
+        placeChain(chain, y);
+        continue;
+      }
+      // No reusable lane on either side; open a new lane on the preferred.
+      laneIdx = lanes.length;
+      lanes.push(chain.endX);
+    } else {
+      lanes[laneIdx] = chain.endX;
+    }
+    const sideSign = chain.preferredSide === 'above' ? -1 : +1;
+    const y = sideSign * (laneIdx + 1) * BRANCH_LANE_OFFSET;
+    placeChain(chain, y);
+  }
+
+  function placeChain(chain: ChainLayout, laneY: number): void {
+    chain.nodes.forEach((occId, idx) => {
+      const x = chain.startX + idx * BRANCH_STEP_X;
+      positions.set(occId, {
+        x,
+        y: laneY,
+        w: ALT_NODE_SIDE,
+        h: ALT_NODE_SIDE,
+      });
+    });
+    chainYByAnchor.set(chain.anchorId + ':' + chain.nodes.join(','), laneY);
   }
 
   // Materialize React Flow nodes.
@@ -98,9 +198,16 @@ export function layoutGraph(graph: GraphData): LayoutResult {
     const position = graph.positions[occ.positionId];
     const isTrunk = trunkSet.has(occ.id);
 
+    // Fullmove labels: ceil(ply / 2). Root (ply 0) renders unlabeled.
+    const moveNumber: number | null = isTrunk
+      ? occ.ply === 0
+        ? null
+        : Math.ceil(occ.ply / 2)
+      : null;
+
     const data: EvoNodeData = {
       kind: isTrunk ? 'trunk' : 'alt',
-      moveNumber: isTrunk ? Math.max(0, occ.ply) : null,
+      moveNumber,
       sideToMove: position?.sideToMove ?? 'w',
       fill: deriveFill(position),
       borderColor: position?.sideToMove === 'b' ? 'black' : 'white',
@@ -113,7 +220,6 @@ export function layoutGraph(graph: GraphData): LayoutResult {
       isAnalyzing: occ.analysisState === 'analyzing',
     };
 
-    // React Flow expects top-left position; our x,y are node centers.
     const halfW = pos.w / 2;
     const halfH = pos.h / 2;
     const tlx = pos.x - halfW;
@@ -136,7 +242,6 @@ export function layoutGraph(graph: GraphData): LayoutResult {
     maxY = Math.max(maxY, tly + pos.h);
   }
 
-  // Per-source-Occurrence edge thickness normalization (SPEC §2 Edges).
   const edges = buildEdges(graph);
 
   const width = (Number.isFinite(maxX) ? maxX : 0) - (Number.isFinite(minX) ? minX : 0);
@@ -156,42 +261,10 @@ export function layoutGraph(graph: GraphData): LayoutResult {
   };
 }
 
-/**
- * For each trunk anchor T, return the list of branch chains rooted at T.
- * A "chain" is a sequence of OccurrenceIds [T, c1, c2, c3, ...] where each
- * Occurrence has exactly one branch-child (or zero). When a chain forks, the
- * fork creates a new chain rooted at the fork point — but for V0 our fixture
- * has only linear chains so the simple walk suffices.
- */
-function collectBranchChains(
-  graph: GraphData,
-  trunkSet: Set<OccurrenceId>,
-): Map<OccurrenceId, OccurrenceId[][]> {
-  const result = new Map<OccurrenceId, OccurrenceId[][]>();
-
-  for (const trunkId of graph.trunkOrder) {
-    const trunk = graph.occurrences[trunkId];
-    if (!trunk) continue;
-
-    const chains: OccurrenceId[][] = [];
-    // Each non-trunk child of the trunk Occurrence is the head of a chain.
-    for (const childId of trunk.childIds) {
-      if (trunkSet.has(childId)) continue;
-      const chain: OccurrenceId[] = [trunkId];
-      walkChain(graph, childId, chain);
-      chains.push(chain);
-    }
-    if (chains.length > 0) result.set(trunkId, chains);
-  }
-
-  return result;
-}
-
 function walkChain(graph: GraphData, startId: OccurrenceId, accumulator: OccurrenceId[]): void {
   let cursor: Occurrence | undefined = graph.occurrences[startId];
   while (cursor !== undefined) {
     accumulator.push(cursor.id);
-    // Continue along the first non-trunk child if any.
     const childIds: OccurrenceId[] = cursor.childIds;
     const nextId = childIds.find((cid) => {
       const child = graph.occurrences[cid];
@@ -242,9 +315,6 @@ function buildEdges(graph: GraphData): RfEdge<EvoEdgeData>[] {
       }
 
       const isTrunkEdge = trunkSet.has(parentId) && trunkSet.has(cid);
-      // Branch edges in this V0 fixture compress multiple paper-plies into
-      // a single visual step → render as dotted/ticked. Trunk edges and
-      // direct one-ply branch links stay solid.
       const isDepth1Branch =
         !isTrunkEdge && trunkSet.has(parentId) && !trunkSet.has(cid);
       const variant: 'solid' | 'dotted' = isTrunkEdge || isDepth1Branch ? 'solid' : 'dotted';
@@ -258,15 +328,13 @@ function buildEdges(graph: GraphData): RfEdge<EvoEdgeData>[] {
         id: `${parentId}->${cid}`,
         source: parentId,
         target: cid,
-        // Trunk edges form a horizontal spine → smoothstep keeps the path
-        // straight. Branch edges arc from trunk anchor down/up to alt nodes
-        // → bezier reproduces the paper's curved connectors (Figure 9).
+        // Trunk = straight smoothstep spine. Branches = bezier (arcing curves).
         type: isTrunkEdge ? 'smoothstep' : 'default',
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: strokeColor,
-          width: isTrunkEdge ? 14 : 10,
-          height: isTrunkEdge ? 14 : 10,
+          width: isTrunkEdge ? 14 : 9,
+          height: isTrunkEdge ? 14 : 9,
           strokeWidth: 1,
         },
         style: {
@@ -290,9 +358,10 @@ function buildEdges(graph: GraphData): RfEdge<EvoEdgeData>[] {
 }
 
 /**
- * Fill rule per Figure 3 legend — drives the square's visible fill from the
- * position's *event*, not from eval magnitude. Most positions are
- * eventless and render as empty (just an outline).
+ * Fill rule per Figure 3 legend. Squares are EMPTY (just an outline) by
+ * default; events drive fill. Mate fills come from the side that mated,
+ * paired with a red crown overlay (the crown carries the red, not the
+ * square — corrected per second-pass review of Figure 9).
  */
 function deriveFill(
   position: { event?: PositionEvent } | undefined,
@@ -303,9 +372,8 @@ function deriveFill(
     case 'mate-by-white':
       return 'white';
     case 'check-by-black':
-      return 'black';
     case 'mate-by-black':
-      return 'red';
+      return 'black';
     case 'draw':
       return 'tie';
     default:
