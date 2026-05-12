@@ -179,6 +179,40 @@ Encoding rules, calibrated against the actual image (not just paper prose):
 - Y-axis: linear in `[-100 cp, +100 cp]`, log-compressed beyond, capped at
   `±2000 cp` visually with "M5" / "M-3" labels for mate scores.
 
+### Research-derived fidelity matrix
+
+This matrix is the bridge between the paper, the chess-math framing, and this
+build contract. It exists to raise confidence with evidence instead of vibes.
+
+| Source claim | Product requirement | Phase / gate |
+|---|---|---|
+| The paper's core workflow is global-to-local: score chart first, evolution graph second, chess board for selected positions. | The first usable app must make chart → graph → board the natural path. Board sync is not decorative; it is the local explanation for any selected graph node. | V1 board sync; V2 score-chart click navigation; V4 user task validation. |
+| The evolution graph x-coordinate represents move progression; y-coordinate represents spread of potential positions. | Trunk x positions are pinned by ply/move. Alternative branches may use layout help, but cannot drift the trunk or break chart alignment. | V0 golden screenshot; §13 layout pipeline. |
+| Actual played positions are circles; AI-computed positions are squares; played positions carry move numbers. | Circle/square semantics are non-negotiable. Any new overlay (path colors, impact pulses) must preserve this base grammar. | V0 visual gate; V2 impact reveal QA. |
+| Node visual encoding communicates advantage, side to move, draws/checks/checkmates, with red crowns for mate events. | Event detection must drive node styling. Mate crowns, draw markers, and effective-check/high-impact events are saliency anchors. | V2 event highlighting; V4 a11y labels. |
+| Edges are solid for single moves and dotted for compressed multiple-move chains. Edge thickness compares gained advantage among sibling moves from the same source only. | Thickness normalization is local to outgoing edges of one source Occurrence. Never compare thickness across unrelated positions. | Unit tests for edge math; V2 visual QA. |
+| The paper uses same-position merging and branch shortening to reduce clutter, while retaining played positions, events, and important branching points. | Use `Position` sharing + `TranspositionLink` for correctness, and branch shortening on the `Occurrence` tree for readability. Preserve all played Occurrences and event/branch endpoints. | §5 data model; V2 branch-shortening tests. |
+| The paper selected four to nine move sequences: if the played move is rank n, keep 1–4 for n≤4, 1–n for 4<n≤8, and 1–8 plus played for n≥9. It cites eight best sequences covering 93.4% of player moves in a 250+ game analysis. | Keep the paper rule as a validation baseline. The product may use the V2 curated keep rule for performance/readability, but V2 must log when it differs from the paper rule and compare node count / readability on the 7 demo games. | V2 curation validation report. |
+| The Plaskett-Shipov case study highlights mistakes at moves 9, 10, 12, 24, and 26, and shows checkmate as unavoidable after move 27. | The Plaskett-Shipov fixture is not just aesthetic. The rendered analysis must surface those moves as thin played arrows / score-chart drops / high-impact alternatives, and terminal mate events after 27. | V2 Plaskett-Shipov checkpoint. |
+| The paper's user study measured whether users could answer questions about critical moves, tactical advantage, turning defeat into victory, and local events faster/more accurately than with a conventional chess GUI. | V4 must include a small task-based validation, not just screenshot approval. Users should identify turning points and explain one critical branch through the board. | V4 validation script. |
+| The chess-math article frames the impossibility of exhaustive search display: 20 first-ply options, explosive growth by 10 plies, Shannon-scale game counts, and a still-huge "sensible games" estimate. | The app must remain editorial. It shows meaningful continuations, not "all permutations." Every branch needs a reason: near-best, played, forced mate, eval swing, or impact frame. | V2 curation logs; V4 docs. |
+
+### Confidence-lift gates
+
+These are not marketing numbers; they are engineering stoplights for whether
+the spec is becoming evidence-backed.
+
+| Evidence collected | Expected confidence |
+|---|---|
+| Spec only, with paper-derived constraints and chess-math curation rationale. | 80–85% that the direction is right. |
+| V0 static fixture passes golden screenshot and maintainer side-by-side review. | 90%+ visual-direction confidence. |
+| V2 Plaskett-Shipov real Stockfish render surfaces moves 9, 10, 12, 24, 26 and mate pressure after 27. | 93%+ paper-fidelity confidence. |
+| Three to five chess-literate users can find the turning points via chart → graph → board without explanation. | 95%+ product-design confidence. |
+
+If a gate fails, do not "average it out" with other wins. Fix the failing
+dimension directly: layout, curation, visual encoding, score-chart alignment,
+or board explanation.
+
 ---
 
 ## 3. Phased contract overview
@@ -608,6 +642,12 @@ emerges visibly.
   - Stop extending: at mate, at depth cap, when eval changes by ≥ 200 cp
     between consecutive plies (the swing is interesting; show the swing
     node and stop).
+- **Paper-rule comparison pass**: for the 7 demo games, compute the paper's
+  4/n/8+played selection rule as an offline validation baseline. Do not render
+  it by default. Store a comparison report with node count, edge count,
+  branch-shortened count, and the moves where the V2 curated policy differs.
+  The V2 policy is allowed to differ, but every difference must be explainable
+  by readability, performance, or impact-frame salience.
 - **Branch shortening** (paper's two-neighbor rule, adapted to the
   Occurrence tree): collapse chains of alternative Occurrences where
   every interior Occurrence has exactly one engine-suggested continuation
@@ -647,11 +687,16 @@ No share links, no Chess.com, no custom paths, no PWA.
 - Branch shortening with dotted edges visible.
 - Impact-weighted reveal is visible during V2 analysis: major swings,
   forcing lines, and mate continuations feel stronger than quiet sidelines.
+- Curation comparison report generated for the 7 demo games, including the
+  paper-rule baseline and V2 curated-policy differences.
 
 ### Gate
 
 - Side-by-side: app rendering Plaskett-Shipov PGN ↔ Figure 5 →
   recognizably the same visual language.
+- Plaskett-Shipov checkpoints: moves 9, 10, 12, 24, and 26 surface as
+  mistakes/turning points, and mate pressure after move 27 is visible via
+  terminal mate events and high-impact reveal.
 - Score-chart click behavior works.
 - 60 fps idle on a 300-node graph; ≥ 30 fps during a layout-freeze-window
   reveal.
@@ -1129,9 +1174,10 @@ Feature detection on boot:
 - **Unit (Vitest)**: FEN normalization, X-FEN edge cases, PGN parsing,
   input detection, move parsing (SAN/LAN/UCI/permissive), UCI info
   parser (20+ real lines), edge thickness math, ImpactFrame derivation
-  (eval swing, confidence, volatility, forced mate), path computation,
-  **Occurrence-tree invariants** (single parent, no cycles, repetition
-  count correctness), TranspositionLink detection.
+  (eval swing, confidence, volatility, forced mate), paper-rule selection
+  baseline (4/n/8+played), path computation, **Occurrence-tree invariants**
+  (single parent, no cycles, repetition count correctness), TranspositionLink
+  detection.
 - **Integration (Vitest)**: full PGN → Occurrence-tree pipeline with
   mocked Stockfish; Lichess client with MSW mocks.
 - **Component (Testing Library)**: EvoNode states (default, selected,
@@ -1140,6 +1186,11 @@ Feature detection on boot:
 - **Golden visual regression (Playwright)**: V0's deliverable. Render
   fixture at fixed viewport, screenshot, diff against
   `tests/golden/figure5.png`. ≤15% pixel delta. **This is V0's gate.**
+- **Research fidelity fixtures**: Plaskett-Shipov gets explicit assertions
+  for the paper's cited tactical checkpoints (moves 9, 10, 12, 24, 26 and
+  mate pressure after 27). The test should not require identical Stockfish
+  scores to the 2014 paper, but it must verify the same moves become visually
+  inspectable turning points.
 - **Accessibility (axe-core via Playwright)**: zero violations on the
   V1/V2/V4 gate scenarios.
 - **Bundle-size (size-limit or bundlewatch)**: enforces §19 budgets.
@@ -1282,9 +1333,13 @@ profiling and the V0/V1 results:
 
 - [ ] Quality-tier analysis ran on all played positions.
 - [ ] Curated alternatives visible for the 7 demo games.
+- [ ] Paper-rule comparison report generated for the 7 demo games, with
+      differences from the V2 curated policy explained.
 - [ ] Branch shortening with dotted edges; click-to-expand.
 - [ ] Impact-weighted reveal differentiates quiet sidelines, major eval
       swings, volatile PVs, forcing lines, and mate continuations.
+- [ ] Plaskett-Shipov checkpoints surface: moves 9, 10, 12, 24, 26 as
+      turning points and mate pressure after move 27.
 - [ ] Score-chart click jumps graph + board.
 - [ ] Multi-ply board animation works for non-adjacent jumps.
 - [ ] Detail zoom callout responds to selection.
@@ -1323,6 +1378,8 @@ profiling and the V0/V1 results:
 - **Lu, Wang, Lin (2014).** "Chess Evolution Visualization." *IEEE TVCG*
   20(5), 702–713. DOI: 10.1109/TVCG.2014.2299803. Alternate access if
   paywalled: <https://scholar.nycu.edu.tw/en/publications/chess-evolution-visualization>.
+- **Full paper PDF used for fidelity matrix**:
+  <https://ir.lib.nycu.edu.tw/bitstream/11536/24720/1/000338120800004.pdf>.
 - **Hyatt & Cozzie (2005).** "The Effect of Hash Signature Collisions in
   a Chess Program." *ICGA Journal* 28(3). Cited by the paper for the
   transposition-merge technique. Not directly used because the
