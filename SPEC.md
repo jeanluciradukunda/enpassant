@@ -47,9 +47,9 @@
 - **Five phases.** Do not begin V(N+1) before V(N) passes its gate.
   - **V0** — static reproduction of Figure 5 from hand-coded fixture data. No
     engine, no imports, no network. Visual-diff CI gate.
-  - **V1** — PGN paste / Lichess game URL → played trunk → Stockfish on played
-    positions with explicit budgets. Score chart + board sync. No streaming,
-    no alternatives.
+  - **V1** — PGN paste → played trunk → Stockfish on played positions with
+    explicit budgets. Score chart + board sync. No streaming, no alternatives,
+    no network imports (those land in V3 with the real proxy).
   - **V2** — curated alternatives (top-K + eval-spread threshold), branch
     shortening, score-chart-driven navigation, phase-based streaming UX.
   - **V3** — Lichess study + user-archive imports, real CORS proxy as infra,
@@ -185,7 +185,7 @@ Encoding rules, calibrated against the actual image (not just paper prose):
 | Phase | Goal (one sentence) | Gate (binary) |
 |---|---|---|
 | **V0** | Static reproduction of Figure 5 from hand-coded fixture data. | Playwright golden-diff against `tests/golden/figure5.png` under ≤15% pixel delta in the salient region. |
-| **V1** | Paste a PGN or Lichess URL → played trunk + populated score chart + synced board. | Anderssen-Kieseritzky PGN renders fully in ≤90 s cold, <1 s warm. |
+| **V1** | Paste a PGN → played trunk + populated score chart + synced board. (No network imports — those land in V3 with the proxy.) | Anderssen-Kieseritzky PGN renders fully in ≤90 s cold, <1 s warm. |
 | **V2** | Add curated alternatives, branch shortening, score-chart navigation. | For the 7 demo games, recognizably paper-density alternative branches render at 60 fps idle. |
 | **V3** | Broader imports + real CORS proxy + share links. | Import 5 Lichess URL forms; share link round-trips for game-URL imports. |
 | **V4** | PWA + custom paths + Chess.com archive + a11y + demo library. | All §24 acceptance criteria pass. |
@@ -242,13 +242,17 @@ type PositionId = string; // sha256(normalizedXFen).slice(0, 16)
 
 interface Position {
   id: PositionId;
-  normalizedFen: string;  // X-FEN, en-passant stripped if unreachable
-  fullFen: string;        // includes 50-move + fullmove counters from one occurrence
+  normalizedFen: string;  // X-FEN, en-passant stripped if unreachable. Includes
+                          //   piece placement, side-to-move, castling, ep square.
+                          //   Does NOT include 50-move or fullmove counters —
+                          //   those are per-Occurrence (game-history-dependent).
   sideToMove: 'w' | 'b';
   legalMovesUci: string[];
   inCheck: boolean;
   isTerminal: 'checkmate' | 'stalemate' | 'insufficient' | null;
-  eval: Evaluation | null; // latest engine eval, if analyzed
+  eval: Evaluation | null; // latest engine eval, if analyzed.
+                           //   Cached safely because eval depends only on
+                           //   Position, not on path history.
   cachedAt: number;
 }
 
@@ -276,16 +280,36 @@ interface Occurrence {
   positionId: PositionId;
   parentId: OccurrenceId | null;   // null = root
   childIds: OccurrenceId[];
-  ply: number;
+  ply: number;                     // 0 = root; fullmove = floor(ply/2) + 1
   moveSan: string | null;          // null = root
   moveUci: string | null;
-  repetitionCount: number;         // 1, 2, or 3 — count of prior same-Position occurrences on this path
-  fiftyMoveClock: number;
+  repetitionCount: number;         // 1-indexed count of this Position's
+                                   //   appearances *at or before* this
+                                   //   Occurrence on the path from root.
+                                   //   First appearance: 1.
+                                   //   Threefold-claim eligible: ≥ 3.
+                                   //   Fivefold automatic draw: 5 (FIDE 9.6.2).
+  fiftyMoveClock: number;          // halfmove clock per FIDE 9.3. Resets on
+                                   //   pawn move or capture.
   isPlayed: boolean;               // on the actual game's trunk
   classification: MoveClassification | null;
   analysisState: 'idle' | 'queued' | 'analyzing' | 'done';
 }
 ```
+
+**FEN sent to the engine is derived per-Occurrence, not stored on Position.**
+Given an Occurrence O and its Position P, the FEN for UCI `position fen <…>`
+is built from:
+
+- `P.normalizedFen` (piece placement, side-to-move, castling, ep)
+- `O.fiftyMoveClock` (halfmove clock)
+- `floor(O.ply / 2) + 1` (fullmove number)
+
+A helper `fenForEngine(occurrence, position): string` lives in `lib/fen.ts`.
+The engine cache key remains position-only (`${normalizedFen}|d${depth}|pv${multipv}`)
+because evaluation is path-independent — but the *FEN sent to the engine*
+must carry the correct counters so Stockfish's terminal-detection logic
+sees the right 50-move state.
 
 ### `TranspositionLink`
 
@@ -435,13 +459,10 @@ analysis pass, no alternatives, no streaming animation.
 - Implement `Position` + `Occurrence` data model (§5). Three Zustand
   stores: `gameTreeStore`, `viewStore`, `analysisStore`. Defer
   `importStore` to V3.
-- Input field that accepts a PGN paste or a Lichess game URL. Use two
-  radio buttons ("PGN" / "Lichess URL") if you need to ship faster — auto
-  detection of all 8 input types is V3+ scope.
-- Lichess fetch: `GET https://lichess.org/game/export/{id}` with
-  `Accept: application/x-chess-pgn`. In dev, via Vite proxy. In V1 prod:
-  direct-from-browser; Lichess often works in practice. The real proxy
-  arrives in V3.
+- Input field that accepts **PGN paste only**. Lichess URL import is
+  deferred to V3 alongside the real CORS proxy — V1 must not depend on
+  network infrastructure it isn't yet shipping. Auto-detection of all 8
+  input types is V3+ scope; V1 detects only "is this PGN-shaped text."
 - PGN → Occurrence tree builder.
 - Stockfish 18 worker. UCI: `uci`, `setoption`, `position fen`, `go depth`.
 - **Analysis budget — Fast tier**: depth 14, MultiPV 3, played positions
@@ -463,8 +484,7 @@ score-chart-driven nav, no share links, no Chess.com.
 
 ### Deliverables
 
-- Paste any PGN OR a Lichess game URL → played trunk renders with real
-  evals.
+- Paste any PGN → played trunk renders with real evals.
 - Tooltip on each trunk node shows eval.
 - Score chart shows the actual eval line over moves.
 - Click a circle → board updates to that position.
@@ -494,10 +514,18 @@ emerges visibly.
 - **Curated branch policy**:
   - At each played Occurrence, take the top 3 PV moves from the quality
     pass.
-  - Keep an alternative only if its eval delta vs the next-best is
-    ≥ 30 cp OR it leads to a forced mate within ≤ 6 plies.
-  - If the played move ∉ top 3, force-include the played-move line as a
-    4th alternative (already scored via `searchmoves` from V1).
+  - **Keep rule**: keep an alternative PV N (rank N in the sorted
+    quality-pass results) iff
+    `eval(PV1) − eval(PV_N) ≤ 30 cp` (absolute gap to the best PV)
+    OR PV N leads to a forced mate within ≤ 6 plies.
+    PV 1 is always kept. The comparison is **vs PV 1**, not vs the adjacent
+    PV — this avoids the "last candidate has no next-best" edge case and
+    keeps all near-best continuations regardless of where the eval curve
+    bends. Sign convention: eval is from the side-to-move's perspective,
+    so higher is better.
+  - If the played move ∉ top 3, force-include the played-move line as an
+    additional alternative regardless of the keep rule (already scored via
+    `searchmoves` from V1).
   - Extend each kept alternative forward 3–5 plies via top-1 PV from
     quality-pass evals on the *successor* positions (queue them in
     priority order).
@@ -674,13 +702,20 @@ V1 uses fast only. V2 adds quality. V4 exposes deep via engine settings UI.
 
 ```ts
 async function scorePlayedMove(occ: Occurrence): Promise<Evaluation> {
-  const res = await engine.analyze({ ...BUDGETS.fast, fen: position.fullFen });
+  const position = getPosition(occ.positionId);
+  // FEN is derived per-Occurrence: position.normalizedFen carries piece
+  // placement etc.; occ.fiftyMoveClock + occ.ply supply the counters.
+  // See lib/fen.ts:fenForEngine.
+  const fen = fenForEngine(occ, position);
+
+  const res = await engine.analyze({ ...BUDGETS.fast, fen });
   const hit = res.multipv.find(p => p.moves[0] === occ.moveUci);
   if (hit) return res; // played move was in the top-K
-  // Run targeted analysis on the played move only
+
+  // Played move outside MultiPV — re-issue with searchmoves restriction.
   return engine.analyze({
     ...BUDGETS.fast,
-    fen: position.fullFen,
+    fen,
     mode: 'searchmoves',
     restrictTo: occ.moveUci!,
   });
@@ -703,29 +738,49 @@ remain (they're real — next time the game is opened, the cache hits).
 
 ## 13. Layout
 
-Use `@dagrejs/dagre` with these constraints to produce the paper's
-axis-parallel grammar:
+Use `@dagrejs/dagre` for the underlying layered DAG layout, then
+**post-process** trunk and branch coordinates to enforce the paper's
+axis-parallel grammar. **Do not rely on `setNode(id, { rank: P })`** —
+that field exists in dagre's internals but is not part of the documented
+public API and behavior across versions is not guaranteed.
 
-1. For every **played-trunk Occurrence** at ply P, set
-   `g.setNode(id, { rank: P })`. Dagre's `rankdir: 'LR'` plus per-node
-   `rank` fixes trunk x-coordinates to a monotonic ladder.
-2. For **alternative Occurrences**, no rank constraint — dagre's rank
-   algorithm places them at their natural depth.
-3. After dagre runs, **lane-allocation pass**: group alternative
-   Occurrences by their trunk-Occurrence anchor (the played Occurrence
-   they branch from). Place successive groups alternately above/below the
-   trunk y-baseline by shifting their y-coordinates within the group.
-   Keeps the trunk visually centered.
-4. **Pin trunk Occurrences** to exact y = 0 after lane allocation. Pin
-   branch-group bounding boxes within ±maxBranchHeight of y = 0.
+The layout pipeline is three passes:
+
+1. **Dagre pass**: build the graph with `rankdir: 'LR'`. Set node
+   `width`/`height` from the rendered EvoNode size. Add invisible
+   high-weight (`weight: 100`) and `minlen: 1` edges chained through the
+   played-trunk Occurrences in ply order — these encourage dagre to keep
+   the trunk Occurrences on a tight monotonic ranking. Run
+   `dagre.layout(g)`.
+
+2. **Trunk x-pin pass**: overwrite trunk Occurrences' x-coordinates with
+   `x = baseX + ply × trunkSpacing` (constants from the visual tokens).
+   This guarantees exact horizontal spacing regardless of what dagre
+   chose, which is the paper's most load-bearing visual invariant. The
+   chained-edge weights above ensure dagre's *relative* trunk ordering
+   already matches ply order; the pin pass just normalizes the spacing.
+
+3. **Branch lane-allocation pass**: group alternative Occurrences by
+   their trunk-Occurrence anchor (the played Occurrence they branch
+   from). Walk the trunk left-to-right; place successive non-empty
+   branch groups alternately above/below the trunk y-baseline by
+   shifting their y-coordinates as a block. Within a group, preserve
+   dagre's relative y-order. Cap branch-group vertical extent at
+   `maxBranchHeight` (a token, default ~200 px).
+
+4. **Trunk y-pin pass**: snap trunk Occurrences to exactly `y = 0` (the
+   centerline). Branches inherit their y from the lane-allocation pass.
 
 ### Escape hatch
 
-If V0's golden-diff fails on constrained dagre (branches don't
-symmetrize, ranks don't align, etc.), switch to a custom deterministic
-paper-layout engine. **Do not default to custom layout** — it's 2–4 extra
-weeks and the long tail of crossing-minimization edge cases is ugly. Try
-the dagre approach first.
+If V0's golden-diff fails on this dagre-plus-post-processing approach
+(branch groups overlap, x-spacing still drifts when many alternatives
+crowd a trunk position, etc.), switch to a custom deterministic
+paper-layout engine: assign trunk x by ply directly, allocate branches
+to vertical lanes via greedy interval-overlap avoidance, route edges as
+orthogonal connectors. **Do not default to custom layout** — it's 2–4
+extra weeks and the crossing-minimization long tail is ugly. Try the
+post-processed dagre approach first.
 
 ### Layout cadence (per §14)
 
@@ -774,11 +829,11 @@ should say "Continue" not "Resume," and not promise zero rework.
 
 ### V1 sources
 
-- **PGN paste** — `[Event "..."]` header signature.
+- **PGN paste** — `[Event "..."]` header signature. The only V1 source.
+
+### V3 additions (paired with the real CORS proxy in §16)
+
 - **Lichess game URL** — `lichess.org/<8-char>[<4-char-color-suffix>][/<color>][#<ply>]`.
-
-### V3 additions
-
 - **Lichess study URL** — `lichess.org/study/<8>[/<8-chapter>]`.
 - **Lichess broadcast URL** — `lichess.org/broadcast/<slug>/<slug>/<8>[/<8>]`.
 - **Lichess username** — 3–25-char `[A-Za-z0-9_-]`. Show user-archive
@@ -792,8 +847,10 @@ should say "Continue" not "Resume," and not promise zero rework.
 ### Detection
 
 A single `detect(input: string): ParsedInput` function returns a tagged
-union. Implemented incrementally per phase — V1 only needs PGN +
-Lichess-game-URL detection.
+union. Implemented incrementally per phase — V1 only needs PGN-shape
+detection (look for `[Event "..."]` or similar header lines). All URL,
+username, and move-sequence detection arrives in V3+ alongside the
+network-dependent surfaces.
 
 ### Error surfaces
 
@@ -1098,7 +1155,7 @@ profiling and the V0/V1 results:
 
 ### V1
 
-- [ ] PGN paste OR Lichess game URL input works.
+- [ ] PGN paste input works (Lichess URL deferred to V3).
 - [ ] Played-trunk graph renders with real Stockfish 18 evals.
 - [ ] Score chart shows played-game eval line.
 - [ ] Click trunk circle → board syncs.
