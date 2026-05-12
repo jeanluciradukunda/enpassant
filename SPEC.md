@@ -51,7 +51,8 @@
     explicit budgets. Score chart + board sync. No streaming, no alternatives,
     no network imports (those land in V3 with the real proxy).
   - **V2** — curated alternatives (top-K + eval-spread threshold), branch
-    shortening, score-chart-driven navigation, phase-based streaming UX.
+    shortening, impact-weighted branch reveal, score-chart-driven navigation,
+    phase-based streaming UX.
   - **V3** — Lichess study + user-archive imports, real CORS proxy as infra,
     IndexedDB cache, share links (game-URL imports only).
   - **V4** — PWA, custom paths, Chess.com archive, dark mode, a11y audit,
@@ -325,6 +326,50 @@ interface TranspositionLink {
 }
 ```
 
+### `ImpactFrame` (V2+)
+
+An *impact frame* is the visual/analytical payload attached to a candidate
+branch while Stockfish is building it. This is **not** a force-directed layout
+simulation; the layout remains stable. "Force" means how much pressure the
+line appears to exert on the game: tactical swing, forcingness, confidence,
+and volatility.
+
+```ts
+interface ImpactFrame {
+  occurrenceId: OccurrenceId;
+  parentOccurrenceId: OccurrenceId;
+  evalSwingCp: number;       // abs(eval(after) - eval(before)), cp-equivalent
+  qualityGapCp: number;      // eval(PV1) - eval(this PV), side-to-move perspective
+  forcingness: number;       // 0..1: checks, captures, only-move defenses, mate threats
+  confidence: number;        // 0..1: depth progress * PV stability
+  volatility: number;        // 0..1: first move / PV changed across recent depths
+  mateDistance: number | null;
+  impact: number;            // 0..1, derived; drives reveal strength
+}
+```
+
+Default derivation:
+
+- `evalSwingCp`: convert mate scores to a capped cp equivalent (`±2000`) for
+  visualization math only.
+- `forcingness`: `1.0` for forced mate, `0.75` for checking lines or only
+  legal/only good move defenses, `0.5` for forcing capture sequences,
+  otherwise `0.0–0.25`.
+- `confidence`: `min(depth / targetDepth, 1) × pvStability`, where
+  `pvStability` is the fraction of the last three reported depths that kept
+  the same first move.
+- `volatility`: `1 - pvStability`.
+- `mateBonus`: `1` when `mateDistance !== null && mateDistance <= 6`,
+  otherwise `0`.
+- `impact`: clamp to `0..1` from
+  `0.45 * logNorm(evalSwingCp) + 0.30 * forcingness + 0.20 * confidence +
+  0.20 * mateBonus - 0.15 * volatility`.
+
+Renderers may tune weights after visual QA, but the components above are the
+contract. The user should perceive *pressure*: tentative ghost lines for
+unstable ideas, heavier confident lines for major swings, and decisive reveal
+for forced mate.
+
 ### Why this matters
 
 - Threefold-repetition is a one-line check: walk back along
@@ -362,6 +407,11 @@ roles, not paper terminology, so renaming is cheap:
 
 --edge-canonical:      #1A1A1A
 --edge-compressed:     #4B5563   /* rendered with stroke-dasharray "4 3" */
+--impact-low:          rgba(26, 26, 26, 0.22)
+--impact-mid:          rgba(26, 26, 26, 0.55)
+--impact-high:         rgba(26, 26, 26, 0.90)
+--impact-pulse:        rgba(37, 99, 235, 0.55)
+--impact-mate:         rgba(220, 38, 38, 0.75)
 
 --path-played:         #FFD700
 --path-best:           #22C55E
@@ -538,6 +588,13 @@ emerges visibly.
   AND no terminal event AND no significant eval delta. Render compressed
   chains as **dotted edges** between endpoints. Click-to-expand restores
   the chain.
+- **Impact-weighted branch reveal**: every kept alternative receives an
+  `ImpactFrame` (§5) before it is shown. Impact controls reveal priority,
+  edge weight, opacity, pulse strength, and whether the branch is presented
+  as tentative or locked-in. High-impact lines appear earlier and with more
+  visual pressure; low-impact lines fade in quietly. Volatile low-depth PVs
+  stay ghosted until confidence rises. Forced-mate lines reveal sharply and
+  terminate with the saturated crown.
 - **Layout with branches**: same dagre constraints from §13. Lane
   allocation places branches above/below trunk alternately. Symmetry
   matters visually.
@@ -562,6 +619,8 @@ No share links, no Chess.com, no custom paths, no PWA.
   curated alternatives with paper-like branch density.
 - Score-chart click jumps graph and board.
 - Branch shortening with dotted edges visible.
+- Impact-weighted reveal is visible during V2 analysis: major swings,
+  forcing lines, and mate continuations feel stronger than quiet sidelines.
 
 ### Gate
 
@@ -801,6 +860,7 @@ the orchestrator to `analysisStore`:
 | `fast-pass-progress` | `{ moveN, total }` |
 | `fast-pass-complete` | — |
 | `quality-pass-progress` | `{ moveN, total }` |
+| `branch-impact-ready` | `{ occurrenceId, impactFrame }` |
 | `alternatives-ready` | `{ count }` |
 | `refining-progress` | `{ branchesDone, branchesTotal }` |
 | `complete` | — |
@@ -810,6 +870,23 @@ the orchestrator to `analysisStore`:
 minimum cooldown). During a layout freeze window, accumulate new
 Occurrences off-screen and reveal them all at once via Motion's
 `AnimatePresence` + FLIP at the end of the window.
+
+**Impact frame reveal**: branch animation uses the latest `ImpactFrame`, not
+raw Stockfish info-line frequency.
+
+- `impact < 0.25`: ghost branch, low opacity, no pulse, delayed until the
+  current reveal batch has no higher-impact work.
+- `0.25 ≤ impact < 0.60`: normal reveal, edge stroke-draw at standard speed.
+- `impact ≥ 0.60`: priority reveal, stronger edge, short pulse travelling
+  from parent to child.
+- Forced mate: priority reveal regardless of cp swing, crown appears last
+  with a crisp fade/scale. Under `prefers-reduced-motion`, replace pulses and
+  travelling effects with immediate opacity/stroke changes.
+- Volatile PVs (`volatility > 0.5`) remain visually tentative even when their
+  eval swing is large; they solidify only when confidence crosses `0.7`.
+
+The graph must never use force-directed movement for this. Existing nodes stay
+anchored; impact affects emphasis and reveal order, not layout physics.
 
 **Streaming indicator** (small overlay in graph corner):
 
@@ -1025,7 +1102,8 @@ Feature detection on boot:
 
 - **Unit (Vitest)**: FEN normalization, X-FEN edge cases, PGN parsing,
   input detection, move parsing (SAN/LAN/UCI/permissive), UCI info
-  parser (20+ real lines), edge thickness math, path computation,
+  parser (20+ real lines), edge thickness math, ImpactFrame derivation
+  (eval swing, confidence, volatility, forced mate), path computation,
   **Occurrence-tree invariants** (single parent, no cycles, repetition
   count correctness), TranspositionLink detection.
 - **Integration (Vitest)**: full PGN → Occurrence-tree pipeline with
@@ -1169,6 +1247,8 @@ profiling and the V0/V1 results:
 - [ ] Quality-tier analysis ran on all played positions.
 - [ ] Curated alternatives visible for the 7 demo games.
 - [ ] Branch shortening with dotted edges; click-to-expand.
+- [ ] Impact-weighted reveal differentiates quiet sidelines, major eval
+      swings, volatile PVs, forcing lines, and mate continuations.
 - [ ] Score-chart click jumps graph + board.
 - [ ] Multi-ply board animation works for non-adjacent jumps.
 - [ ] Detail zoom callout responds to selection.
