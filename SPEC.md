@@ -350,25 +350,51 @@ interface ImpactFrame {
 
 Default derivation:
 
+- `logNorm(x) = log(1 + |x|) / log(1 + 2000)`, clamped to `[0, 1]`. Maps the
+  0..2000 cp range to 0..1 with log compression so a swing of 0→100 cp
+  matters more than 1900→2000 cp.
 - `evalSwingCp`: convert mate scores to a capped cp equivalent (`±2000`) for
   visualization math only.
-- `forcingness`: `1.0` for forced mate, `0.75` for checking lines or only
-  legal/only good move defenses, `0.5` for forcing capture sequences,
-  otherwise `0.0–0.25`.
+- `qualityGapCp`: 0 for PV 1; for other kept lines, `eval(PV1) − eval(this PV)`
+  from side-to-move perspective. Bounded to `[0, 30]` by the curated keep
+  rule (§9) — except for the force-included played-move line, which may
+  exceed it.
+- `forcingness` (no expensive "only-good-move" subroutine — see notes below):
+  - `1.0` — forced mate within 6 plies on this PV.
+  - `0.75` — the move places the opponent in check (compute from the
+    resulting position) OR the resulting position has exactly one legal
+    move (chess.js `moves().length === 1`).
+  - `0.5` — capture sequence: the move is a capture AND it is PV 1 AND
+    the parent's next-best PV has `qualityGapCp ≥ 100 cp` (engine is
+    decisive about taking).
+  - `0.0` otherwise. The original "only good move defense" intent is
+    approximated cheaply via the check / only-move buckets above plus
+    PV stability (already captured by `confidence` / `volatility`).
+    Computing "only good move" exactly would require eval-spreading every
+    response position — out of scope for V2's budget.
 - `confidence`: `min(depth / targetDepth, 1) × pvStability`, where
-  `pvStability` is the fraction of the last three reported depths that kept
-  the same first move.
-- `volatility`: `1 - pvStability`.
-- `mateBonus`: `1` when `mateDistance !== null && mateDistance <= 6`,
-  otherwise `0`.
-- `impact`: clamp to `0..1` from
-  `0.45 * logNorm(evalSwingCp) + 0.30 * forcingness + 0.20 * confidence +
-  0.20 * mateBonus - 0.15 * volatility`.
+  `pvStability` is the fraction of the last three reported depths that
+  kept the same first move (0, 1/3, 2/3, or 1).
+- `volatility`: `1 − pvStability`.
+- `mateBonus`: `1` when `mateDistance !== null && mateDistance ≤ 6`,
+  otherwise `0`. Computed inline during impact derivation; not stored.
+- `impact`: clamp to `[0, 1]` from
+  ```
+  0.45 × logNorm(evalSwingCp)
+  + 0.30 × forcingness
+  + 0.20 × confidence
+  + 0.20 × mateBonus
+  − 0.15 × volatility
+  − 0.10 × (qualityGapCp / 30)
+  ```
+  The `qualityGapCp` term penalizes borderline-kept lines so that within
+  the curated set, the near-optimal alternatives are revealed with more
+  pressure than the ones that just barely passed the keep rule.
 
-Renderers may tune weights after visual QA, but the components above are the
-contract. The user should perceive *pressure*: tentative ghost lines for
-unstable ideas, heavier confident lines for major swings, and decisive reveal
-for forced mate.
+Renderers may tune weights after visual QA, but the components above are
+the contract. The user should perceive *pressure*: tentative ghost lines
+for unstable ideas, heavier confident lines for major swings, and decisive
+reveal for forced mate.
 
 ### Why this matters
 
@@ -1214,6 +1240,16 @@ profiling and the V0/V1 results:
   community guidance; verify at V3 deploy time.
 - **Custom-layout fallback**: only triggered if V0 golden-diff fails on
   constrained dagre. Don't pre-build it.
+- **Impact-frame weight tuning**: `confidence` and `volatility` share
+  `pvStability` as a factor, so weighting both in the impact formula
+  partially double-counts. The defaults in §5 are sensible starting
+  values; refine during V2 visual QA if double-counting becomes visible
+  (e.g., volatile-but-deep PVs feeling under-emphasized, or quiet stable
+  PVs over-emphasized).
+- **Impact reveal thresholds**: the 0.25 / 0.60 ghost-vs-normal-vs-priority
+  cutoffs and the 0.70 confidence-solidify line (§14) are starting
+  defaults, not load-bearing constants. Tune against the 7 demo games
+  during V2 visual QA before locking.
 
 ---
 
