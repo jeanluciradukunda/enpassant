@@ -1,0 +1,88 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/*
+ * Visual tokens from SPEC.md §6 — Visual encoding.
+ * Calibrated against Figure 5 of Lu/Wang/Lin 2014.
+ * Tokens use functional names (not paper terminology) so renaming is cheap.
+ */
+
+:root {
+  /* Background */
+  --bg-graph: #8fbc8f; /* darkseagreen, paper's signature */
+  --bg-graph-dark: #2d4a3d; /* V4 dark mode */
+  --bg-surface: #ffffff;
+  --bg-surface-dark: #1a1a1a;
+
+  /* Played-trunk circles */
+  --trunk-fill: #ffffff;
+  --trunk-fill-selected: #1a1a1a;
+  --trunk-border: #1a1a1a;
+  --trunk-text: #1a1a1a;
+  --trunk-text-selected: #ffffff;
+
+  /* Alternative squares */
+  --alt-fill-white: #f5f5f5;
+  --alt-fill-black: #1a1a1a;
+  --alt-fill-tie: #999999;
+  --alt-border-white: #ffffff;
+  --alt-border-black: #1a1a1a;
+
+  /* Terminal */
+  --checkmate-crown: #dc2626;
+
+  /* Edges */
+  --edge-canonical: #1a1a1a;
+  --edge-compressed: #4b5563; /* rendered with stroke-dasharray "4 3" */
+
+  /* Impact tokens (V2+) — declared now so we don't need to revisit at V2 */
+  --impact-low: rgba(26, 26, 26, 0.22);
+  --impact-mid: rgba(26, 26, 26, 0.55);
+  --impact-high: rgba(26, 26, 26, 0.9);
+  --impact-pulse: rgba(37, 99, 235, 0.55);
+  --impact-mate: rgba(220, 38, 38, 0.75);
+
+  /* Path overlays (V2+) */
+  --path-played: #ffd700;
+  --path-best: #22c55e;
+  --path-worst: #ef4444;
+  --path-tal: #a855f7; /* displayed label: "Tal" */
+  --path-quietest: #64748b;
+
+  /* Score chart */
+  --chart-white-band: rgba(245, 245, 245, 0.3);
+  --chart-black-band: rgba(30, 30, 30, 0.3);
+  --chart-played-line: #1a1a1a;
+  --chart-mate-marker: #dc2626;
+
+  /* Text */
+  --text-primary: #111827;
+  --text-primary-dark: #f3f4f6;
+  --text-secondary: #6b7280;
+
+  /* Semantic */
+  --accent: #2563eb;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #dc2626;
+
+  /* Layout constants (logical units) */
+  --trunk-spacing: 60px;
+  --trunk-base-x: 80px;
+  --trunk-circle-diameter: 18px;
+  --alt-square-side: 10px;
+  --crown-size: 8px;
+
+  /* Animation timings */
+  --t-hover: 150ms;
+  --t-modal: 200ms;
+  --t-board-piece: 200ms;
+  --t-edge-draw: 400ms;
+  --t-layout-shift: 300ms;
+  --t-pulse: 1500ms;
+
+  /* Z-layers */
+  --z-edge: 1;
+  --z-node: 2;
+  --z-node-selected: 3;
+  --z-overlay: 10;
+  --z-callout: 20;
+}

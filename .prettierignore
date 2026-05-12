@@ -1,0 +1,9 @@
+dist
+node_modules
+playwright-report
+test-results
+coverage
+docs/SPEC-v0-research.md
+SPEC.md
+LICENSE
+*.png
