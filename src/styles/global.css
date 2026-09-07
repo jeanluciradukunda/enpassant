@@ -24,23 +24,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* React Flow viewport — drop the default background color so our token wins. */
-.react-flow {
-  background: transparent !important;
-}
-
-.react-flow__attribution {
-  /* Suppress the "React Flow" attribution in dev — paper-fidelity demands no decoration. */
-  display: none !important;
-}
-
-/*
- * React Flow's auto-generated edge markers (markerEnd: { type: MarkerType.* })
- * sometimes emit the polyline without inherited fill/stroke (observed in
- * v12 with the @xyflow/system marker symbols). Force them visible.
- * Trunk-edge arrows are slightly heavier than branch arrows by using a class
- * on the edge's React Flow wrapper.
- */
+/* Keep arrowhead ink consistent across both SVG renderers. */
 svg marker polyline,
 svg marker path,
 svg marker polygon {

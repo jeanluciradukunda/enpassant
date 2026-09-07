@@ -88,6 +88,7 @@ export function identifyInput(text: string): {
 }
 
 export async function archives(username: string, signal: AbortSignal): Promise<string[]> {
+  username = username.trim().toLowerCase();
   if (!/^[a-zA-Z0-9_-]{2,50}$/.test(username.trim()))
     throw new Error('Enter the Chess.com username of a player in this game.');
   const data = await (
