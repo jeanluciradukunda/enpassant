@@ -79,7 +79,7 @@ describe('paper score bands', () => {
     const game = parseGame('1. e4 e5 *');
     const values = new Map([
       ['p0', result([['e2e4'], ['d2d4']])],
-      ['p1', result([['e7e5']])],
+      ['p1', result([['c7c5']])],
     ]);
     const bands = scoreBands(game, values, 2);
     expect(bands[0].segments[0]?.actual.value).toBe(40);

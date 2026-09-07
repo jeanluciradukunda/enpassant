@@ -1,0 +1,720 @@
+[
+  {
+    "ply": 72,
+    "position": "36… axb5",
+    "elapsedMs": 2521.5999999996275,
+    "lines": [
+      {
+        "rank": 1,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 129
+        },
+        "moves": [
+          "c2e4",
+          "c8b8",
+          "a2a6",
+          "g8h7",
+          "g1h2",
+          "e8d8",
+          "f2a2",
+          "a8a6",
+          "a2a6",
+          "b8b6",
+          "a6a7",
+          "h7g8",
+          "a7a8",
+          "d6b8",
+          "a1a7",
+          "d8d6",
+          "h2g3",
+          "g8h7",
+          "a7f7",
+          "h7g8",
+          "f7b7",
+          "g8h7",
+          "g3g4",
+          "b8c7",
+          "b7a7"
+        ]
+      },
+      {
+        "rank": 2,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 75
+        },
+        "moves": [
+          "f2b6",
+          "a8a2",
+          "a1a2",
+          "c8a8",
+          "a2a5",
+          "e8f8",
+          "b6b5",
+          "e5e4",
+          "g1f1",
+          "a8b8",
+          "b5c6",
+          "b8c8",
+          "c6a6",
+          "g8h7",
+          "c2e4",
+          "c8e8",
+          "a6c4",
+          "f8e7",
+          "a5a6",
+          "e7e5",
+          "c4d4",
+          "e5h2",
+          "a6d6",
+          "h2d6",
+          "e4f3",
+          "d6a6",
+          "f1g1",
+          "e8e1",
+          "g1f2"
+        ]
+      },
+      {
+        "rank": 3,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 3
+        },
+        "moves": [
+          "f2e2",
+          "a8a2",
+          "a1a2",
+          "c8a8",
+          "c2e4",
+          "a8a2",
+          "e2a2",
+          "e8h5",
+          "a2d2",
+          "h5h4",
+          "d2e3",
+          "h4f4",
+          "e3f4",
+          "e5f4",
+          "e4f3",
+          "g8f7",
+          "h3h4",
+          "d6e5",
+          "d5d6",
+          "e5c3"
+        ]
+      },
+      {
+        "rank": 4,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 0
+        },
+        "moves": [
+          "a2a8",
+          "c8a8",
+          "a1a8",
+          "e8a8",
+          "f2e1",
+          "e5e4",
+          "c2e4",
+          "a8a3",
+          "e4f3",
+          "g8f8",
+          "g1f1",
+          "a3b2",
+          "e1e6",
+          "b2c1",
+          "f1e2",
+          "c1b2"
+        ]
+      },
+      {
+        "rank": 5,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 0
+        },
+        "moves": [
+          "f2e3",
+          "a8a2",
+          "a1a2",
+          "c8a8",
+          "a2a8",
+          "e8a8",
+          "e3e1",
+          "e5e4",
+          "c2e4",
+          "a8a3",
+          "e4f3",
+          "g8f8",
+          "g1f1",
+          "a3b2",
+          "e1e6",
+          "b2c1",
+          "f1f2",
+          "c1d2",
+          "f3e2",
+          "d2f4",
+          "f2g1",
+          "f4h2",
+          "g1f2"
+        ]
+      },
+      {
+        "rank": 6,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 0
+        },
+        "moves": [
+          "f2e1",
+          "a8a2",
+          "a1a2",
+          "c8a8",
+          "a2a8",
+          "e8a8",
+          "c2e4",
+          "a8a3",
+          "g1h2",
+          "g8f8",
+          "e1d2",
+          "f8g8"
+        ]
+      },
+      {
+        "rank": 7,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 0
+        },
+        "moves": [
+          "f2h4",
+          "a8a2",
+          "a1a2",
+          "c8a8",
+          "a2a8",
+          "e8a8",
+          "h4e1",
+          "e5e4",
+          "c2e4",
+          "a8a3",
+          "e4f3",
+          "g8f8",
+          "g1f1",
+          "a3b2",
+          "e1e6",
+          "b2c1",
+          "f1f2",
+          "c1d2",
+          "f3e2",
+          "d2f4",
+          "f2g1",
+          "f4h2",
+          "g1f1",
+          "h2f4",
+          "e2f3"
+        ]
+      },
+      {
+        "rank": 8,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 0
+        },
+        "moves": [
+          "f2g3",
+          "a8a2",
+          "a1a2",
+          "c8a8",
+          "a2a8",
+          "e8a8",
+          "g3e1",
+          "e5e4",
+          "c2e4",
+          "a8a3",
+          "e4f3",
+          "g8f8",
+          "g1f1",
+          "a3b2",
+          "e1e6",
+          "b2c1",
+          "f1f2",
+          "c1d2",
+          "f2f1",
+          "g7g5"
+        ]
+      }
+    ],
+    "depth": 20,
+    "milliseconds": 15000
+  },
+  {
+    "ply": 87,
+    "position": "44. Kf1",
+    "elapsedMs": 6838.4000000003725,
+    "lines": [
+      {
+        "rank": 1,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 287
+        },
+        "moves": [
+          "b7b8",
+          "c6b6",
+          "b8b6",
+          "f1e2",
+          "b6b8",
+          "a8a6",
+          "f7e7",
+          "a6a7",
+          "e7d8",
+          "a7g7",
+          "b8b6",
+          "g7a7",
+          "d6c7",
+          "e2f3",
+          "b6d6",
+          "a7a8",
+          "d8d7",
+          "f3g4",
+          "c7b6",
+          "g4h5"
+        ]
+      },
+      {
+        "rank": 2,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 464
+        },
+        "moves": [
+          "b6c6",
+          "d5c6",
+          "b7b8",
+          "a8a7",
+          "f7e8",
+          "a7g7",
+          "b8a8",
+          "c6c7",
+          "a8a1",
+          "f1f2",
+          "a1a2",
+          "f2f3",
+          "d6c7",
+          "g7c7",
+          "a2a3",
+          "c7b7",
+          "a3c3",
+          "f3e2",
+          "c3b3",
+          "b7b5",
+          "e8d7",
+          "b5b7",
+          "d7d6",
+          "b7b6",
+          "d6d7"
+        ]
+      },
+      {
+        "rank": 3,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 1181
+        },
+        "moves": [
+          "d6b8",
+          "c6e6",
+          "b6e6",
+          "d5e6",
+          "f7e7",
+          "e4b7",
+          "b8c7",
+          "b7c6",
+          "e7d6",
+          "c6b5",
+          "c7b6",
+          "a8g8",
+          "g7g6",
+          "g8g7",
+          "d6d5",
+          "g7d7",
+          "d5e4",
+          "f5g6",
+          "b6d4"
+        ]
+      },
+      {
+        "rank": 4,
+        "depth": 20,
+        "score": {
+          "type": "mate",
+          "value": 9
+        },
+        "moves": [
+          "b6g1",
+          "f1g1",
+          "b7b8",
+          "a8a7",
+          "f7g8",
+          "c6d6",
+          "b8a8",
+          "a7a8",
+          "g8h7",
+          "a8a7",
+          "h7g8",
+          "d6e6",
+          "g8h8",
+          "e6e8",
+          "h8h7",
+          "e8g6",
+          "h7g8",
+          "g6g7"
+        ]
+      },
+      {
+        "rank": 5,
+        "depth": 20,
+        "score": {
+          "type": "mate",
+          "value": 8
+        },
+        "moves": [
+          "b7e7",
+          "c6b6",
+          "e7e8",
+          "a8e8",
+          "f7e8",
+          "b6d6",
+          "e8f7",
+          "d6e6",
+          "f7f8",
+          "d5d6",
+          "g7g5",
+          "e6e7",
+          "f8g8",
+          "d6d7",
+          "g5g4",
+          "d7d8q"
+        ]
+      },
+      {
+        "rank": 6,
+        "depth": 20,
+        "score": {
+          "type": "mate",
+          "value": 7
+        },
+        "moves": [
+          "b6f2",
+          "f1f2",
+          "b7b8",
+          "a8a7",
+          "f7g8",
+          "c6d6",
+          "b8a8",
+          "a7a8",
+          "g8h7",
+          "d6c7",
+          "h6h5",
+          "a8a7",
+          "h7h6",
+          "c7g7"
+        ]
+      },
+      {
+        "rank": 7,
+        "depth": 20,
+        "score": {
+          "type": "mate",
+          "value": 5
+        },
+        "moves": ["b6d8", "a8d8", "b7e7", "c6c8", "e7e8", "d8e8", "g7g5", "c8d7", "d6e7", "d7e7"]
+      },
+      {
+        "rank": 8,
+        "depth": 20,
+        "score": {
+          "type": "mate",
+          "value": 3
+        },
+        "moves": ["d6f8", "c6e8", "f7g8", "e8f8", "g8h7", "f8g8"]
+      }
+    ],
+    "depth": 20,
+    "milliseconds": 15000
+  },
+  {
+    "ply": 89,
+    "position": "45. Ra6",
+    "elapsedMs": 7628.5999999996275,
+    "lines": [
+      {
+        "rank": 1,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 40
+        },
+        "moves": [
+          "b6e3",
+          "c6d6",
+          "b8e8",
+          "d6d7",
+          "e8e7",
+          "d7b5",
+          "e3e4",
+          "a6a1",
+          "e4d3",
+          "f1g1",
+          "d3c3",
+          "a1d1",
+          "c3b3",
+          "d1f1",
+          "b3e3",
+          "g1h2",
+          "e3d3",
+          "f1c1",
+          "d3f5",
+          "b5c4",
+          "f5f4",
+          "c4f4",
+          "e5f4",
+          "b4b5",
+          "e7b7",
+          "c1b1",
+          "b7b6",
+          "h2g1"
+        ]
+      },
+      {
+        "rank": 2,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 385
+        },
+        "moves": [
+          "b6c6",
+          "d5c6",
+          "b8e8",
+          "a6a7",
+          "e8e7",
+          "a7a8",
+          "e7e8",
+          "a8a5",
+          "d6c7",
+          "a5b5",
+          "f7e7",
+          "b5c5",
+          "e8a8",
+          "c5c4",
+          "a8a2",
+          "c4c5",
+          "e7d8",
+          "c5d5",
+          "d8c8",
+          "d5d7",
+          "c7b6"
+        ]
+      },
+      {
+        "rank": 3,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 607
+        },
+        "moves": [
+          "b6d8",
+          "c6d6",
+          "d8d6",
+          "a6d6",
+          "f7f8",
+          "d6a6",
+          "f8e7",
+          "d5d6",
+          "e7d7",
+          "a6a7",
+          "d7d6",
+          "a7g7",
+          "b8f8",
+          "g7a7",
+          "f8g8",
+          "a7a6",
+          "d6e7",
+          "a6e6",
+          "e7d8",
+          "e6f6",
+          "d8c7",
+          "f6a6"
+        ]
+      },
+      {
+        "rank": 4,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 612
+        },
+        "moves": [
+          "b6c7",
+          "c6d6",
+          "c7d6",
+          "a6d6",
+          "f7g8",
+          "d6a6",
+          "g8h7",
+          "d5d6",
+          "b8d8",
+          "g2g4",
+          "h6h5",
+          "g4g5",
+          "f6g5",
+          "f1f2",
+          "h7g8",
+          "e4d5",
+          "g8f8"
+        ]
+      },
+      {
+        "rank": 5,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 613
+        },
+        "moves": [
+          "b6b7",
+          "c6b7",
+          "b8b7",
+          "a6d6",
+          "f7e7",
+          "d6a6",
+          "e7d7",
+          "d5d6",
+          "b7b8",
+          "f1f2",
+          "h6h5",
+          "f2f1",
+          "h5h4",
+          "f1e2",
+          "b8g8",
+          "a6b6",
+          "g8c8",
+          "b6b5",
+          "d7d6",
+          "b5b6",
+          "d6e7",
+          "b6b7",
+          "e7f8",
+          "b4b5",
+          "c8a8",
+          "b5b6",
+          "a8a6",
+          "b7b8",
+          "f8e7",
+          "b6b7",
+          "a6b6",
+          "b8c8",
+          "b6b7"
+        ]
+      },
+      {
+        "rank": 6,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 691
+        },
+        "moves": [
+          "b6a6",
+          "c6a6",
+          "b8d8",
+          "a6b5",
+          "f7g8",
+          "b5c4",
+          "d8b8",
+          "c4c6",
+          "d6b4",
+          "d5d6",
+          "b4d6",
+          "c6d6",
+          "b8b2",
+          "g2g4",
+          "g8h7"
+        ]
+      },
+      {
+        "rank": 7,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 1074
+        },
+        "moves": [
+          "b6g1",
+          "f1g1",
+          "b8d8",
+          "a6a7",
+          "f7g8",
+          "c6b6",
+          "d8d7",
+          "a7d7",
+          "d6f8",
+          "b6b5",
+          "g8h7",
+          "b5c4",
+          "f8d6",
+          "d7d6",
+          "h6h5",
+          "c4c8",
+          "h5h4",
+          "c8e6",
+          "h7h6",
+          "e6e8"
+        ]
+      },
+      {
+        "rank": 8,
+        "depth": 20,
+        "score": {
+          "type": "cp",
+          "value": 1146
+        },
+        "moves": [
+          "f7g8",
+          "a6b6",
+          "b8d8",
+          "f1e2",
+          "g7g5",
+          "b6b5",
+          "g5g4",
+          "h3g4",
+          "d6f8",
+          "b5b7",
+          "h6h5",
+          "c6f6",
+          "h5g4",
+          "f6g6",
+          "g8h8"
+        ]
+      }
+    ],
+    "depth": 20,
+    "milliseconds": 15000
+  }
+]

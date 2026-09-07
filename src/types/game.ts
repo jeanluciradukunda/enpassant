@@ -9,6 +9,7 @@ export interface GamePosition {
   check: boolean;
   mate: boolean;
   draw: boolean;
+  legalReplies?: number;
 }
 
 export interface Game {
@@ -32,8 +33,13 @@ export interface EngineLine {
 }
 export interface Analysis {
   lines: EngineLine[];
+  // A separately searched played move; its exact rank beyond MultiPV is unknown.
+  playedLine?: EngineLine;
   depth: number;
   milliseconds: number;
+  elapsedMs?: number;
+  requestedDepth?: number;
+  depthReached?: boolean;
 }
 export interface PositionAnalysis extends Analysis {
   positionId: string;
@@ -46,6 +52,8 @@ export interface EvolutionNode extends GamePosition {
   originPly: number;
   x: number;
   y: number;
+  checkQuality?: 'supported' | 'inferior' | 'unassessed';
+  continuationEnd?: 'display-limit' | 'pv-end';
 }
 export interface EvolutionGraph {
   nodes: EvolutionNode[];
@@ -66,4 +74,6 @@ export interface EvolutionEdge {
   paths: string[][];
   d: string;
   weight: number;
+  kind?: 'move' | 'recurrence';
+  quality?: number;
 }

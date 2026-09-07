@@ -68,6 +68,8 @@ Choose **Growing replay → Play**, or use **← / →** to step and **Space** t
 
 [Import behavior, score semantics and layout details →](docs/game-visualizer.md)
 
+Try **Import game → Try the paper’s game → Depth 20 study** to explore Deep Blue–Kasparov (1997). [See the measured comparison with Figure 7 →](docs/research/paper-fidelity-implementation.md)
+
 </details>
 
 ## From paper to play

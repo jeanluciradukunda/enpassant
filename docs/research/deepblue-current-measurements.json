@@ -1,0 +1,332 @@
+{
+  "engine": "stockfish-18.0.8-lite-single",
+  "budgetMs": 400,
+  "plies": 89,
+  "positionsAnalyzed": 90,
+  "depth": {
+    "min": 12,
+    "median": 13,
+    "max": 16,
+    "at20": 0
+  },
+  "returnedPvLength": {
+    "min": 1,
+    "median": 13,
+    "max": 34
+  },
+  "graph": {
+    "positions": 5122,
+    "merged": 212,
+    "shortened": 3712,
+    "visible": 1198,
+    "edges": 1250,
+    "compressedEdges": 538,
+    "width": 2624.9,
+    "height": 315.52,
+    "sharedGlyphs": 99
+  },
+  "events": {
+    "check": 115,
+    "mate": 0,
+    "draw": 0,
+    "lateCheck": 65,
+    "lateMate": 0
+  },
+  "outsideTop8": [
+    {
+      "ply": 29,
+      "played": "Nc6",
+      "rank": null
+    },
+    {
+      "ply": 37,
+      "played": "Nh4",
+      "rank": null
+    },
+    {
+      "ply": 50,
+      "played": "f4",
+      "rank": null
+    },
+    {
+      "ply": 51,
+      "played": "Nf6",
+      "rank": null
+    },
+    {
+      "ply": 62,
+      "played": "Bc5",
+      "rank": null
+    },
+    {
+      "ply": 73,
+      "played": "Rxa2",
+      "rank": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "ply": 72,
+      "position": "36… axb5",
+      "depth": 16,
+      "best": {
+        "rank": 1,
+        "depth": 16,
+        "score": {
+          "type": "cp",
+          "value": 108
+        },
+        "moves": [
+          "c2e4",
+          "d6c7",
+          "a2a6",
+          "c8d8",
+          "g1h2",
+          "a8a6",
+          "a1a6",
+          "d8d6",
+          "a6c6",
+          "d6c6",
+          "d5c6",
+          "e8e7",
+          "f2a7",
+          "e7d6",
+          "a7a6"
+        ]
+      },
+      "playedRank": 1
+    },
+    {
+      "ply": 73,
+      "position": "37. Be4",
+      "depth": 12,
+      "best": {
+        "rank": 1,
+        "depth": 12,
+        "score": {
+          "type": "cp",
+          "value": 104
+        },
+        "moves": [
+          "d6c7",
+          "a2a6",
+          "c8d8",
+          "f2a2",
+          "c7b6",
+          "g1h2",
+          "a8a6",
+          "a2a6",
+          "d8b8",
+          "d5d6",
+          "g8h7",
+          "a1d1"
+        ]
+      },
+      "playedRank": null
+    },
+    {
+      "ply": 74,
+      "position": "37… Rxa2",
+      "depth": 15,
+      "best": {
+        "rank": 1,
+        "depth": 15,
+        "score": {
+          "type": "cp",
+          "value": 157
+        },
+        "moves": [
+          "f2a2",
+          "c8d8",
+          "a2a6",
+          "g8h7",
+          "a6c6",
+          "e8h5",
+          "c6b6",
+          "h5e8",
+          "a1a6",
+          "d6f8",
+          "b6c7",
+          "d8c8",
+          "a6e6",
+          "e8d8",
+          "c7d8"
+        ]
+      },
+      "playedRank": 1
+    },
+    {
+      "ply": 75,
+      "position": "38. Qxa2",
+      "depth": 12,
+      "best": {
+        "rank": 1,
+        "depth": 12,
+        "score": {
+          "type": "cp",
+          "value": 160
+        },
+        "moves": ["c8b8", "a2a6", "e8f8", "g1f1", "g8h7", "a6c6", "h6h5", "h3h4", "h7h6", "f1e2"]
+      },
+      "playedRank": 7
+    },
+    {
+      "ply": 76,
+      "position": "38… Qd7",
+      "depth": 14,
+      "best": {
+        "rank": 1,
+        "depth": 14,
+        "score": {
+          "type": "cp",
+          "value": 185
+        },
+        "moves": ["a2a6", "g8h7", "a6b6", "c8d8", "a1a6", "d7e8", "g2g4", "h6h5", "g1f2", "h7h6"]
+      },
+      "playedRank": 2
+    },
+    {
+      "ply": 85,
+      "position": "43. Qc6",
+      "depth": 13,
+      "best": {
+        "rank": 1,
+        "depth": 13,
+        "score": {
+          "type": "cp",
+          "value": 277
+        },
+        "moves": ["c7d7", "g1f2", "b7a7", "c6d7", "a7d7", "f2f3", "h6h5"]
+      },
+      "playedRank": 3
+    },
+    {
+      "ply": 86,
+      "position": "43… Qb6+",
+      "depth": 14,
+      "best": {
+        "rank": 1,
+        "depth": 14,
+        "score": {
+          "type": "cp",
+          "value": 321
+        },
+        "moves": [
+          "g1h2",
+          "b7b8",
+          "c6b6",
+          "b8b6",
+          "h2g3",
+          "d6b8",
+          "g3h4",
+          "b8d6",
+          "h4g4",
+          "d6f8",
+          "g4h5",
+          "f8d6",
+          "a8a7",
+          "f7g8",
+          "h5g6",
+          "d6f8",
+          "h3h4",
+          "b6d6",
+          "g2g4"
+        ]
+      },
+      "playedRank": 4
+    },
+    {
+      "ply": 87,
+      "position": "44. Kf1",
+      "depth": 14,
+      "best": {
+        "rank": 1,
+        "depth": 14,
+        "score": {
+          "type": "cp",
+          "value": 302
+        },
+        "moves": [
+          "b7b8",
+          "c6b6",
+          "b8b6",
+          "f1f2",
+          "b6b8",
+          "a8a6",
+          "f7e7",
+          "a6a7",
+          "e7e8",
+          "f2g3",
+          "b8c8",
+          "a7g7"
+        ]
+      },
+      "playedRank": 1
+    },
+    {
+      "ply": 88,
+      "position": "44… Rb8",
+      "depth": 15,
+      "best": {
+        "rank": 1,
+        "depth": 15,
+        "score": {
+          "type": "cp",
+          "value": 288
+        },
+        "moves": [
+          "c6b6",
+          "b8b6",
+          "f1f2",
+          "d6e7",
+          "f2g3",
+          "b6d6",
+          "g3g4",
+          "e7d8",
+          "g4h5",
+          "d8b6",
+          "a8b8",
+          "b6e3",
+          "b8b7",
+          "f7e8",
+          "b7c7"
+        ]
+      },
+      "playedRank": 6
+    },
+    {
+      "ply": 89,
+      "position": "45. Ra6",
+      "depth": 15,
+      "best": {
+        "rank": 1,
+        "depth": 15,
+        "score": {
+          "type": "cp",
+          "value": 105
+        },
+        "moves": [
+          "b6e3",
+          "c6d6",
+          "b8e8",
+          "d6d7",
+          "e8e7",
+          "d7c6",
+          "e3e4",
+          "d5d6",
+          "e4b1",
+          "f1f2",
+          "b1c2",
+          "f2g1",
+          "c2c1",
+          "g1h2",
+          "e7e8",
+          "c6d5",
+          "f7f8"
+        ]
+      }
+    }
+  ],
+  "elapsedMs": 42913,
+  "browserErrors": []
+}

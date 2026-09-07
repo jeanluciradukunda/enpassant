@@ -1,0 +1,11 @@
+{
+  "source": "https://people.cs.nycu.edu.tw/~yushuen/data/ChessVis14.pdf",
+  "sha256": "584bd5e16cfed095866c4b20651a737282a22ec69b28bce97611fe26abc61e7e",
+  "authorManuscriptPage": 8,
+  "figure": 7,
+  "visibleNodes": 1245,
+  "playedCircles": 90,
+  "alternativeSquares": 1155,
+  "mateImageMarkers": 11,
+  "note": "Geometric count from original PDF, deduplicating fill/stroke paths; excludes chart and enlarged inset. No FEN or engine-tree correspondence inferred."
+}

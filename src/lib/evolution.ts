@@ -1,5 +1,6 @@
 import { Chess } from 'chess.js';
 import { position } from './games';
+import { candidates, checkQuality } from './semantics';
 import type { Analysis, EvolutionGraph, EvolutionNode, Game } from '../types/game';
 
 export const PLY_WIDTH = 28;
@@ -12,6 +13,8 @@ export const xForPly = (ply: number) => 36 + ply * PLY_WIDTH;
 export class EvolutionBuilder {
   private nodes = new Map<string, EvolutionNode>();
   private analysis = new Map<string, Analysis>();
+  private contributions = new Map<string, Set<string>>();
+  private endings = new Map<string, Map<string, EvolutionNode['continuationEnd']>>();
   private placed: EvolutionGraph | undefined;
   constructor(private game: Game) {
     const moves: string[] = [];
@@ -33,9 +36,9 @@ export class EvolutionBuilder {
     if (!source) return;
     this.analysis.set(sourceId, analysis);
     const played = source.played ? this.game.positions[source.ply + 1]?.uci : undefined;
-    const rank = analysis.lines.find((line) => line.moves[0] === played)?.rank ?? 9;
-    const keep = source.played ? Math.max(4, Math.min(8, rank)) : 4;
-    for (const line of analysis.lines.slice(0, keep)) {
+    const contribution = new Set<string>([sourceId]);
+    const endings = new Map<string, EvolutionNode['continuationEnd']>();
+    for (const line of candidates(analysis, played)) {
       const chess = new Chess(this.game.initialFen);
       for (const move of source.moves) chess.move(move);
       let parent = source;
@@ -63,9 +66,32 @@ export class EvolutionBuilder {
           };
           this.nodes.set(id, node);
         }
+        contribution.add(id);
         parent = node;
       }
+      if (!parent.mate && !parent.draw && parent.id !== sourceId)
+        endings.set(parent.id, line.moves.length > length ? 'display-limit' : 'pv-end');
     }
+    this.contributions.set(sourceId, contribution);
+    this.endings.set(sourceId, endings);
+    // Re-search replaces its own paths. Other roots and deliberately explored
+    // branches retain their contributions and every ancestor needed for replay.
+    const used = new Set([...this.contributions.values()].flatMap((ids) => [...ids]));
+    for (const id of [...used]) {
+      let node = this.nodes.get(id);
+      while (node?.parent && !used.has(node.parent)) {
+        used.add(node.parent);
+        node = this.nodes.get(node.parent);
+      }
+    }
+    for (const [id, node] of this.nodes) {
+      if (!node.played && !used.has(id)) this.nodes.delete(id);
+      else node.checkQuality = checkQuality(node, this.analysis.get(node.parent ?? ''));
+    }
+    const parents = new Set([...this.nodes.values()].map((n) => n.parent));
+    const allEndings = new Map([...this.endings.values()].flatMap((ends) => [...ends]));
+    for (const node of this.nodes.values())
+      node.continuationEnd = parents.has(node.id) ? undefined : allEndings.get(node.id);
   }
   snapshot(): EvolutionGraph {
     if (this.placed) return this.placed;

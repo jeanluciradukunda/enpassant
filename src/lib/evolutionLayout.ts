@@ -1,10 +1,11 @@
-import type { Analysis, EvolutionEdge, EvolutionGraph, EvolutionNode, Score } from '../types/game';
+import type { Analysis, EvolutionEdge, EvolutionGraph, EvolutionNode } from '../types/game';
 
+import { evolutionDot } from './evolutionDot';
 import { renderGraph } from './graphviz';
+import { candidates, candidateQualities, positionKey } from './semantics';
 
-const numeric = (score: Score) =>
-  score.type === 'cp' ? score.value : Math.sign(score.value) * (30000 - Math.abs(score.value));
-const event = (node: EvolutionNode) => node.check || node.mate || node.draw;
+const event = (node: EvolutionNode) =>
+  (node.check && node.checkQuality !== 'inferior') || node.mate || node.draw;
 const curve = (a: EvolutionNode, b: EvolutionNode) =>
   `M${a.x},${a.y}C${(a.x + b.x) / 2},${a.y} ${(a.x + b.x) / 2},${b.y} ${b.x},${b.y}`;
 
@@ -24,9 +25,9 @@ export async function layoutEvolution(
   const groups = new Map<string, string[]>();
   const alias = new Map<string, string>();
   for (const n of nodes) {
-    // Same ply, full FEN (including clocks), and event state. Repetition state
-    // isn't discarded: merged glyphs retain all underlying occurrence paths.
-    const key = `${n.ply}:${n.fen}:${n.draw}`;
+    // Sharing is visual only. Keep the played timeline chronological and keep
+    // distinct terminal/check classifications distinct even on the same board.
+    const key = `${n.ply}:${positionKey(n)}:${n.draw}:${n.mate}:${n.checkQuality}`;
     const members = groups.get(key) ?? [];
     members.push(n.id);
     groups.set(key, members);
@@ -49,13 +50,31 @@ export async function layoutEvolution(
       into.add(from);
       incoming.set(to, into);
     }
-  const keep = new Set<string>();
+  // Back links express recurrence without collapsing the chronology or using
+  // the earlier occurrence's draw status in a later engine search.
+  const recurrences: { from: string; to: string }[] = [];
+  for (const n of nodes) {
+    let ancestor = n.parent ? byId.get(n.parent) : undefined;
+    while (ancestor) {
+      if (positionKey(ancestor) === positionKey(n)) {
+        recurrences.push({ from: n.id, to: ancestor.id });
+        break;
+      }
+      ancestor = ancestor.parent ? byId.get(ancestor.parent) : undefined;
+    }
+  }
+  const keep = new Set(recurrences.flatMap(({ from, to }) => [alias.get(from)!, alias.get(to)!]));
   for (const v of vertices) {
     const highlighted = v.members.some((id) => {
       const n = byId.get(id)!;
       return n.played || event(n);
     });
-    if (highlighted || incoming.get(v.id)?.size !== 1 || outgoing.get(v.id)?.size !== 1)
+    if (
+      highlighted ||
+      v.members.some((id) => !children.get(id)?.length) ||
+      incoming.get(v.id)?.size !== 1 ||
+      outgoing.get(v.id)?.size !== 1
+    )
       keep.add(v.id);
     if (highlighted) {
       for (const id of incoming.get(v.id) ?? []) keep.add(id);
@@ -92,51 +111,30 @@ export async function layoutEvolution(
   for (const [sourceId, result] of analysis) {
     const source = byId.get(sourceId);
     if (!source || !result.lines.length) continue;
-    const scores = result.lines.map((line) => numeric(line.score) * (source.turn === 'w' ? 1 : -1));
-    const min = Math.min(...scores);
-    const max = Math.max(...scores);
-    for (const [i, line] of result.lines.entries()) {
+    const played = (children.get(sourceId) ?? [])
+      .map((id) => byId.get(id)!)
+      .find((n) => n.played)?.uci;
+    const retained = candidates(result, source.played ? played : undefined).filter(
+      (line) => line.depth === result.depth,
+    );
+    const qualities = candidateQualities(retained, source.turn);
+    for (const [i, line] of retained.entries()) {
       const child = (children.get(sourceId) ?? []).find(
         (id) => byId.get(id)?.uci === line.moves[0],
       );
-      if (child)
-        weights.set(
-          child,
-          max === min
-            ? 1.1
-            : 0.22 + 2.2 * Math.pow(Math.log1p(scores[i] - min) / Math.log1p(max - min), 2),
-        );
+      if (child) weights.set(child, qualities[i]);
     }
   }
   for (const edge of edges) {
-    const from = byId.get(edge.from)!;
-    const to = byId.get(edge.to)!;
-    edge.weight = Math.max(...edge.paths.map((path) => weights.get(path[1]) ?? 0.38));
-    if (from.played && to.played) edge.weight = Math.max(edge.weight, 1.3);
+    const qualities = edge.paths.map((path) => weights.get(path[1]));
+    // A junction can carry differently evaluated histories. Only one unambiguous
+    // local measurement gets a quantitative width; the route picker exposes each.
+    if (qualities[0] !== undefined && qualities.every((q) => q === qualities[0]))
+      edge.quality = qualities[0];
+    edge.weight = edge.quality === undefined ? 0.38 : edge.quality / 10;
   }
-  const names = new Map(shown.map((v, i) => [v.id, `n${i}`]));
-  // Rank the shortened graph itself: reserving a column for every hidden ply
-  // turns compact trees into long parallel lanes and defeats shortening.
-  const lines = [
-    'digraph evolution {',
-    'graph [rankdir=LR, nodesep=.04, ranksep=.16, margin=0, splines=true, newrank=true, outputorder=edgesfirst];',
-    'node [shape=box, label="", fixedsize=true, width=.07, height=.07];',
-    'edge [arrowsize=.35];',
-  ];
-  for (const v of shown) {
-    const node = byId.get(v.id)!;
-    const name = names.get(v.id)!;
-    lines.push(`${name} [${node.played ? 'shape=circle,width=.19,height=.19,group=played' : ''}];`);
-  }
-  for (const edge of edges) {
-    const a = byId.get(edge.from)!;
-    const b = byId.get(edge.to)!;
-    lines.push(
-      `${names.get(edge.from)} -> ${names.get(edge.to)} [id="${edge.id}", minlen=1, weight=${a.played && b.played ? 40 : edge.paths[0].length > 2 ? 2 : 8}];`,
-    );
-  }
-  lines.push('}');
-  const result = await renderGraph(lines.join('\n'));
+  const { dot, names } = evolutionDot(shown, byId, edges);
+  const result = await renderGraph(dot);
   const bounds = result.bb.split(',').map(Number);
   const height = Math.max(220, bounds[3] + 36);
   const dotToId = new Map([...names].map(([id, name]) => [name, id]));
@@ -233,6 +231,25 @@ export async function layoutEvolution(
         n.y = a.y + (b.y - a.y) * (3 * t * t - 2 * t * t * t);
       }
   }
+  const recurrenceMap = new Map<string, EvolutionEdge>();
+  for (const { from, to } of recurrences) {
+    const a = byId.get(alias.get(from)!)!,
+      b = byId.get(alias.get(to)!)!;
+    const id = `recurrence:${a.id}→${b.id}`;
+    const existing = recurrenceMap.get(id);
+    if (existing) existing.paths.push([from, to]);
+    else
+      recurrenceMap.set(id, {
+        id,
+        from: a.id,
+        to: b.id,
+        paths: [[from, to]],
+        kind: 'recurrence',
+        weight: 0.6,
+        d: `M${a.x},${a.y - 8}C${a.x},${Math.max(2, Math.min(a.y, b.y) - 28)} ${b.x},${Math.max(2, Math.min(a.y, b.y) - 28)} ${b.x},${b.y - 8}`,
+      });
+  }
+  edges.push(...recurrenceMap.values());
   return {
     nodes,
     byId,

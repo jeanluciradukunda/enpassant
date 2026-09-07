@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { descendants, visibleAt } from '../lib/evolution';
 import { moveLabel } from '../lib/games';
+import { eventFill } from '../lib/semantics';
 import type { EvolutionGraph, EvolutionNode } from '../types/game';
 
 export interface MarksProps {
@@ -65,7 +66,8 @@ export function EvolutionMarks({
         </marker>
       </defs>
       {edges.map((edge) => {
-        const compressed = edge.paths.some((p) => p.length > 2);
+        const recurrence = edge.kind === 'recurrence';
+        const compressed = !recurrence && edge.paths.some((p) => p.length > 2);
         const dim = !lit(edge.paths.flat());
         const path = edge.paths[0];
         const d = edge.d;
@@ -74,14 +76,23 @@ export function EvolutionMarks({
             <path
               data-edge={edge.id}
               data-compressed={compressed}
+              data-recurrence={recurrence || undefined}
               className="branch-edge"
               d={d}
               fill="none"
-              stroke="#111b13"
-              strokeWidth={compressed ? Math.min(edge.weight, 0.7) : edge.weight}
-              strokeDasharray={compressed ? '1.1 1.65' : undefined}
+              stroke={recurrence ? '#536c55' : '#111b13'}
+              strokeWidth={edge.weight}
+              strokeDasharray={recurrence ? '4 2' : compressed ? '1.1 1.65' : undefined}
               markerEnd={`url(#${detail ? 'lens-arrow' : 'evolution-arrow'})`}
-            />
+            >
+              <title>
+                {recurrence
+                  ? 'Return to an earlier occurrence of this position · relationship, not an extra move'
+                  : edge.quality === undefined
+                    ? 'Continuation · no comparable local evaluation'
+                    : `Local move quality ${edge.quality.toFixed(1)} / 30 · compare siblings only`}
+              </title>
+            </path>
             {compressed && !detail && (
               <path
                 d={d}
@@ -117,14 +128,7 @@ export function EvolutionMarks({
       )}
       {vertices.map(({ node, members }) => {
         const side = node.turn === 'w' ? '#fff' : '#090e0a';
-        const fill =
-          node.mate || node.check
-            ? node.turn === 'b'
-              ? '#fff'
-              : '#090e0a'
-            : node.draw
-              ? '#7c847e'
-              : '#9dcd9d';
+        const fill = eventFill(node);
         const isSelected = members.includes(selected.id);
         return (
           <g
@@ -135,6 +139,10 @@ export function EvolutionMarks({
             data-x={node.x}
             data-y={node.y}
             data-members={members.length}
+            data-continuation-end={node.continuationEnd}
+            data-event={
+              node.mate ? 'mate' : node.draw ? 'draw' : node.check ? node.checkQuality : undefined
+            }
             className="evolution-node"
             opacity={lit(members) ? 1 : 0.1}
             role={detail ? undefined : 'button'}
@@ -172,7 +180,7 @@ export function EvolutionMarks({
                   fontSize="8.7"
                   fontFamily="Georgia,serif"
                   textAnchor="middle"
-                  fill={node.check ? (node.turn === 'b' ? '#090e0a' : '#fff') : side}
+                  fill={fill === '#fff' ? '#090e0a' : fill === '#090e0a' ? '#fff' : side}
                 >
                   {String(node.moveNumber).padStart(2, '0')}
                 </text>
@@ -184,7 +192,7 @@ export function EvolutionMarks({
                 width="5.2"
                 height="5.2"
                 fill={fill}
-                stroke={node.check ? fill : '#101a12'}
+                stroke="#101a12"
                 strokeWidth=".65"
               />
             )}
@@ -206,8 +214,19 @@ export function EvolutionMarks({
             )}
             <title>
               {moveLabel(node)}
+              {node.continuationEnd === 'display-limit'
+                ? ' · Display horizon, not a terminal position'
+                : node.continuationEnd === 'pv-end'
+                  ? ' · End of returned line, not a forced ending'
+                  : ''}
               {members.length > 1 ? ` · ${members.length} routes reach this position` : ''}
-              {node.mate ? ' · Checkmate' : node.check ? ' · Check' : ''}
+              {node.mate
+                ? ' · Checkmate'
+                : node.draw
+                  ? ' · Draw'
+                  : node.check
+                    ? ` · Check (${node.checkQuality ?? 'unassessed'})`
+                    : ''}
             </title>
           </g>
         );

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { DEEP_MS, Engine, QUICK_MS } from './engine';
+import { DEEP_MS, Engine, QUICK_MS, STUDY_MS } from './engine';
+import type { AnalysisProfile } from './engine';
 import { EvolutionBuilder } from './evolution';
 import type { Analysis, EvolutionNode, Game } from '../types/game';
 
-export function useAnalysis(game: Game, replaying = false) {
+export function useAnalysis(game: Game, replaying = false, profile: AnalysisProfile = 'quick') {
   const [builder] = useState(() => new EvolutionBuilder(game));
   const [graph, setGraph] = useState(() => builder.snapshot());
   const frozen = useRef(replaying);
@@ -66,7 +67,12 @@ export function useAnalysis(game: Game, replaying = false) {
           const result = await engine.analyze(
             game.initialFen,
             next.moves,
-            deep ? DEEP_MS : QUICK_MS,
+            profile === 'study' ? STUDY_MS : deep ? DEEP_MS : QUICK_MS,
+            {
+              depth: 20,
+              playedMove: next.played ? game.positions[next.ply + 1]?.uci : undefined,
+              refresh: !!deep,
+            },
           );
           if (stopped) break;
           setStatus('analyzing');
@@ -94,7 +100,7 @@ export function useAnalysis(game: Game, replaying = false) {
       stopped = true;
       engine?.dispose();
     };
-  }, [builder, game, run]);
+  }, [builder, game, run, profile]);
 
   const pause = () => {
     cancel.current();
@@ -108,6 +114,12 @@ export function useAnalysis(game: Game, replaying = false) {
     else setWorkingOn(`Queued ${node.san || 'start'}`);
   };
   const completed = game.positions.filter((pos) => analysis.has(pos.id)).length;
+  const retryLimited = () => {
+    for (const pos of game.positions)
+      if (saved.current.has(pos.id) && !saved.current.get(pos.id)!.depthReached)
+        jobs.current.set(pos.id, builder.get(pos.id)!);
+    resume();
+  };
   return {
     graph,
     analysis,
@@ -116,8 +128,10 @@ export function useAnalysis(game: Game, replaying = false) {
     workingOn,
     completed,
     total: game.positions.length,
+    atDepth: game.positions.filter((pos) => analysis.get(pos.id)?.depthReached).length,
     pause,
     resume,
     expand,
+    retryLimited,
   };
 }

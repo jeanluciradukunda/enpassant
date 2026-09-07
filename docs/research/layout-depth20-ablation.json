@@ -1,0 +1,61 @@
+{
+  "input": "docs/research/deepblue-depth20-analysis.json.gz",
+  "sha256": "f6f60f7a79d0fab27d94e426392bb8858088a4c299783c5145584a54d65e4046",
+  "frozenGraph": false,
+  "vertices": 1237,
+  "results": [
+    {
+      "name": "legacy-with-played-group",
+      "orderFans": false,
+      "playedWeight": 40,
+      "branchWeight": 8,
+      "compressedWeight": 2,
+      "groupPlayed": true,
+      "graphBounds": "0,0,2486.6,241.04",
+      "branchesAbove": 3,
+      "branchesBelow": 314,
+      "playedVerticalSpread": 0
+    },
+    {
+      "name": "legacy-mixed-weights",
+      "orderFans": false,
+      "playedWeight": 40,
+      "branchWeight": 8,
+      "compressedWeight": 2,
+      "graphBounds": "0,0,2486.6,286.04",
+      "branchesAbove": 160,
+      "branchesBelow": 150,
+      "playedVerticalSpread": 64.00000000000001
+    },
+    {
+      "name": "unordered-5-to-1",
+      "orderFans": false,
+      "playedWeight": 50,
+      "branchWeight": 10,
+      "graphBounds": "0,0,2486.6,278.04",
+      "branchesAbove": 158,
+      "branchesBelow": 150,
+      "playedVerticalSpread": 123.00000000000001
+    },
+    {
+      "name": "ordered-5-to-1",
+      "orderFans": true,
+      "playedWeight": 50,
+      "branchWeight": 10,
+      "graphBounds": "0,0,2486.6,413.04",
+      "branchesAbove": 192,
+      "branchesBelow": 123,
+      "playedVerticalSpread": 248.99999999999997
+    },
+    {
+      "name": "ordered-1-to-1",
+      "orderFans": true,
+      "playedWeight": 10,
+      "branchWeight": 10,
+      "graphBounds": "0,0,2486.6,1001",
+      "branchesAbove": 149,
+      "branchesBelow": 137,
+      "playedVerticalSpread": 918
+    }
+  ]
+}
