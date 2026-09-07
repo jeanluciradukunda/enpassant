@@ -27,7 +27,7 @@ export function position(
 
 export function parseGame(pgn: string): Game {
   if (!pgn.trim()) throw new Error('Paste a PGN or choose a .pgn file to begin.');
-  if (pgn.length > MAX_PGN_BYTES)
+  if (new TextEncoder().encode(pgn).byteLength > MAX_PGN_BYTES)
     throw new Error('This PGN is too large. Import a file under 2 MB.');
   const chess = new Chess();
   try {
@@ -70,7 +70,8 @@ export function parseGame(pgn: string): Game {
 }
 
 export function parseGames(pgn: string): Game[] {
-  if (pgn.length > MAX_PGN_BYTES) throw new Error('Import a PGN file under 2 MB.');
+  if (new TextEncoder().encode(pgn).byteLength > MAX_PGN_BYTES)
+    throw new Error('Import a PGN file under 2 MB.');
   // PGN export collections conventionally start each game with an Event tag.
   const parts = pgn
     .trim()

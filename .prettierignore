@@ -9,3 +9,5 @@ LICENSE
 *.png
 src/fixtures/figure5.json
 public/engine/
+pnpm-lock.yaml
+artifacts/
