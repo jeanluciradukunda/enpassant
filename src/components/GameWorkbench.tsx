@@ -4,9 +4,11 @@ import { visibleAt } from '../lib/evolution';
 import { unfoldGraph } from '../lib/unfold';
 import type { AnalysisProfile } from '../lib/engine';
 import { candidates } from '../lib/semantics';
+import type { CheckMode } from '../lib/diagramStyle';
 import { useAnalysis } from '../lib/useAnalysis';
 import { moveLabel, scoreLabel } from '../lib/games';
 import { ChessBoard } from './ChessBoard';
+import { DiagramKey } from './DiagramKey';
 import { EvolutionDiagram, GraphMarks } from './EvolutionDiagram';
 import type { EvolutionNode, Game } from '../types/game';
 
@@ -37,6 +39,7 @@ function Workbench({
   const [speed, setSpeed] = useState(1);
   const [flipped, setFlipped] = useState(false);
   const [isolated, setIsolated] = useState(false);
+  const [checkMode, setCheckMode] = useState<CheckMode>('retained');
   const [unfolded, setUnfolded] = useState<string[] | null>(null);
   const graph = useMemo(() => unfoldGraph(engine.graph, unfolded), [engine.graph, unfolded]);
   const [exploringPly, setExploringPly] = useState<number | null>(null);
@@ -171,6 +174,7 @@ function Workbench({
     overview,
     selected,
     isolated,
+    checkMode,
     exploringPly,
     onSelect: select,
     onUnfold: setUnfolded,
@@ -417,16 +421,33 @@ function Workbench({
               </span>
               <span>
                 <i className="legend-check" />
-                Evaluated check
+                {checkMode === 'retained' ? 'Retained check' : 'Evaluated check'}
               </span>
               <span>
                 <i className="legend-mate">▲</i>Mate
               </span>
-              <span title="Dashed back link to an earlier occurrence; histories remain separate">
+              <span title="A return to a represented position. The route picker preserves each move history.">
                 ↶ Repeat
               </span>
             </div>
           </div>
+          <label className="check-display">
+            Check highlights
+            <select
+              aria-label="Check highlights"
+              value={checkMode}
+              onChange={(event) => setCheckMode(event.target.value as CheckMode)}
+            >
+              <option value="retained">Checks in retained lines</option>
+              <option value="assessed">Locally evaluated checks</option>
+            </select>
+            <span>
+              {checkMode === 'retained'
+                ? 'Shows legal checks in the chosen continuations; locally refuted checks stay hollow.'
+                : 'Highlights checks within 0.50 pawns of the best locally searched move.'}
+            </span>
+          </label>
+          <DiagramKey />
         </section>
         <aside className="position-panel" aria-label="Selected position">
           <div className="paper-detail-panel">
@@ -533,6 +554,12 @@ function Workbench({
             >
               ← Back to the played game
             </button>
+          )}
+          {routes.some((id) => graph.byId.get(id)!.draw) && !selected.draw && (
+            <p className="branch-help">
+              A different route reaches a draw at this shared position. The selected history can
+              still continue.
+            </p>
           )}
           {routes.length > 1 && (
             <label className="route-picker">

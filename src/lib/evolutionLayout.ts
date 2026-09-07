@@ -3,6 +3,12 @@ import type { Analysis, EvolutionEdge, EvolutionGraph, EvolutionNode } from '../
 import { evolutionDot } from './evolutionDot';
 import { renderGraph } from './graphviz';
 import { candidates, candidateQualities, positionKey } from './semantics';
+import { diagramStyle } from './diagramStyle';
+
+export interface StructurePolicy {
+  compression?: 'events' | 'neighbors' | 'none';
+  merging?: 'positions' | 'ply' | 'none';
+}
 
 const event = (node: EvolutionNode) =>
   (node.check && node.checkQuality !== 'inferior') || node.mate || node.draw;
@@ -16,6 +22,7 @@ export async function layoutEvolution(
   input: EvolutionNode[],
   analysis: Map<string, Analysis>,
   previous?: EvolutionGraph,
+  { compression = 'events', merging = 'positions' }: StructurePolicy = {},
 ): Promise<EvolutionGraph> {
   const nodes = input.map((n) => ({ ...n }));
   const byId = new Map(nodes.map((n) => [n.id, n]));
@@ -24,16 +31,40 @@ export async function layoutEvolution(
     if (n.parent) children.set(n.parent, [...(children.get(n.parent) ?? []), n.id]);
   const groups = new Map<string, string[]>();
   const alias = new Map<string, string>();
+  const positions = new Map<string, EvolutionNode[]>();
   for (const n of nodes) {
-    // Sharing is visual only. Keep the played timeline chronological and keep
-    // distinct terminal/check classifications distinct even on the same board.
-    const key = `${n.ply}:${positionKey(n)}:${n.draw}:${n.mate}:${n.checkQuality}`;
-    const members = groups.get(key) ?? [];
-    members.push(n.id);
-    groups.set(key, members);
+    const key = positionKey(n);
+    positions.set(key, [...(positions.get(key) ?? []), n]);
+  }
+  for (const equivalents of positions.values()) {
+    const played = equivalents.filter((n) => n.played);
+    const first = equivalents.reduce((a, b) => (a.ply <= b.ply ? a : b));
+    for (const n of equivalents) {
+      // Repeated played instants retain their numbered chart anchors. Predicted
+      // occurrences join the nearest matching anchor, or a shared alternative.
+      // Draw and check evidence belong to occurrences, not the identity key.
+      const anchor = n.played
+        ? n
+        : (played.reduce(
+            (best, candidate) =>
+              !best || Math.abs(candidate.ply - n.ply) < Math.abs(best.ply - n.ply)
+                ? candidate
+                : best,
+            undefined as EvolutionNode | undefined,
+          ) ?? first);
+      const key =
+        merging === 'none'
+          ? n.id
+          : merging === 'ply'
+            ? `${n.ply}:${positionKey(n)}:${n.draw}:${n.mate}:${n.checkQuality}`
+            : anchor.id;
+      groups.set(key, [...(groups.get(key) ?? []), n.id]);
+    }
   }
   const vertices = [...groups.values()].map((members) => {
-    const id = members.find((id) => byId.get(id)!.played) ?? members[0];
+    const id =
+      members.find((id) => byId.get(id)!.played) ??
+      members.reduce((a, b) => (byId.get(a)!.ply <= byId.get(b)!.ply ? a : b));
     for (const member of members) alias.set(member, id);
     return { id, members };
   });
@@ -50,10 +81,10 @@ export async function layoutEvolution(
       into.add(from);
       incoming.set(to, into);
     }
-  // Back links express recurrence without collapsing the chronology or using
-  // the earlier occurrence's draw status in a later engine search.
+  // Played repetitions keep their timeline anchors and an explicit relationship.
+  // Predicted repetitions instead redirect their real move edges through aliases.
   const recurrences: { from: string; to: string }[] = [];
-  for (const n of nodes) {
+  for (const n of nodes.filter((n) => n.played)) {
     let ancestor = n.parent ? byId.get(n.parent) : undefined;
     while (ancestor) {
       if (positionKey(ancestor) === positionKey(n)) {
@@ -70,15 +101,25 @@ export async function layoutEvolution(
       return n.played || event(n);
     });
     if (
+      compression === 'none' ||
       highlighted ||
       v.members.some((id) => !children.get(id)?.length) ||
       incoming.get(v.id)?.size !== 1 ||
       outgoing.get(v.id)?.size !== 1
     )
       keep.add(v.id);
-    if (highlighted) {
+    if (compression === 'neighbors' && highlighted) {
       for (const id of incoming.get(v.id) ?? []) keep.add(id);
       for (const id of outgoing.get(v.id) ?? []) keep.add(id);
+    }
+  }
+  // Preserve a sampled decision's first moves so solid sibling widths remain
+  // comparable. Quiet replies inside later event chains can still disappear.
+  for (const id of analysis.keys()) {
+    const from = alias.get(id);
+    if (from && (outgoing.get(from)?.size ?? 0) > 1) {
+      keep.add(from);
+      for (const to of outgoing.get(from) ?? []) keep.add(to);
     }
   }
   // A later search cannot hide or reposition a glyph already inspected.
@@ -98,10 +139,19 @@ export async function layoutEvolution(
           current = next;
         }
         const to = alias.get(current)!;
-        const key = `${vertex.id}→${to}`;
+        const key = `${vertex.id}→${to}:${path.length > 2 ? 'fold' : 'move'}`;
         const existing = edgeMap.get(key);
         if (existing) existing.paths.push(path);
-        else edgeMap.set(key, { id: key, from: vertex.id, to, paths: [path], d: '', weight: 0.45 });
+        else
+          edgeMap.set(key, {
+            id: key,
+            from: vertex.id,
+            to,
+            paths: [path],
+            d: '',
+            weight: 0.45,
+            kind: byId.get(to)!.ply <= byId.get(vertex.id)!.ply ? 'return' : 'move',
+          });
       }
     }
   const edges = [...edgeMap.values()];
@@ -131,7 +181,11 @@ export async function layoutEvolution(
     // local measurement gets a quantitative width; the route picker exposes each.
     if (qualities[0] !== undefined && qualities.every((q) => q === qualities[0]))
       edge.quality = qualities[0];
-    edge.weight = edge.quality === undefined ? 0.38 : edge.quality / 10;
+    edge.weight = edge.paths.some((path) => path.length > 2)
+      ? diagramStyle.compressedWidth
+      : edge.quality === undefined
+        ? diagramStyle.neutralWidth
+        : edge.quality / 10;
   }
   const { dot, names } = evolutionDot(shown, byId, edges);
   const result = await renderGraph(dot);
@@ -155,6 +209,11 @@ export async function layoutEvolution(
         )
         .join(' ');
     else edge.d = curve(byId.get(edge.from)!, byId.get(edge.to)!);
+    // Graphviz's spline stops before its arrowhead. Use the published tip from
+    // `pos` so our SVG marker reaches the node boundary instead of floating.
+    const tip = rendered?.pos?.match(/^e,([\d.-]+),([\d.-]+)/);
+    if (points?.length && tip)
+      edge.d += ` L${(Number(tip[1]) + 18).toFixed(2)},${(bounds[3] - Number(tip[2]) + 18).toFixed(2)}`;
   }
   let width = Math.max(720, bounds[2] + 36);
   let finalHeight = height;
@@ -203,11 +262,9 @@ export async function layoutEvolution(
         n.y = preferred + (gap % 2 ? -1 : 1) * (Math.floor(gap / 2) + 1) * 8;
       occupied.push(n);
     }
-    const oldEdges = new Map(previous.edges.map((e) => [`${e.from}→${e.to}`, e]));
+    const oldEdges = new Map(previous.edges.map((e) => [e.id, e]));
     for (const edge of edges)
-      edge.d =
-        oldEdges.get(`${edge.from}→${edge.to}`)?.d ??
-        curve(byId.get(edge.from)!, byId.get(edge.to)!);
+      edge.d = oldEdges.get(edge.id)?.d ?? curve(byId.get(edge.from)!, byId.get(edge.to)!);
     width = previous.width;
     finalHeight = previous.height;
   }
@@ -226,7 +283,7 @@ export async function layoutEvolution(
     for (const path of edge.paths)
       for (let i = 1; i < path.length - 1; i++) {
         const n = byId.get(path[i])!;
-        const t = (n.ply - a.ply) / (b.ply - a.ply);
+        const t = i / (path.length - 1);
         n.x = a.x + (b.x - a.x) * t;
         n.y = a.y + (b.y - a.y) * (3 * t * t - 2 * t * t * t);
       }

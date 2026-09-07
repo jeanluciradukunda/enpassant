@@ -1,0 +1,40 @@
+{
+  "provenance": "Source-derived src/fixtures/figure5.json, not fresh chess analysis. PDF width transforms were calibrated in its extraction script. Ratios are before browser zoom.",
+  "sourceSha256": "584bd5e16cfed095866c4b20651a737282a22ec69b28bce97611fe26abc61e7e",
+  "figure": 5,
+  "compressedEdges": 561,
+  "compressedStrokeWidths": [0.6651],
+  "compressedDashArrays": [[0.0665, 0.3325]],
+  "circleDiameter": 3.8574,
+  "squareSide": 1.9288,
+  "circleToSquareRatio": 1.9998963085856492,
+  "compressedStrokeToSquareRatio": 0.3448257984238905,
+  "compressedWhiteCheckToWhiteCheckEdges": 207,
+  "examples": [
+    {
+      "edge": "e22",
+      "source": "n20",
+      "target": "n21"
+    },
+    {
+      "edge": "e26",
+      "source": "n23",
+      "target": "n24"
+    },
+    {
+      "edge": "e36",
+      "source": "n33",
+      "target": "n34"
+    },
+    {
+      "edge": "e49",
+      "source": "n43",
+      "target": "n47"
+    }
+  ],
+  "appAtCommit": "249f7159c6cdd11ced49b980d37d9fb19cb049f9",
+  "appCircleDiameter": 13.6,
+  "appSquareSide": 5.2,
+  "appNeutralCompressedStroke": 0.38,
+  "appNeutralCompressedDash": [1.1, 1.65]
+}

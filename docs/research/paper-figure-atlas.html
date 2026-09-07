@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Reading the diagram · Enpassant figure atlas</title>
+    <style>
+      :root {
+        --paper: #f4f1e8;
+        --ink: #233e32;
+        --muted: #617065;
+        --line: #d4d8ca;
+        --green: #9dcd9d;
+        --accent: #9b4d32;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font:
+          16px/1.6 -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+      }
+      button,
+      select {
+        font: inherit;
+      }
+      a {
+        color: inherit;
+        text-underline-offset: 4px;
+      }
+      a:hover {
+        color: var(--accent);
+      }
+      button:focus-visible,
+      a:focus-visible,
+      select:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 4px;
+      }
+      header,
+      main,
+      footer {
+        width: min(1440px, calc(100% - 72px));
+        margin: auto;
+      }
+      header {
+        padding: 30px 0 34px;
+        border-bottom: 1px solid var(--line);
+      }
+      .masthead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .wordmark {
+        font:
+          26px Georgia,
+          serif;
+        letter-spacing: -0.7px;
+        text-decoration: none;
+      }
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.17em;
+        text-transform: uppercase;
+        font-weight: 650;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      h1 {
+        font:
+          clamp(40px, 5vw, 68px)/1.05 Georgia,
+          serif;
+        letter-spacing: -0.045em;
+        margin: 44px 0 16px;
+      }
+      .intro {
+        max-width: 820px;
+        margin: 0;
+        font-size: 18px;
+        color: var(--muted);
+      }
+      .intro strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 232px minmax(0, 1fr);
+        gap: 40px;
+        padding-top: 32px;
+      }
+      nav {
+        border-right: 1px solid var(--line);
+        padding-right: 24px;
+      }
+      nav .eyebrow {
+        margin: 0 0 16px;
+      }
+      .nav-list {
+        display: grid;
+        gap: 5px;
+      }
+      .nav-list button {
+        display: flex;
+        gap: 13px;
+        text-align: left;
+        width: 100%;
+        border: 0;
+        border-radius: 3px;
+        padding: 10px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        line-height: 1.3;
+        font-size: 13px;
+      }
+      .nav-list button:hover {
+        background: #e9ebdf;
+      }
+      .nav-list button[aria-current='true'] {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .num {
+        font-variant-numeric: tabular-nums;
+        opacity: 0.7;
+      }
+      .read-more {
+        display: block;
+        margin: 28px 10px;
+        font-size: 13px;
+      }
+      .figure-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      h2 {
+        font:
+          32px/1.15 Georgia,
+          serif;
+        margin: 8px 0 22px;
+        letter-spacing: -0.03em;
+      }
+      .stepper {
+        display: flex;
+        gap: 8px;
+        padding-top: 20px;
+      }
+      .stepper button {
+        border: 1px solid #bac4b5;
+        background: transparent;
+        color: var(--ink);
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        cursor: pointer;
+        line-height: 1;
+      }
+      .stepper button:disabled {
+        opacity: 0.3;
+        cursor: default;
+      }
+      figure {
+        margin: 0;
+      }
+      .image-stage {
+        background: #e3e8da;
+        border: 1px solid #cad3c2;
+        padding: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 240px;
+      }
+      .image-stage a {
+        display: contents;
+      }
+      .image-stage img {
+        display: block;
+        max-width: 100%;
+        width: auto;
+        max-height: 68vh;
+        object-fit: contain;
+      }
+      figcaption {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .notes {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 26px;
+        margin: 30px 0 25px;
+      }
+      .notes > div {
+        border-top: 2px solid var(--ink);
+        padding-top: 13px;
+      }
+      .notes h3 {
+        margin: 0 0 10px;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .notes p {
+        margin: 0;
+        font-size: 14px;
+      }
+      .uncertainty {
+        padding: 17px 20px;
+        background: #ece6d8;
+        border-left: 3px solid var(--accent);
+        font-size: 14px;
+        margin: 20px 0 34px;
+      }
+      .uncertainty strong {
+        color: var(--accent);
+      }
+      .index {
+        margin-top: 32px;
+        padding: 28px 0 32px;
+        border-top: 1px solid var(--line);
+      }
+      .index h2 {
+        font-size: 28px;
+      }
+      .principles {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+      }
+      .principles p {
+        margin: 0;
+        font-size: 14px;
+      }
+      .principles strong {
+        display: block;
+        margin-bottom: 7px;
+      }
+      footer {
+        padding: 26px 0 36px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 12px;
+      }
+      footer p {
+        max-width: 1000px;
+        margin: 6px 0;
+      }
+      .mobile-picker {
+        display: none;
+      }
+      @media (max-width: 850px) {
+        header,
+        main,
+        footer {
+          width: calc(100% - 36px);
+        }
+        .layout {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+        nav {
+          border: 0;
+          padding: 0;
+        }
+        .nav-list,
+        nav > .eyebrow,
+        .read-more {
+          display: none;
+        }
+        .mobile-picker {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+        }
+        select {
+          width: 100%;
+          padding: 12px;
+          color: var(--ink);
+          background: transparent;
+          border: 1px solid var(--line);
+        }
+        .notes,
+        .principles {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+        .image-stage {
+          min-height: 120px;
+          padding: 7px;
+        }
+        .image-stage img {
+          max-height: 60vh;
+        }
+        .masthead > .eyebrow {
+          font-size: 9px;
+          text-align: right;
+        }
+        h1 {
+          margin-top: 32px;
+        }
+        h2 {
+          font-size: 27px;
+        }
+        .intro {
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="masthead">
+        <a class="wordmark" href="../../README.md">enpassant.</a>
+        <span class="eyebrow muted">Research collection / 07 September 2026</span>
+      </div>
+      <h1>Reading the diagram.</h1>
+      <p class="intro">
+        Eleven figures. One visual language. A close reading of
+        <em>Chess Evolution Visualization</em>—what the paper specifies, what its artwork shows, and
+        what we still need to resolve. <strong>All images below are published references.</strong>
+      </p>
+    </header>
+    <main>
+      <div class="layout">
+        <nav aria-label="Paper figures">
+          <p class="eyebrow muted">The complete figure atlas</p>
+          <div id="figure-navigation" class="nav-list"></div>
+          <div class="mobile-picker">
+            <label for="figure-picker" class="eyebrow">Figure</label
+            ><select id="figure-picker"></select>
+          </div>
+          <a class="read-more" href="paper-visual-rulebook.md">Read the complete rulebook ↗</a>
+        </nav>
+        <article id="figure-panel" aria-labelledby="figure-title">
+          <div class="figure-head">
+            <div>
+              <div id="figure-source" class="eyebrow muted"></div>
+              <h2 id="figure-title"></h2>
+            </div>
+            <div class="stepper">
+              <button id="previous" aria-label="Previous figure">←</button
+              ><button id="next" aria-label="Next figure">→</button>
+            </div>
+          </div>
+          <figure>
+            <div class="image-stage">
+              <a id="image-link" target="_blank" rel="noopener"
+                ><img id="reference-image" alt=""
+              /></a>
+            </div>
+            <figcaption>
+              <span>Lu, Wang &amp; Lin · Original paper artwork</span
+              ><span>Click the image to inspect at full size ↗</span>
+            </figcaption>
+          </figure>
+          <div class="notes" aria-live="polite">
+            <div>
+              <h3>Its role</h3>
+              <p id="role-note"></p>
+            </div>
+            <div>
+              <h3>What to look for</h3>
+              <p id="look-note"></p>
+            </div>
+            <div>
+              <h3>What it asks of our app</h3>
+              <p id="app-note"></p>
+            </div>
+          </div>
+          <p class="uncertainty">
+            <strong>Keep this distinction. </strong><span id="open-note"></span>
+          </p>
+        </article>
+      </div>
+      <section class="index" aria-labelledby="principle-title">
+        <div class="eyebrow muted">Before another renderer pass</div>
+        <h2 id="principle-title">Three things to hold separately.</h2>
+        <div class="principles">
+          <p>
+            <strong>The chess.</strong>Legal moves, analysis coverage and tactical evidence decide
+            which claims the graph can make.
+          </p>
+          <p>
+            <strong>The relationships.</strong>Shared positions, loops and quiet-chain compression
+            determine the structure that reaches the screen.
+          </p>
+          <p>
+            <strong>The reading.</strong>Glyph contrast, arrow texture, score bands and focus help
+            people understand those relationships.
+          </p>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <p>
+        <a href="paper-visual-rulebook.md">Complete rulebook &amp; renderer gap analysis</a> ·
+        <a href="https://people.cs.nycu.edu.tw/~yushuen/data/ChessVis14.pdf">Original paper</a> ·
+        <a href="images/atlas/manifest.json">Source and crop manifest</a>
+      </p>
+      <p>
+        Page numbers refer to the 14-page author manuscript. The figure excerpts are research
+        evidence, not generated Enpassant output. Original artwork belongs to the authors and
+        relevant rights holders and is not relicensed as application code.
+      </p>
+    </footer>
+    <script>
+      const figures = [
+        {
+          title: 'The board cannot tell the whole story',
+          short: 'The problem',
+          page: 1,
+          role: 'Figure 1 compares Arena’s board and move highlights with long algebraic continuations. Figure 9 later presents the same puzzle as a graph.',
+          look: 'Board-square colours describe attack and capture situations. Purple and blue arrows identify candidate moves. The sequences on the right are hard to compare as a whole.',
+          app: 'Make the future paths readable, and keep every selected position linked to a board that explains the piece movement.',
+          open: 'Arena’s red, yellow and green square meanings do not belong to the evolution graph’s event legend.',
+        },
+        {
+          title: 'The three stages that make the picture',
+          short: 'Tree → graph → diagram',
+          page: 4,
+          role: 'Figure 2 separates the full retained tree (a), merged positions (b), and shortened graph (c). Each stage changes the visible structure.',
+          look: 'Long repetitive lanes become shared routes, then compact event chains. The final trunk becomes easy to trace without making every played edge thick.',
+          app: 'Keep a frozen three-stage comparison. Inspect where duplication disappears and which quiet positions are hidden.',
+          open: 'The caption protects event neighbours, but the final artwork hides replies between consecutive White check events. Our blanket preservation rule needs reconciliation with the figures.',
+        },
+        {
+          title: 'A grammar built from simple marks',
+          short: 'The complete legend',
+          page: 5,
+          role: 'Figure 3 defines shape, boundary, fill, crown, arrow style and local width. The worked graph demonstrates their combinations.',
+          look: 'Circle = reference position; square = predicted. A circle’s border is the side to move. White or black fill is the event beneficiary. A red crown adds mate.',
+          app: 'Use a composition table. Preserve clean white event squares, quiet hollow squares and meaningful local differences in solid-arrow width.',
+          open: 'A white-filled, black-bordered circle is intentional: White has delivered a check and Black must respond. The fills do not simply alternate players.',
+        },
+        {
+          title: 'Focus without losing the surrounding game',
+          short: 'Focus & context',
+          page: 6,
+          role: 'Figure 4 emphasizes the computed continuations associated with Black’s 04, while the surrounding graph remains faded but visible.',
+          look: 'Only a finite stretch of the actual trunk stays bright. Later played nodes are faded, despite being reachable through the complete game.',
+          app: 'Define focus using the provenance of the computed continuations, and specify what happens through shared positions.',
+          open: 'The precise membership algorithm is unpublished. Our unlimited future-descendant traversal is a different operation from the visible source behaviour.',
+        },
+        {
+          title: 'Overview, turning point, tactical detail',
+          short: 'Three scales of a game',
+          page: 7,
+          role: 'Figure 5 combines an irregular full-game graph, two score bands, and an enlarged terminal region. It is our strongest existing geometry reference.',
+          look: 'The chart reverses near moves 9–10. The late inset reveals White check chains and mate endpoints. Dense transverse ticks give compressed routes visible weight.',
+          app: 'Calibrate marks at both overview and close-up scales. Source compressed strokes are about 4.7 times heavier relative to square size than our neutral strokes.',
+          open: 'The red frame and leader arrow connect an inset to its source region. They are not chess transitions. This picture is original artwork, not our generated app result.',
+        },
+        {
+          title: 'An advantage can become a return loop',
+          short: 'The draw loop',
+          page: 7,
+          role: 'Figure 6 shows an earlier White advantage followed by a missed opportunity and a draw-related return near move 39.',
+          look: 'The enlargement shows a thin played choice beside a much thicker alternative, then a Black checking position and a backward route into grey 39.',
+          app: 'Represent the actual return relationship and retain the history that determines a draw, while making the missed decision easy to compare.',
+          open: 'A grey shared glyph is not enough to terminate every replay history. The paper does not fully specify how draw status is aggregated after merging.',
+        },
+        {
+          title: 'The famous game, read through its choices',
+          short: 'Deep Blue–Kasparov',
+          page: 8,
+          role: 'Figure 7 presents game 2 of the 1997 rematch, with an overview, score chart and move-37 close-up.',
+          look: 'Quiet early structures give way to more White events late in the game. The inset explains local choices; widths can only be compared at the same parent.',
+          app: 'Use the verified game to test structure, critical decisions and score alignment. Keep resignation distinct from a mate found in an alternative.',
+          open: 'The paper itself acknowledges a possible draw after resignation. Several displayed mate routes do not establish that every defence loses.',
+        },
+        {
+          title: 'The mistake and the ending deserve separate views',
+          short: 'Attack & defence',
+          page: 8,
+          role: 'Figure 8 shows Stockfish–AnMon with separate enlargements for defensive decisions around moves 28–33 and the terminal region at move 37.',
+          look: 'The late fan contains repeated event chains, quiet junctions and red mate crowns. The earlier lower excursion differs markedly from Figure 7.',
+          app: 'Let real relationships produce different shapes. Support reading a poor response separately from tracing the eventual tactical mechanism.',
+          open: 'Five seconds was the engines’ playing budget in this example. The paper’s post-game analysis uses its separate depth-20 policy.',
+        },
+        {
+          title: 'A solution path can share a position with a draw route',
+          short: 'Puzzle & alternative outcomes',
+          page: 9,
+          role: 'Figure 9 presents a six-move solution path alongside alternatives: checks for either side, mates, quiet endpoints and draw-related cycles.',
+          look: 'Grey 04 has a backward return as well as the forward solution path. Four grey squares also receive backward edges. The circles show the chosen solution.',
+          app: 'Separate position identity from occurrence history. Verify legal forced replies instead of inferring them from a single visible continuation.',
+          open: 'This figure qualifies the paper’s claim that Figure 6 is its only backward-edge example. The draw aggregation mechanism remains unspecified.',
+        },
+        {
+          title: 'Can people answer the right questions?',
+          short: 'Time & correctness',
+          page: 11,
+          role: 'Figure 10 evaluates the interface against Arena using answer-time distributions on the left and correctness rates on the right.',
+          look: 'Green and blue identify interfaces, not chess sides. Lower answer times and higher correctness are the intended outcomes. The vertical time axis increases upward.',
+          app: 'Ask readers to find critical decisions, compare choices and explain outcomes. A passing screenshot test cannot answer those questions.',
+          open: 'These are results from 21 trained participants. The caption lists percentile order opposite to the numerical axis; Table 1 uses a p < 0.08 criterion.',
+        },
+        {
+          title: 'Clarity is learned, then judged',
+          short: 'Reader preference',
+          page: 12,
+          role: 'Figure 11 reports subjective ratings for intuitiveness, enjoyment, ease, efficiency and teaching helpfulness.',
+          look: 'The spans show minimum to maximum; the colour split indicates the mean. Ratings run from 1 to 5. This is evaluation graphics, not another graph legend.',
+          app: 'Provide a usable legend and worked examples, and keep the board close enough to explain the events the graph reveals.',
+          open: 'The authors still describe the diagram as abstract for younger children. Preference after training does not prove instant understanding by every new user.',
+        },
+      ];
+      const nav = document.getElementById('figure-navigation');
+      const picker = document.getElementById('figure-picker');
+      const image = document.getElementById('reference-image');
+      const previous = document.getElementById('previous');
+      const next = document.getElementById('next');
+      let current = 0;
+      for (const [index, figure] of figures.entries()) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('aria-controls', 'figure-panel');
+        const number = document.createElement('span');
+        number.className = 'num';
+        number.textContent = String(index + 1).padStart(2, '0');
+        const title = document.createElement('span');
+        title.textContent = figure.short;
+        button.append(number, title);
+        button.addEventListener('click', () => select(index));
+        nav.append(button);
+        const option = document.createElement('option');
+        option.value = String(index);
+        option.textContent = `${index + 1}. ${figure.short}`;
+        picker.append(option);
+      }
+      function select(index, updateHash = true) {
+        current = Math.max(0, Math.min(figures.length - 1, index));
+        const figure = figures[current];
+        const number = String(current + 1).padStart(2, '0');
+        document.getElementById('figure-source').textContent =
+          `Published figure ${number} / Author PDF page ${figure.page}`;
+        document.getElementById('figure-title').textContent = figure.title;
+        document.getElementById('role-note').textContent = figure.role;
+        document.getElementById('look-note').textContent = figure.look;
+        document.getElementById('app-note').textContent = figure.app;
+        document.getElementById('open-note').textContent = figure.open;
+        image.src = `images/atlas/figure-${number}.png`;
+        image.alt = `Published Figure ${current + 1}: ${figure.short}, Lu, Wang and Lin`;
+        document.getElementById('image-link').href = image.src;
+        [...nav.children].forEach((button, i) =>
+          button.setAttribute('aria-current', String(i === current)),
+        );
+        picker.value = String(current);
+        previous.disabled = current === 0;
+        next.disabled = current === figures.length - 1;
+        if (updateHash) history.replaceState(null, '', `#figure-${current + 1}`);
+      }
+      function readHash() {
+        const match = location.hash.match(/^#figure-(\d+)$/);
+        select(match ? Number(match[1]) - 1 : 2, false);
+      }
+      previous.addEventListener('click', () => select(current - 1));
+      next.addEventListener('click', () => select(current + 1));
+      picker.addEventListener('change', () => select(Number(picker.value)));
+      window.addEventListener('hashchange', readHash);
+      readHash();
+    </script>
+  </body>
+</html>

@@ -67,3 +67,7 @@ Layout references: [Chess Evolution Visualization, §§3.1–3.3](https://people
 ## Measured research fidelity
 
 **Import game → Try the paper’s game** opens the verified Deep Blue–Kasparov 1997 game-2 PGN. The [baseline study](research/paper-fidelity-study-2026-09-07.md) and [implemented comparison](research/paper-fidelity-implementation.md) document the method, corrected grouping experiment, full depth-20 benchmark and remaining limits. All 90 roots reached depth 20 in the measured study. Its retained graph has 1,237 vertices and no mate endpoints; the paper has 1,245 visible vertices and 11 crowns. The engine returned six mate-scored lines, all pruned by the reference candidate rule. Matching counts alone does not establish fidelity.
+
+## Visual rule fidelity
+
+The [visual-rules implementation report](research/visual-rules-implementation.md) documents event-chain compression, cross-ply predicted junctions and returns, occurrence-safe draw colouring, bounded source focus, local unfolding and measured marks. The default highlight mode shows legal checks in retained lines, excluding locally refuted checks; the alternate mode requires a local evaluation. Unknown effectiveness remains explicit in the inspector.

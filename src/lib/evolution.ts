@@ -14,6 +14,7 @@ export class EvolutionBuilder {
   private nodes = new Map<string, EvolutionNode>();
   private analysis = new Map<string, Analysis>();
   private contributions = new Map<string, Set<string>>();
+  private continuations = new Map<string, string[][]>();
   private endings = new Map<string, Map<string, EvolutionNode['continuationEnd']>>();
   private placed: EvolutionGraph | undefined;
   constructor(private game: Game) {
@@ -37,11 +38,13 @@ export class EvolutionBuilder {
     this.analysis.set(sourceId, analysis);
     const played = source.played ? this.game.positions[source.ply + 1]?.uci : undefined;
     const contribution = new Set<string>([sourceId]);
+    const paths: string[][] = [];
     const endings = new Map<string, EvolutionNode['continuationEnd']>();
     for (const line of candidates(analysis, played)) {
       const chess = new Chess(this.game.initialFen);
       for (const move of source.moves) chess.move(move);
       let parent = source;
+      const path = [sourceId];
       for (const uci of line.moves.slice(0, length)) {
         if (chess.isGameOver()) break;
         let move;
@@ -67,12 +70,15 @@ export class EvolutionBuilder {
           this.nodes.set(id, node);
         }
         contribution.add(id);
+        path.push(id);
         parent = node;
       }
       if (!parent.mate && !parent.draw && parent.id !== sourceId)
         endings.set(parent.id, line.moves.length > length ? 'display-limit' : 'pv-end');
+      paths.push(path);
     }
     this.contributions.set(sourceId, contribution);
+    this.continuations.set(sourceId, paths);
     this.endings.set(sourceId, endings);
     // Re-search replaces its own paths. Other roots and deliberately explored
     // branches retain their contributions and every ancestor needed for replay.
@@ -119,6 +125,7 @@ export class EvolutionBuilder {
   async layout() {
     const { layoutEvolution } = await import('./evolutionLayout');
     const result = await layoutEvolution([...this.nodes.values()], this.analysis, this.placed);
+    result.continuations = Object.fromEntries(this.continuations);
     this.placed = result;
     // Hidden positions get interpolated display locations for board selection
     // and expanding dotted paths, while retaining their own full move histories.
@@ -146,4 +153,21 @@ export function descendants(graph: EvolutionGraph, id: string) {
   for (const node of graph.nodes)
     if (node.parent && included.has(node.parent)) included.add(node.id);
   return included;
+}
+
+/** Fig.4-inspired focus: a searched root's own retained lines, or the suffixes
+ * containing an unsearched occurrence. Never jump between merged histories. */
+export function continuationFocus(graph: EvolutionGraph, id: string) {
+  const paths =
+    graph.continuations?.[id] ??
+    Object.values(graph.continuations ?? {})
+      .flat()
+      .flatMap((path) => {
+        const index = path.indexOf(id);
+        return index < 0 ? [] : [path.slice(index)];
+      });
+  return {
+    nodes: new Set([id, ...paths.flat()]),
+    steps: new Set(paths.flatMap((path) => path.slice(1).map((to, i) => `${path[i]}→${to}`))),
+  };
 }

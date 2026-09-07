@@ -188,8 +188,8 @@ export function EvolutionDiagram(props: Props) {
                       .reverse()
                       .map((p) => `L${x(p.pos.id)},${p.low}`)
                       .join(' ')}Z`}
-                    fill={side === 'w' ? '#fff' : '#101a12'}
-                    fillOpacity={side === 'w' ? '.52' : '.43'}
+                    fill={side === 'w' ? '#fff' : '#000'}
+                    fillOpacity=".498"
                     stroke="none"
                   />
                 );
@@ -197,7 +197,7 @@ export function EvolutionDiagram(props: Props) {
               {segments
                 .filter((p) => p !== null)
                 .map((p) => (
-                  <g key={p.pos.id} fill={side === 'w' ? '#fff' : '#090e0a'}>
+                  <g key={p.pos.id} fill={side === 'w' ? '#fff' : '#000'}>
                     {p.actual.type === 'mate' && (
                       <path
                         data-score-mate
@@ -207,10 +207,16 @@ export function EvolutionDiagram(props: Props) {
                         <title>{scoreLabel(p.actual)}</title>
                       </path>
                     )}
-                    <circle cx={x(p.pos.id)} cy={p.y} r="1.3">
+                    <circle
+                      cx={x(p.pos.id)}
+                      cy={p.y}
+                      r="1.6"
+                      fill="none"
+                      stroke={side === 'w' ? '#fff' : '#000'}
+                      strokeWidth=".6"
+                    >
                       <title>
-                        {scoreLabel(p.actual)} · depth {p.depth} · played candidate at the preceding
-                        search root
+                        {`${scoreLabel(p.actual)} · depth ${p.depth} · played candidate at the preceding search root`}
                       </title>
                     </circle>
                     <text

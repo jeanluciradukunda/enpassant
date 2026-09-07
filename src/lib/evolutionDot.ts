@@ -1,3 +1,4 @@
+import { diagramStyle } from './diagramStyle';
 import type { EvolutionGraph, EvolutionNode, EvolutionEdge } from '../types/game';
 
 interface LayoutPolicy {
@@ -27,7 +28,7 @@ export function evolutionDot(
   const lines = [
     'digraph evolution {',
     `graph [rankdir=LR, nodesep=.04, ranksep=.16, margin=0, splines=true, newrank=true, outputorder=edgesfirst${orderFans ? ', ordering=out' : ''}];`,
-    'node [shape=box, label="", fixedsize=true, width=.07, height=.07];',
+    `node [shape=box, label="", fixedsize=true, width=${diagramStyle.squareSide / 72}, height=${diagramStyle.squareSide / 72}];`,
     'edge [arrowsize=.35];',
   ];
   for (const v of shown) {
@@ -50,7 +51,7 @@ export function evolutionDot(
     const a = byId.get(edge.from)!;
     const b = byId.get(edge.to)!;
     lines.push(
-      `${names.get(edge.from)} -> ${names.get(edge.to)} [id="${edge.id}", minlen=1, weight=${a.played && b.played ? playedWeight : edge.paths[0].length > 2 ? compressedWeight : branchWeight}];`,
+      `${names.get(edge.from)} -> ${names.get(edge.to)} [id="${edge.id}", minlen=${edge.kind === 'return' ? '0, constraint=false' : 1}, weight=${a.played && b.played ? playedWeight : edge.paths[0].length > 2 ? compressedWeight : branchWeight}];`,
     );
   }
   lines.push('}');

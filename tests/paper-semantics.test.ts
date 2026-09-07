@@ -65,13 +65,13 @@ describe('analysis and visible evidence', () => {
     const check = builder.get('p0/e2e4/e7e5/d1h5/b8c6/h5f7')!;
     expect(check.check).toBe(true);
     expect(check.checkQuality).toBe('unassessed');
-    expect(eventFill(check)).toBe('#9dcd9d');
+    expect(eventFill(check)).toBe('#9dcd9b');
     const game = parseGame(
       '[SetUp "1"]\n[FEN "4r2k/8/8/8/8/8/8/4K3 w - - 0 1"]\n\n1. Kf1 Rf8+ 2. Ke1 Re8+ 3. Kf1 Rf8+ 4. Ke1 Re8+ 1/2-1/2',
     );
     const drawn = new EvolutionBuilder(game).get('p8')!;
     expect(drawn.check && drawn.draw).toBe(true);
-    expect(eventFill(drawn)).toBe('#7c847e');
+    expect(eventFill(drawn)).toBe('#7f7f7f');
   });
   it('uses a transparent local check proxy with an explicit unknown state for mismatched depths', () => {
     const game = parseGame('1. e4 e5 2. Qh5 Nc6 3. Qxf7+ *');

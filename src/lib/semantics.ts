@@ -1,4 +1,5 @@
 import type { Analysis, EngineLine, EvolutionNode, Score } from '../types/game';
+import { diagramStyle, type CheckMode } from './diagramStyle';
 
 // One policy drives the visible branches, their widths, and the chart envelope.
 export function candidates(result: Analysis, playedMove?: string): EngineLine[] {
@@ -32,11 +33,16 @@ export function checkQuality(
     : 'inferior';
 }
 
-export function eventFill(node: EvolutionNode) {
-  if (node.draw && !node.mate) return '#7c847e';
-  if (node.mate || (node.check && node.checkQuality === 'supported'))
-    return node.turn === 'b' ? '#fff' : '#090e0a';
-  return '#9dcd9d';
+export function eventFill(node: EvolutionNode, mode: CheckMode = 'assessed', drawRelated = false) {
+  if ((node.draw || drawRelated) && !node.mate) return diagramStyle.draw;
+  if (
+    node.mate ||
+    (node.check &&
+      (node.checkQuality === 'supported' ||
+        (mode === 'retained' && node.checkQuality !== 'inferior')))
+  )
+    return node.turn === 'b' ? '#fff' : diagramStyle.ink;
+  return diagramStyle.green;
 }
 
 // Display equivalence includes side, castling and en-passant rights. Occurrence

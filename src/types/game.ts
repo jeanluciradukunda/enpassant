@@ -62,6 +62,10 @@ export interface EvolutionGraph {
   height: number;
   vertices: { id: string; members: string[] }[];
   edges: EvolutionEdge[];
+  // Exact retained paths, keyed by their searched occurrence. Focus must not
+  // walk into unrelated searches just because they meet at a display junction.
+  continuations?: Record<string, string[][]>;
+  unfoldOrigins?: Record<string, { x: number; y: number }>;
   ready: boolean;
   stats: { positions: number; merged: number; shortened: number };
 }
@@ -74,6 +78,6 @@ export interface EvolutionEdge {
   paths: string[][];
   d: string;
   weight: number;
-  kind?: 'move' | 'recurrence';
+  kind?: 'move' | 'return' | 'recurrence';
   quality?: number;
 }

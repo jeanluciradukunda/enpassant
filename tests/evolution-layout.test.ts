@@ -40,7 +40,7 @@ describe('paper display graph', () => {
       expect(chess.fen()).toBe(n.fen);
     }
   });
-  it('shortens quiet chains and preserves played nodes, events and their neighbors', async () => {
+  it('shortens quiet chains and preserves played nodes and events', async () => {
     const game = parseGame('1. d4 d5 2. c4 e6 *');
     const builder = new EvolutionBuilder(game);
     builder.append('p0', result([['e2e4', 'e7e5', 'd1h5', 'b8c6', 'f1c4', 'g8f6', 'h5f7']]));
@@ -49,7 +49,6 @@ describe('paper display graph', () => {
     expect(graph.edges.some((e) => e.paths.some((p) => p.length > 2))).toBe(true);
     for (const node of graph.nodes) {
       if (node.played || node.check || node.mate) expect(shown.has(node.id)).toBe(true);
-      if (node.check && node.parent) expect(shown.has(node.parent)).toBe(true);
     }
     const mate = graph.nodes.find((n) => n.mate)!;
     expect(mate).toBeDefined();

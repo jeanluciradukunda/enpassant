@@ -2,6 +2,8 @@
 
 7 September 2026 · Baseline research against application commit `ca20907`.
 
+**Later source review:** the [complete visual rulebook and figure atlas](paper-visual-rulebook.md) qualifies this study's interpretation of neighbour preservation, draw loops and focus scope. Use its figure-by-figure evidence for the next renderer pass; retain this document as the baseline experiment record.
+
 The [implemented fidelity pass](paper-fidelity-implementation.md) follows this baseline study. The later controlled experiment corrects the initial, inconclusive browser test of `group=played` below.
 
 **Running the same game through Enpassant does not yet produce a close reproduction of Figure 7.** It produces a real, legally replayable analysis with related visual marks, but materially different geometry and tactical detail. Improving fidelity is achievable; identical output would additionally require the authors’ original analysis data and rendering configuration.

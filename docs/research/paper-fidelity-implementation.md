@@ -2,6 +2,8 @@
 
 7 September 2026 · Implementation and measured comparison
 
+**Later source review:** the [complete visual rulebook and figure atlas](paper-visual-rulebook.md) identifies further gaps in compression, merged draw state, focus scope and mark proportions. This report records what the implementation changed; it does not establish that the paper's full visual contract has been recovered.
+
 **The visualizer now implements a substantially more faithful structural model, but it is not an exact reproduction of Figure 7.** The full Deep Blue–Kasparov game reached depth 20 at all 90 roots. Its retained graph contains 1,237 vertices, compared with 1,245 in the paper. Those similar counts do not establish tactical or geometric equivalence.
 
 To try it: **Import game → Try the paper’s game → Depth 20 study**. A fresh run took 12 minutes 11 seconds on this machine; cached reopening took about six seconds. Timing is an observation, not a performance guarantee. The study can be paused and resumed; every individual search has a 60-second ceiling, and missed depth targets are reported with an explicit retry action.

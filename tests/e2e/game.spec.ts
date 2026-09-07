@@ -20,6 +20,16 @@ test('real Stockfish, fixed replay, branch exploration, board and cached reopen'
   await expect(page.locator('[data-score-side]')).toHaveCount(2);
   expect(await graph.locator('[data-compressed="true"]').count()).toBeGreaterThan(20);
   await expect(page.getByTestId('live-detail')).toBeVisible();
+  const checkHighlights = page.getByLabel('Check highlights', { exact: true });
+  const unassessedWhite = graph.locator('[data-event="unassessed"] rect[fill="#fff"]');
+  expect(await unassessedWhite.count()).toBeGreaterThan(0);
+  await checkHighlights.selectOption('assessed');
+  await expect(unassessedWhite).toHaveCount(0);
+  await checkHighlights.selectOption('retained');
+  expect(await unassessedWhite.count()).toBeGreaterThan(0);
+  await page.getByText('How to read this diagram', { exact: true }).click();
+  await expect(page.getByText('Trace the arrows.', { exact: true })).toBeVisible();
+  await page.getByText('How to read this diagram', { exact: true }).click();
   await page.screenshot({ path: 'test-results/enpassant-game-desktop.png', fullPage: true });
   const locations = await graph
     .locator('[data-position]')
