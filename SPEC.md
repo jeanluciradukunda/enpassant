@@ -1,5 +1,15 @@
 # enpassant — Specification (V0 → V4)
 
+> **V0 correction, 2026-09-07:** The actual Figure 5 vector geometry has now
+> been recovered. For the static reproduction, direct source observations in
+> [docs/figure5-reconstruction.md](docs/figure5-reconstruction.md) supersede
+> the approximate counts, colors, trunk constraints and V0 library choices
+> below. The `/paper` page uses a native SVG fixture and an independent paper
+> comparison gate. The `/` page now implements imports, Stockfish analysis, a
+> generated diagram and growing replay; see [the implemented scope](docs/game-visualizer.md).
+> The detailed V1–V4 gates below remain the original roadmap, not a claim that
+> every research algorithm or planned feature has been completed.
+
 > **Status**: build contract, supersedes `docs/SPEC-v0-research.md` (the
 > research-stage spec preserved for lineage).
 >
