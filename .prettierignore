@@ -7,3 +7,5 @@ docs/SPEC-v0-research.md
 SPEC.md
 LICENSE
 *.png
+src/fixtures/figure5.json
+public/engine/

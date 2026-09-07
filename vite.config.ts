@@ -21,5 +21,12 @@ export default defineConfig({
   build: {
     target: 'es2022',
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.endsWith('/fixtures/figure5.json')) return 'figure5';
+        },
+      },
+    },
   },
 });

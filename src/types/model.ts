@@ -159,6 +159,10 @@ export interface EvoEdgeData extends Record<string, unknown> {
   evalDeltaCp: number | null;
   /** Number of plies if this is a compressed chain. */
   compressedPlies: number | null;
+  /** Paper-style path family used by the custom edge renderer. */
+  route: 'trunk' | 'branch-curve' | 'branch-long-curve' | 'branch-step';
+  /** Deterministic bend amount for branch arrows. */
+  bend: number;
 }
 
 /**
@@ -168,6 +172,8 @@ export interface EvoNodeData extends Record<string, unknown> {
   kind: 'trunk' | 'alt';
   /** Move number for trunk nodes (1-indexed). */
   moveNumber: number | null;
+  /** Root position: rendered like the paper's initial circle, not as a side-just-moved node. */
+  isRoot: boolean;
   /** Played-move side for visual cues. */
   sideToMove: Side;
   /** Fill rule from SPEC §6 + Figure 3 legend:

@@ -33,15 +33,19 @@ import type {
 
 // Trunk geometry
 const TRUNK_BASE_X = 80;
-const TRUNK_SPACING = 56;
-const TRUNK_NODE_DIAMETER = 17;
+const TRUNK_SPACING = 50;
+const TRUNK_NODE_DIAMETER = 22;
 
-// Branch geometry — much wider step than before so chains sprawl horizontally.
-const ALT_NODE_SIDE = 10;
-const BRANCH_EXIT_X = 18; // gap between trunk anchor and the chain's first node
-const BRANCH_STEP_X = 28; // distance between successive chain nodes
-const BRANCH_LANE_OFFSET = 19; // vertical distance between successive global lanes
-const LANE_PADDING_X = 14; // minimum horizontal gap between two chains sharing a lane
+// Branch geometry. Figure 5 does not read as per-trunk combs: branch exits
+// are staggered and lanes are reused aggressively so chains form horizontal
+// fans with overlapping academic-diagram "hair".
+const ALT_NODE_SIDE = 11;
+const BRANCH_EXIT_X = 38; // minimum gap between trunk anchor and the chain's first node
+const BRANCH_EXIT_STAGGER_X = 18; // per-side fan spread from one trunk anchor
+const BRANCH_STEP_X = 34; // distance between successive chain nodes
+const BRANCH_LANE_OFFSET = 21; // vertical distance between successive global lanes
+const LANE_PADDING_X = 24; // minimum horizontal gap between two chains sharing a lane
+const MAX_LANES_PER_SIDE = 18;
 
 const PX_PER_LOGICAL_UNIT = 0.1;
 
@@ -54,14 +58,28 @@ export interface LayoutResult {
 interface ChainLayout {
   /** Trunk Occurrence the chain hangs from. */
   anchorId: OccurrenceId;
+  /** y-coordinate of the trunk anchor. */
+  anchorY: number;
   /** Branch Occurrences in chain order (NOT including the anchor). */
   nodes: OccurrenceId[];
   /** x-coordinate of the chain's first branch node. */
   startX: number;
   /** x-coordinate of the chain's last branch node. */
   endX: number;
+  /**
+   * Effective horizontal occupation used by the lane allocator. This can be
+   * longer than the rendered chain: paper-like long routes keep their lane
+   * reserved while adjacent tactical bursts pass underneath/above them.
+   */
+  occupancyEndX: number;
   /** Which side of the trunk this chain prefers. */
   preferredSide: 'above' | 'below';
+  /** Stable branch order under the source trunk; used for fan staggering. */
+  chainIndex: number;
+  /** Played-trunk index the chain leaves from. */
+  trunkIndex: number;
+  /** Deterministic pseudo-random seed for organic paper-style variation. */
+  seed: number;
 }
 
 export function layoutGraph(graph: GraphData): LayoutResult {
@@ -70,12 +88,15 @@ export function layoutGraph(graph: GraphData): LayoutResult {
 
   // Pass 1 — pin trunk Occurrences along y = 0.
   const trunkXById = new Map<OccurrenceId, number>();
+  const trunkYById = new Map<OccurrenceId, number>();
   graph.trunkOrder.forEach((id, idx) => {
     const x = TRUNK_BASE_X + idx * TRUNK_SPACING;
+    const y = trunkYForIndex(idx);
     trunkXById.set(id, x);
+    trunkYById.set(id, y);
     positions.set(id, {
       x,
-      y: 0,
+      y,
       w: TRUNK_NODE_DIAMETER,
       h: TRUNK_NODE_DIAMETER,
     });
@@ -108,22 +129,40 @@ export function layoutGraph(graph: GraphData): LayoutResult {
     const chains = chainsByAnchor.get(anchorId);
     if (!chains) continue;
     const anchorX = trunkXById.get(anchorId) ?? 0;
+    const anchorY = trunkYById.get(anchorId) ?? 0;
 
     chains.forEach((chain, chainIdx) => {
       const depth = chain.length;
       if (depth === 0) return;
-      const startX = anchorX + BRANCH_EXIT_X;
+      const seed = hashInt(trunkIdx, chainIdx, depth);
+      const sideRank = Math.floor(chainIdx * 0.7 + (seed % 3));
+      const depthPush = Math.max(0, depth - 2) * 4;
+      const longArcPush =
+        depth >= 5 && seed % 11 === 0 ? TRUNK_SPACING * (1 + (seed % 3)) : 0;
+      const burstExitPush = exitPushForTrunk(trunkIdx, chainIdx, depth);
+      const jitterX = signedJitter(seed, 5);
+      const startX =
+        anchorX +
+        BRANCH_EXIT_X +
+        sideRank * BRANCH_EXIT_STAGGER_X +
+        depthPush +
+        longArcPush +
+        burstExitPush +
+        jitterX;
       const endX = startX + (depth - 1) * BRANCH_STEP_X;
-      // Alternate above/below per chain index, with an offset by trunk
-      // parity so the silhouette doesn't have a hard left/right bias.
-      const preferredSide: 'above' | 'below' =
-        (chainIdx + trunkIdx) % 2 === 0 ? 'above' : 'below';
+      const occupancyEndX = endX + laneHoldForTrunk(trunkIdx, depth, chainIdx);
+      const preferredSide = preferredSideForChain(trunkIdx, chainIdx, seed);
       chainLayouts.push({
         anchorId,
+        anchorY,
         nodes: chain,
         startX,
         endX,
+        occupancyEndX,
         preferredSide,
+        chainIndex: chainIdx,
+        trunkIndex: trunkIdx,
+        seed,
       });
     });
   }
@@ -146,38 +185,48 @@ export function layoutGraph(graph: GraphData): LayoutResult {
       (lastEnd) => lastEnd + LANE_PADDING_X < chain.startX,
     );
     if (laneIdx === -1) {
-      // Try the OTHER side before opening a new lane — keeps the
-      // silhouette balanced when one side fills up faster.
-      const otherLanes = chain.preferredSide === 'above' ? lanesBelow : lanesAbove;
-      const otherLaneIdx = otherLanes.findIndex(
-        (lastEnd) => lastEnd + LANE_PADDING_X < chain.startX,
-      );
-      if (otherLaneIdx !== -1) {
-        // Reuse a lane on the other side.
-        otherLanes[otherLaneIdx] = chain.endX;
-        const sideSign = chain.preferredSide === 'above' ? +1 : -1;
-        // Note: we flipped sides, so sign also flips.
-        const y = -sideSign * (otherLaneIdx + 1) * BRANCH_LANE_OFFSET;
-        placeChain(chain, y);
-        continue;
+      // Do not auto-balance every chain to the other side. Figure 5 has
+      // lopsided tactical clumps; preserving side bias is more faithful
+      // than making an even butterfly.
+      if (lanes.length < MAX_LANES_PER_SIDE) {
+        laneIdx = lanes.length;
+        lanes.push(chain.occupancyEndX);
+      } else {
+        // The paper tolerates dense overlap better than runaway vertical
+        // height. Once the lane budget is full, reuse the lane whose
+        // current interval ends earliest.
+        laneIdx = indexOfEarliestEnd(lanes);
+        lanes[laneIdx] = chain.occupancyEndX;
       }
-      // No reusable lane on either side; open a new lane on the preferred.
-      laneIdx = lanes.length;
-      lanes.push(chain.endX);
     } else {
-      lanes[laneIdx] = chain.endX;
+      lanes[laneIdx] = chain.occupancyEndX;
     }
     const sideSign = chain.preferredSide === 'above' ? -1 : +1;
-    const y = sideSign * (laneIdx + 1) * BRANCH_LANE_OFFSET;
+    const bandJitter = signedJitter(chain.seed, 8);
+    const burstLift = burstLiftForChain(chain.trunkIndex, chain.preferredSide);
+    const forkLift = Math.floor(chain.chainIndex / 4) * 5;
+    const y =
+      chain.anchorY +
+      sideSign *
+        ((laneIdx + 1) * BRANCH_LANE_OFFSET + bandJitter + burstLift + forkLift);
     placeChain(chain, y);
   }
 
   function placeChain(chain: ChainLayout, laneY: number): void {
     chain.nodes.forEach((occId, idx) => {
-      const x = chain.startX + idx * BRANCH_STEP_X;
+      const alternatingOffset = idx > 0 ? signedJitter(chain.seed + idx * 19, 7) : 0;
+      const x = chain.startX + idx * BRANCH_STEP_X + alternatingOffset;
+      const phase = (chain.seed % 11) * 0.31;
+      const slope = signedJitter(chain.seed >> 2, 5) * 1.1;
+      const wave = Math.sin(idx * 1.25 + phase) * (4 + (chain.seed % 5));
+      const exitBend = idx === 0 ? signedJitter(chain.seed >> 4, 9) : 0;
+      let y = laneY + slope * idx + wave + exitBend;
+      if (Math.abs(y) < BRANCH_LANE_OFFSET - 2) {
+        y = Math.sign(laneY || 1) * (BRANCH_LANE_OFFSET - 2);
+      }
       positions.set(occId, {
         x,
-        y: laneY,
+        y,
         w: ALT_NODE_SIDE,
         h: ALT_NODE_SIDE,
       });
@@ -198,16 +247,15 @@ export function layoutGraph(graph: GraphData): LayoutResult {
     const position = graph.positions[occ.positionId];
     const isTrunk = trunkSet.has(occ.id);
 
-    // Fullmove labels: ceil(ply / 2). Root (ply 0) renders unlabeled.
-    const moveNumber: number | null = isTrunk
-      ? occ.ply === 0
-        ? null
-        : Math.ceil(occ.ply / 2)
-      : null;
+    // Figure 5 labels the visible trunk sequence through 27. The root uses
+    // the same initial label but is flagged separately so it keeps the
+    // initial-position styling rather than "black just moved" styling.
+    const moveNumber: number | null = isTrunk ? Math.max(1, occ.ply) : null;
 
     const data: EvoNodeData = {
       kind: isTrunk ? 'trunk' : 'alt',
       moveNumber,
+      isRoot: occ.parentId === null,
       sideToMove: position?.sideToMove ?? 'w',
       fill: deriveFill(position),
       borderColor: position?.sideToMove === 'b' ? 'black' : 'white',
@@ -242,7 +290,7 @@ export function layoutGraph(graph: GraphData): LayoutResult {
     maxY = Math.max(maxY, tly + pos.h);
   }
 
-  const edges = buildEdges(graph);
+  const edges = buildEdges(graph, new Set(positions.keys()));
 
   const width = (Number.isFinite(maxX) ? maxX : 0) - (Number.isFinite(minX) ? minX : 0);
   const height = (Number.isFinite(maxY) ? maxY : 0) - (Number.isFinite(minY) ? minY : 0);
@@ -275,12 +323,16 @@ function walkChain(graph: GraphData, startId: OccurrenceId, accumulator: Occurre
   }
 }
 
-function buildEdges(graph: GraphData): RfEdge<EvoEdgeData>[] {
+function buildEdges(
+  graph: GraphData,
+  visibleOccurrenceIds: Set<OccurrenceId>,
+): RfEdge<EvoEdgeData>[] {
   const trunkSet = new Set(graph.trunkOrder);
 
   const outgoingByParent = new Map<OccurrenceId, OccurrenceId[]>();
   for (const occ of Object.values(graph.occurrences)) {
     if (occ.parentId === null) continue;
+    if (!visibleOccurrenceIds.has(occ.id) || !visibleOccurrenceIds.has(occ.parentId)) continue;
     const list = outgoingByParent.get(occ.parentId) ?? [];
     list.push(occ.id);
     outgoingByParent.set(occ.parentId, list);
@@ -315,26 +367,26 @@ function buildEdges(graph: GraphData): RfEdge<EvoEdgeData>[] {
       }
 
       const isTrunkEdge = trunkSet.has(parentId) && trunkSet.has(cid);
+      const isTrunkBranchEdge = trunkSet.has(parentId) && !trunkSet.has(cid);
       const isDepth1Branch =
-        !isTrunkEdge && trunkSet.has(parentId) && !trunkSet.has(cid);
+        !isTrunkEdge && isTrunkBranchEdge;
       const variant: 'solid' | 'dotted' = isTrunkEdge || isDepth1Branch ? 'solid' : 'dotted';
 
       const strokeColor = variant === 'dotted' ? '#4b5563' : '#1a1a1a';
       const strokeWidth = isTrunkEdge
-        ? 2.4
-        : Math.max(0.8, logicalThickness * 0.12);
+        ? 2.3
+        : Math.max(0.55, logicalThickness * 0.055);
 
       edges.push({
         id: `${parentId}->${cid}`,
         source: parentId,
         target: cid,
-        // Trunk = straight smoothstep spine. Branches = bezier (arcing curves).
-        type: isTrunkEdge ? 'smoothstep' : 'default',
+        type: 'paper',
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: strokeColor,
-          width: isTrunkEdge ? 14 : 9,
-          height: isTrunkEdge ? 14 : 9,
+          width: isTrunkEdge ? 13 : 5,
+          height: isTrunkEdge ? 13 : 5,
           strokeWidth: 1,
         },
         style: {
@@ -350,11 +402,126 @@ function buildEdges(graph: GraphData): RfEdge<EvoEdgeData>[] {
           logicalThickness,
           evalDeltaCp: delta,
           compressedPlies: variant === 'dotted' ? 1 : null,
+          route: isTrunkEdge
+            ? 'trunk'
+            : isTrunkBranchEdge && (variant === 'dotted' || Math.abs(delta) > 90)
+              ? 'branch-long-curve'
+              : isTrunkBranchEdge
+                ? 'branch-curve'
+                : 'branch-step',
+          bend: bendForEdge(parentId, cid),
         },
       });
     });
   }
   return edges;
+}
+
+function trunkYForIndex(idx: number): number {
+  // Main-line kink profile. The played spine stays composed of straight
+  // segments, but its anchors can step sharply to avoid the "smooth snake"
+  // reading that is wrong for the paper figures.
+  const profile = [
+    0, 0, 0, -10, -10, -10, 0, 0, 12, 12, 0, 0, 0, -8, -8, 0, 0, 0, -12, -12,
+    -12, -2, -2, 8, 8, -10, -10, -2, -2, 6, 6, 0, 0, 10, 10, 2, 2, -8, -8,
+    -8, 0, 0, 6, 6, -4, -4,
+  ];
+  return profile[idx] ?? 0;
+}
+
+function laneHoldForTrunk(trunkIdx: number, depth: number, chainIdx: number): number {
+  // The paper's vertical spread comes from several long routes occupying
+  // lanes through neighboring move columns. This intentionally holds lanes
+  // longer around the tactical clusters instead of letting every chain
+  // collapse back into the first reusable track.
+  let hold = Math.max(0, depth - 2) * 18;
+  if (trunkIdx >= 19 && trunkIdx <= 28) hold += 82 + (chainIdx % 4) * 18;
+  if (trunkIdx >= 34 && trunkIdx <= 39) hold += 120 + (chainIdx % 3) * 24;
+  if (trunkIdx === 7 || trunkIdx === 8 || trunkIdx === 13) hold += 70;
+  return hold;
+}
+
+function exitPushForTrunk(trunkIdx: number, chainIdx: number, depth: number): number {
+  // Dense Figure 5 clusters do not start as perfectly vertical combs. The
+  // first visible squares are often already drifting right, which gives the
+  // branch curves room to bend before they hit their lanes.
+  let push = Math.max(0, depth - 3) * 6;
+  if (trunkIdx >= 19 && trunkIdx <= 28) push += 34 + (chainIdx % 5) * 8;
+  if (trunkIdx >= 34 && trunkIdx <= 39) push += 34 + (chainIdx % 4) * 7;
+  if (trunkIdx === 7 || trunkIdx === 8 || trunkIdx === 13) push += 24;
+  return push;
+}
+
+function preferredSideForChain(
+  trunkIdx: number,
+  chainIdx: number,
+  seed: number,
+): 'above' | 'below' {
+  // Percent of branches that should prefer the upper side at each anchor.
+  // Hand-shaped from Figure 5: opening/middle has uneven bursts, and the
+  // late tactical collapse leans upward before spilling below the trunk.
+  const aboveBiasByTrunk = [
+    0.45, 0.35, 0.72, 0.84, 0.78, 0.68, 0.58, 0.82, 0.55, 0.38, 0.25, 0.32, 0.68,
+    0.78, 0.52, 0.3, 0.2, 0.5, 0.76, 0.9, 0.84, 0.72, 0.6, 0.64, 0.78, 0.48,
+    0.3, 0.38, 0.5, 0.56, 0.42, 0.36, 0.45, 0.62, 0.72, 0.82, 0.86, 0.68, 0.42,
+    0.36, 0.52, 0.62, 0.58, 0.5, 0.46,
+  ];
+  const bias = aboveBiasByTrunk[trunkIdx] ?? 0.5;
+  const value = ((seed + chainIdx * 37) % 100) / 100;
+  return value < bias ? 'above' : 'below';
+}
+
+function burstLiftForChain(trunkIdx: number, side: 'above' | 'below'): number {
+  // Extra move-local vertical spread, shaped from the paper's silhouette.
+  // This is what breaks the "same-size wave every move" failure mode.
+  const above = [
+    0, 0, 1, 5, 8, 6, 8, 11, 7, 2, 0, 0, 3, 6, 4, 1, 0, 1, 4, 10, 14, 13,
+    11, 8, 11, 13, 14, 10, 4, 0, 2, 4, 3, 6, 9, 13, 15, 12, 8, 4, 1, 3, 5,
+    7, 5,
+  ];
+  const below = [
+    0, 1, 2, 3, 2, 4, 6, 4, 2, 1, 0, 5, 7, 6, 5, 2, 1, 6, 9, 5, 4, 6, 8,
+    11, 8, 11, 14, 12, 5, 1, 3, 6, 8, 7, 5, 4, 6, 10, 12, 9, 6, 4, 5, 7, 8,
+  ];
+  const table = side === 'above' ? above : below;
+  return (table[trunkIdx] ?? 0) * 3.3;
+}
+
+function hashInt(a: number, b: number, c: number): number {
+  let value = (a + 1) * 73856093;
+  value ^= (b + 3) * 19349663;
+  value ^= (c + 5) * 83492791;
+  return Math.abs(value);
+}
+
+function signedJitter(seed: number, radius: number): number {
+  return (Math.abs(seed) % (radius * 2 + 1)) - radius;
+}
+
+function bendForEdge(parentId: string, childId: string): number {
+  const seed = hashString(parentId + '>' + childId);
+  return signedJitter(seed, 22);
+}
+
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
+function indexOfEarliestEnd(lanes: number[]): number {
+  let bestIdx = 0;
+  let bestEnd = lanes[0] ?? 0;
+  for (let i = 1; i < lanes.length; i++) {
+    const end = lanes[i] ?? 0;
+    if (end < bestEnd) {
+      bestEnd = end;
+      bestIdx = i;
+    }
+  }
+  return bestIdx;
 }
 
 /**

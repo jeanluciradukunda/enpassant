@@ -7,7 +7,7 @@
 
 :root {
   /* Background */
-  --bg-graph: #8fbc8f; /* darkseagreen, paper's signature */
+  --bg-graph: #9dcd9d; /* Figure 5 PDF's actual outer canvas color. */
   --bg-graph-dark: #2d4a3d; /* V4 dark mode */
   --bg-surface: #ffffff;
   --bg-surface-dark: #1a1a1a;

@@ -2,11 +2,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * V0 gate: golden visual-diff against `tests/golden/figure5.png`.
- * Threshold per SPEC §7: ≤15% pixel delta in salient region.
- *
- * Playwright's `toHaveScreenshot` uses pixelmatch under the hood.
- * `maxDiffPixelRatio: 0.15` enforces the 15% threshold.
+ * V0 gate is implemented in golden.spec.ts against the independent PDF crop
+ * in public/reference/figure5.png. Snapshot updates cannot replace it.
  */
 export default defineConfig({
   testDir: './tests/e2e',
@@ -16,14 +13,8 @@ export default defineConfig({
   retries: process.env['CI'] ? 1 : 0,
   workers: 1,
   reporter: process.env['CI'] ? [['github'], ['html', { open: 'never' }]] : 'list',
-  expect: {
-    toHaveScreenshot: {
-      maxDiffPixelRatio: 0.15,
-      threshold: 0.2,
-    },
-  },
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://127.0.0.1:5173',
     headless: true,
     viewport: { width: 1600, height: 900 },
     deviceScaleFactor: 1,
@@ -38,8 +29,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:5173',
+    command: 'node node_modules/vite/bin/vite.js --host 127.0.0.1',
+    url: 'http://127.0.0.1:5173',
     reuseExistingServer: !process.env['CI'],
     stdout: 'ignore',
     stderr: 'pipe',

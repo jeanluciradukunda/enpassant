@@ -22,6 +22,7 @@ test-results/
 # Stockfish WASM binaries (committed manually after download; large)
 # Uncomment if you decide to gitignore them and document the download step instead:
 # public/stockfish/
+public/engine/
 
 # Env + secrets
 .env
@@ -55,3 +56,6 @@ pnpm-debug.log*
 *.tsbuildinfo
 .eslintcache
 .cache/
+
+# Local verification media
+artifacts/

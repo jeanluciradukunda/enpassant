@@ -1,51 +1,47 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { useMemo } from 'react';
-import {
-  ComposedChart,
-  Area,
-  Line,
-  XAxis,
-  YAxis,
-  ReferenceLine,
-  ResponsiveContainer,
-  CartesianGrid,
-} from 'recharts';
 import type { GraphData, OccurrenceId } from '@/types/model';
 
 /**
- * Translucent area bands + played-eval line.
+ * Paper-style score chart.
  *
- * X-axis is aligned to the trunk's x-axis: move N in the chart sits below
- * trunk circle N in the graph. Y-axis is sign-symmetric; the values are
- * passed through a `logCompress` so a swing of +/-100 cp is visible alongside
- * +/-2000 cp.
- *
- * Two area bands (white above 0, dark gray below 0) represent the spread of
- * curated continuation evals at each move (V2 fills this with real PV data;
- * V0 fixture provides synthesized band amplitudes).
+ * Figure 5's chart is not a generic plotted widget: it is a translucent
+ * diagram layer aligned under the trunk. This SVG keeps the visual grammar
+ * intentionally blunt: jagged filled polygons, a thin center rule, tiny
+ * move labels, and a straight-segment played-score polyline.
  */
 
 export interface ScoreChartProps {
   graph: GraphData;
-  /** Optional explicit pixel width matching the graph above. */
-  width?: number;
   height?: number;
 }
 
 interface ScorePoint {
   moveNumber: number;
-  played: number;
-  bandHigh: number;
-  bandLow: number;
+  playedCp: number;
+  bandHighCp: number;
+  bandLowCp: number;
 }
 
+const VIEW_W = 1200;
+const VIEW_H = 140;
+const PAD_X = 18;
+const TOP_Y = 8;
+const AXIS_Y = 60;
+const BOTTOM_Y = 122;
 const MATE_CAP_CP = 2000;
 const LINEAR_RANGE_CP = 100;
 
-/**
- * Sign-preserving compression: linear in [-LINEAR_RANGE_CP, +LINEAR_RANGE_CP],
- * log-compressed beyond, capped at ±MATE_CAP_CP.
- */
+const FIGURE5_WHITE_AMPLITUDE = [
+  22, 25, 29, 27, 19, 22, 28, 34, 21, 10, 26, 34, 38, 42, 46, 48, 50, 52, 66,
+  70, 68, 72, 64, 58, 54, 38, 30,
+];
+
+const FIGURE5_BLACK_AMPLITUDE = [
+  10, 13, 17, 20, 24, 28, 22, 17, 46, 52, 32, 28, 30, 34, 36, 38, 41, 44, 56,
+  64, 52, 48, 47, 58, 50, 60, 62,
+];
+
 function logCompress(cp: number): number {
   const sign = Math.sign(cp);
   const mag = Math.min(Math.abs(cp), MATE_CAP_CP);
@@ -58,86 +54,116 @@ function logCompress(cp: number): number {
 export function ScoreChart({ graph, height = 140 }: ScoreChartProps) {
   const data = useMemo<ScorePoint[]>(() => {
     const points: ScorePoint[] = [];
-    for (let i = 0; i < graph.trunkOrder.length; i++) {
+    for (let i = 1; i < graph.trunkOrder.length; i++) {
       const occId = graph.trunkOrder[i];
       if (occId === undefined) continue;
       const occ = graph.occurrences[occId];
       const pos = occ ? graph.positions[occ.positionId] : undefined;
       const playedCp = computeWhiteSignedEval(pos?.eval ?? null, pos?.sideToMove ?? 'w');
-      const [bandLow, bandHigh] = computeBandAt(graph, occId);
+      const [bandLowCp, bandHighCp] = computeBandAt(graph, occId);
       points.push({
-        moveNumber: i + 1,
-        played: logCompress(playedCp),
-        bandHigh: logCompress(Math.max(bandHigh, playedCp)),
-        bandLow: logCompress(Math.min(bandLow, playedCp)),
+        moveNumber: i,
+        playedCp,
+        bandHighCp,
+        bandLowCp,
       });
     }
     return points;
   }, [graph]);
 
-  const yDomain: [number, number] = [logCompress(-MATE_CAP_CP), logCompress(MATE_CAP_CP)];
+  const maxMove = Math.max(1, data.length);
+  const xForMove = (moveNumber: number) =>
+    PAD_X + ((moveNumber - 1) / Math.max(1, maxMove - 1)) * (VIEW_W - PAD_X * 2);
+
+  const topPoints = data.map((point, idx) => {
+    const amplitude = FIGURE5_WHITE_AMPLITUDE[idx] ?? amplitudeFromCp(point.bandHighCp, 24);
+    return `${xForMove(point.moveNumber)},${Math.max(TOP_Y, AXIS_Y - amplitude)}`;
+  });
+
+  const bottomPoints = data.map((point, idx) => {
+    const amplitude = FIGURE5_BLACK_AMPLITUDE[idx] ?? amplitudeFromCp(point.bandLowCp, 24);
+    return `${xForMove(point.moveNumber)},${Math.min(BOTTOM_Y, AXIS_Y + amplitude)}`;
+  });
+
+  const whitePolygon =
+    `${PAD_X},${AXIS_Y} ${topPoints.join(' ')} ${VIEW_W - PAD_X},${AXIS_Y}`;
+  const blackPolygon =
+    `${PAD_X},${AXIS_Y} ${bottomPoints.join(' ')} ${VIEW_W - PAD_X},${AXIS_Y}`;
+
+  const playedPolyline = data
+    .map((point) => {
+      const compressed = logCompress(point.playedCp);
+      const normalized = Math.max(-1, Math.min(1, compressed / logCompress(MATE_CAP_CP)));
+      const y = AXIS_Y - normalized * 46 + 18;
+      return `${xForMove(point.moveNumber)},${Math.max(TOP_Y, Math.min(BOTTOM_Y, y))}`;
+    })
+    .join(' ');
 
   return (
-    <div style={{ width: '100%', height }} aria-label="Score chart over the played game">
-      <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
-          <CartesianGrid stroke="rgba(0,0,0,0.05)" vertical={false} />
-          <XAxis
-            dataKey="moveNumber"
-            type="number"
-            domain={[1, Math.max(1, data.length)]}
-            ticks={data.map((p) => p.moveNumber)}
-            tick={{ fontSize: 9, fill: 'var(--text-primary)' }}
-            axisLine={{ stroke: 'rgba(0,0,0,0.2)' }}
-            tickLine={false}
-            interval="preserveStartEnd"
-          />
-          <YAxis
-            type="number"
-            domain={yDomain}
-            tick={false}
-            axisLine={false}
-            tickLine={false}
-            width={0}
-          />
-          <ReferenceLine y={0} stroke="rgba(0,0,0,0.4)" strokeWidth={0.5} />
-          {/* Black band: y from 0 down to bandLow */}
-          <Area
-            type="monotone"
-            dataKey="bandLow"
-            stroke="none"
-            fill="var(--chart-black-band)"
-            isAnimationActive={false}
-            connectNulls
-          />
-          {/* White band: y from 0 up to bandHigh */}
-          <Area
-            type="monotone"
-            dataKey="bandHigh"
-            stroke="none"
-            fill="var(--chart-white-band)"
-            isAnimationActive={false}
-            connectNulls
-          />
-          {/* Played-eval line on top */}
-          <Line
-            type="monotone"
-            dataKey="played"
-            stroke="var(--chart-played-line)"
-            strokeWidth={1}
-            dot={{ r: 1.5, fill: 'var(--chart-played-line)', stroke: 'none' }}
-            isAnimationActive={false}
-          />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
+    <svg
+      viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+      width="100%"
+      height={height}
+      preserveAspectRatio="none"
+      aria-label="Score chart over the played game"
+    >
+      <polygon points={whitePolygon} fill="var(--chart-white-band)" opacity={0.72} />
+      <polygon points={blackPolygon} fill="var(--chart-black-band)" opacity={0.82} />
+      <line
+        x1={PAD_X}
+        y1={AXIS_Y}
+        x2={VIEW_W - PAD_X}
+        y2={AXIS_Y}
+        stroke="rgba(255,255,255,0.8)"
+        strokeWidth={0.8}
+      />
+      <polyline
+        points={playedPolyline}
+        fill="none"
+        stroke="var(--chart-played-line)"
+        strokeWidth={1.25}
+        strokeLinejoin="miter"
+        strokeLinecap="butt"
+      />
+      {data.map((point, idx) => {
+        const x = xForMove(point.moveNumber);
+        const playedCoord = playedPolyline.split(' ')[idx]?.split(',')[1] ?? String(BOTTOM_Y);
+        return (
+          <g key={point.moveNumber}>
+            <circle cx={x} cy={Number(playedCoord)} r={1.35} fill="var(--chart-played-line)" />
+            <text
+              x={x}
+              y={Math.max(12, AXIS_Y - (FIGURE5_WHITE_AMPLITUDE[idx] ?? 18) - 5)}
+              textAnchor="middle"
+              fontSize={13}
+              fill="rgba(255,255,255,0.9)"
+              fontFamily="Times New Roman, serif"
+            >
+              {point.moveNumber}
+            </text>
+            <text
+              x={x}
+              y={BOTTOM_Y - 4}
+              textAnchor="middle"
+              fontSize={13}
+              fill="rgba(0,0,0,0.92)"
+              fontFamily="Times New Roman, serif"
+            >
+              {point.moveNumber}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
   );
 }
 
-/**
- * Eval normalized to white's perspective (positive = good for white).
- * Stockfish gives evals from side-to-move perspective; flip for black.
- */
+function amplitudeFromCp(cp: number, fallback: number): number {
+  const compressed = Math.abs(logCompress(cp));
+  if (compressed <= 1) return fallback;
+  return Math.max(8, Math.min(66, compressed / 8));
+}
+
 function computeWhiteSignedEval(
   evalData: { type: 'cp' | 'mate'; value: number } | null,
   sideToMove: 'w' | 'b',
@@ -150,10 +176,6 @@ function computeWhiteSignedEval(
   return sign * evalData.value;
 }
 
-/**
- * Compute the [low, high] band amplitude at a played Occurrence as the range
- * of curated continuation evals at that ply.
- */
 function computeBandAt(graph: GraphData, trunkOccId: OccurrenceId): [number, number] {
   const trunk = graph.occurrences[trunkOccId];
   if (!trunk) return [0, 0];

@@ -19,8 +19,8 @@ import type { EvoNodeData } from '@/types/model';
  * positions. The visual is an absolutely-positioned `<svg>` overlay.
  */
 
-const TRUNK_DIAMETER = 17;
-const ALT_SIDE = 10;
+const TRUNK_DIAMETER = 22;
+const ALT_SIDE = 11;
 const CROWN_WIDTH = 7;
 const CROWN_HEIGHT = 5;
 
@@ -71,7 +71,7 @@ function EvoNodeImpl({ data }: Props) {
 
 function TrunkSvg({ data }: { data: EvoNodeData }) {
   const justMoved: 'w' | 'b' | null =
-    data.moveNumber === 0 ? null : data.sideToMove === 'b' ? 'w' : 'b';
+    data.isRoot || data.moveNumber === null ? null : data.sideToMove === 'b' ? 'w' : 'b';
   const baseFill = justMoved === 'b' ? 'var(--trunk-fill-selected)' : 'var(--trunk-fill)';
   const baseText = justMoved === 'b' ? 'var(--trunk-text-selected)' : 'var(--trunk-text)';
   const fill = data.isSelected ? invert(baseFill) : baseFill;
@@ -113,7 +113,7 @@ function TrunkSvg({ data }: { data: EvoNodeData }) {
         fill={text}
         style={{ userSelect: 'none' }}
       >
-        {data.moveNumber}
+        {data.moveNumber === null ? '' : String(data.moveNumber).padStart(2, '0')}
       </text>
       {data.isCheckmate ? <Crown parentWidth={TRUNK_DIAMETER} /> : null}
     </svg>
@@ -216,6 +216,7 @@ export const EvoNode = memo(EvoNodeImpl, (prev, next) => {
   return (
     a.kind === b.kind &&
     a.moveNumber === b.moveNumber &&
+    a.isRoot === b.isRoot &&
     a.fill === b.fill &&
     a.borderColor === b.borderColor &&
     a.sideToMove === b.sideToMove &&

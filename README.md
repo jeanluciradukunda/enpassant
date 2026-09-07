@@ -1,112 +1,53 @@
 # enpassant
 
-Interactive reproduction of the chess evolution graph from Lu, Wang & Lin 2014
-(_IEEE TVCG_ 20(5)). Turns any chess game into a navigable tree of what was
-played and what could have been, with Stockfish doing the heavy lifting and
-the user steering the exploration.
+Import a chess game and watch its possibilities unfold. The original **Chess Evolution Visualization** paper study remains at `/paper`; the new game tool is at `/`.
 
-The canonical build contract is in [`SPEC.md`](./SPEC.md) — V0→V4 phased
-gates. Earlier research-stage spec is preserved at
-[`docs/SPEC-v0-research.md`](./docs/SPEC-v0-research.md) for lineage.
+- Import PGN text/files, Chess.com profiles or game links, and public Lichess game/study links.
+- Explore real Stockfish alternatives with a synchronized chessboard and evaluation chart.
+- Switch to **Growing replay** and press Play, or step through moves. Each decision grows the diagram while earlier branches stay in place.
+- The paper’s compact branching, numbered circles, check/mate symbols, dotted quiet sequences, two score bands and linked red magnifier now also apply to imported games.
+- Click a dotted path to unfold its hidden moves. Click any position to inspect it, **Explore this position** to grow more variations, or isolate and magnify a branch.
+- Pause/resume analysis, change replay speed, scrub, pan and zoom. Analysis is cached in your browser.
 
-## Status
+The first visit opens indigojeans–GM-Shadi, a real Chess.com game from 10 August 2026. Your last imported PGN is remembered locally.
 
-| Phase  | Goal                                                                               | State           |
-| ------ | ---------------------------------------------------------------------------------- | --------------- |
-| **V0** | Static reproduction of Figure 5 from hand-coded fixture data. Visual-diff CI gate. | **in progress** |
-| V1     | PGN paste → played trunk → Stockfish on played positions.                          | pending         |
-| V2     | Curated alternatives + branch shortening + score-chart-driven nav.                 | pending         |
-| V3     | Lichess imports + real CORS proxy + cache + share links.                           | pending         |
-| V4     | PWA + custom paths + Chess.com archive + a11y audit + demo library.                | pending         |
+## Run
 
-## Quick start
+Node 20.11+ and pnpm 10.33.4 (pinned in `package.json`):
 
-```
+```sh
 pnpm install
-pnpm dev               # http://localhost:5173
+pnpm dev
 ```
 
-## Scripts
+Open http://localhost:5173. Development and build scripts prepare the local Stockfish worker and WASM automatically. No API keys or backend are required. Public game imports need network access; analysis runs locally.
 
-| Command                | What it does                                           |
-| ---------------------- | ------------------------------------------------------ |
-| `pnpm dev`             | Run Vite dev server.                                   |
-| `pnpm build`           | Type-check + production build.                         |
-| `pnpm preview`         | Serve the production build locally.                    |
-| `pnpm type-check`      | TypeScript-only check, no emit.                        |
-| `pnpm lint`            | ESLint flat config.                                    |
-| `pnpm format`          | Prettier write.                                        |
-| `pnpm format:check`    | Prettier check, no write.                              |
-| `pnpm test`            | Vitest unit tests (placeholder until V0 stabilises).   |
-| `pnpm test:e2e`        | Playwright tests, including the V0 golden visual diff. |
-| `pnpm test:e2e:update` | Re-baseline the V0 golden screenshot.                  |
-
-## V0 contract
-
-V0 renders a static reproduction of Figure 5 from typed fixture data. No
-engine, no imports, no network. The deliverable lives at the index route and
-is screen-shotted by the Playwright golden test in
-[`tests/e2e/golden.spec.ts`](./tests/e2e/golden.spec.ts).
-
-### Gate
-
-The Playwright golden-diff against `tests/e2e/golden.spec.ts-snapshots/figure5-chromium-darwin.png`
-must pass under `maxDiffPixelRatio: 0.15`. After intentional visual changes,
-run `pnpm test:e2e:update` to re-baseline.
-
-### What V0 proves
-
-The visual chassis works before any chess code is real:
-
-- Layout pipeline turns Occurrences into positioned React Flow nodes.
-- EvoGraph + EvoNode + EvoEdge renderers respect the paper's encoding
-  (white-filled circles, side-to-move borders, red crowns, dotted compressed
-  edges, per-source edge thickness).
-- ScoreChart's translucent area bands and played-eval line align with the
-  trunk x-axis.
-- DetailZoomCallout reproduces the paper's red-bordered magnification inset.
-- All visual tokens from SPEC §6 are wired through CSS custom properties.
-
-## Stack
-
-See [`SPEC.md` §4](./SPEC.md). Headlines: Vite + React 19 + TS 5.7 strict +
-@xyflow/react v12 + @dagrejs/dagre + Recharts + Motion + Tailwind v4 + Dexie.
-Future V1+ adds Stockfish 18 (released 2026-01-31), chess.js, chessops, and
-@mliebelt/pgn-parser.
-
-## License
-
-GPL-3.0-or-later. The bundle inherits GPL-3 contamination from Stockfish and
-chessground (added in V1+). See [`LICENSE`](./LICENSE).
-
-## Project layout
-
-```
-src/
-├── components/         EvoGraph, EvoNode, EvoEdge, ScoreChart, DetailZoomCallout
-├── fixtures/           Hand-coded data shaped like Figure 5 (V0)
-├── lib/                Layout pipeline (constrained, trunk-anchored)
-├── styles/             CSS tokens + Tailwind import
-├── types/              Position, Occurrence, TranspositionLink, ImpactFrame
-├── App.tsx             V0 index page
-└── main.tsx
-tests/
-└── e2e/
-    ├── golden.spec.ts                            Playwright golden-diff gate
-    └── golden.spec.ts-snapshots/                 Committed golden image
-docs/
-└── SPEC-v0-research.md  Original research-stage spec (preserved for lineage)
-SPEC.md                  Canonical V0→V4 build contract
+```sh
+pnpm test
+pnpm type-check
+pnpm lint
+pnpm build
+pnpm test:e2e
 ```
 
-## Contributing
+Use `LIVE_IMPORTS=1 pnpm test:e2e tests/e2e/import-live.spec.ts` to check the external Chess.com and Lichess integrations. Browser tests require Playwright Chromium (`pnpm exec playwright install chromium`). If invoking Vite directly after a clean install, run `pnpm prepare:engine` first.
 
-PRs land on `main` via squash merge with linear history. Branch protection
-requires a PR — direct pushes to `main` are blocked locally and remotely. The
-preferred branch naming is `<phase>/<short-topic>` (e.g., `v0/foundation`,
-`v1/pgn-import`).
+## Current scope
 
-Per SPEC §1's visual priority rule: when paper fidelity conflicts with modern
-polish, **paper fidelity wins**. No gradients, no hero cards, no
-glassmorphism. Flat darkseagreen canvas, thin black connectors, small
-encoded nodes.
+Standard chess, including custom starting FENs and special moves. The initial pass uses Stockfish 18 **lite**, up to eight candidate lines and a short search budget; deeper searches are available on demand. The graph shows sampled engine variations rather than every legal continuation. Chess.com game URLs need a participant's username to locate the game in their published monthly archives.
+
+[Dynamic tool architecture and limits](docs/game-visualizer.md) describes import behavior, replay, score semantics, history-safe caching and the paper-based layout.
+
+## The paper study
+
+`/paper` reconstructs Figure 5 from Lu, Wang & Lin (IEEE TVCG, 2014) using **938 SVG nodes, 972 edges, 54 played positions and 22 mate markers**. Selection, linked magnification, isolation and pan/zoom remain available. **Original paper** switches to an independently rasterized source figure.
+
+The recovered fixture is visual evidence, with no FENs or engine scores; it is separate from the dynamic game model. The source-image tests still require less than 12% color difference, at least 85% dark-pixel precision and 90% recall, allowing two pixels of rasterization tolerance. Updating app snapshots cannot rewrite that reference.
+
+[Figure 5 reconstruction notes](docs/figure5-reconstruction.md) · [Original roadmap](SPEC.md)
+
+## Source and license
+
+Application code is GPL-3.0-or-later. Stockfish.js is GPLv3; its pinned source and license are linked from the tool. The paper figure and recovered geometry retain their original rights and attribution.
+
+[Author-hosted paper](https://people.cs.nycu.edu.tw/~yushuen/data/ChessVis14.pdf) · [DOI](https://doi.org/10.1109/TVCG.2014.2299803)
