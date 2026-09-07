@@ -5,6 +5,14 @@ export const ENGINE_VERSION = 'stockfish-18.0.8-lite-single';
 export const QUICK_MS = 400;
 export const DEEP_MS = 1800;
 export const PV_COUNT = 8;
+export const STUDY_MS = 60_000;
+export type AnalysisProfile = 'quick' | 'study';
+export interface SearchOptions {
+  depth?: number;
+  playedMove?: string;
+  searchMove?: string;
+  refresh?: boolean;
+}
 
 export function parseInfo(text: string, whiteToMove: boolean): EngineLine | null {
   if (!text.startsWith('info ') || /\b(?:upperbound|lowerbound)\b/.test(text)) return null;
@@ -25,8 +33,13 @@ export function parseInfo(text: string, whiteToMove: boolean): EngineLine | null
   };
 }
 
-export function cacheKey(initialFen: string, moves: string[], milliseconds: number) {
-  return `${ENGINE_VERSION}:pv${PV_COUNT}:${milliseconds}:${initialFen}:${moves.join(' ')}`;
+export function cacheKey(
+  initialFen: string,
+  moves: string[],
+  milliseconds: number,
+  options: SearchOptions = {},
+) {
+  return `${ENGINE_VERSION}:v2:pv${options.searchMove ? 1 : PV_COUNT}:${milliseconds}:depth${options.depth ?? 20}:played${options.playedMove ?? ''}:only${options.searchMove ?? ''}:${initialFen}:${moves.join(' ')}`;
 }
 
 let database: Promise<IDBDatabase | null> | undefined;
@@ -141,18 +154,40 @@ export class Engine {
     });
   }
 
-  async analyze(initialFen: string, moves: string[], milliseconds = QUICK_MS): Promise<Analysis> {
-    const key = cacheKey(initialFen, moves, milliseconds);
+  async analyze(
+    initialFen: string,
+    moves: string[],
+    milliseconds = QUICK_MS,
+    options: SearchOptions = {},
+  ): Promise<Analysis> {
+    const key = cacheKey(initialFen, moves, milliseconds, options);
     const cached = await readAnalysis(key);
     if (this.disposed) throw new DOMException('Analysis cancelled', 'AbortError');
-    if (cached) return cached;
+    if (
+      cached &&
+      !options.refresh &&
+      (!cached.playedLine || cached.playedLine.depth === cached.depth)
+    )
+      return cached;
     await this.ready;
     const chess = new Chess(initialFen);
     for (const move of moves) chess.move(move);
-    if (chess.isGameOver()) return { lines: [], depth: 0, milliseconds: 0 };
-    const expected = Math.min(PV_COUNT, chess.moves().length);
+    if (chess.isGameOver()) {
+      const terminal = {
+        lines: [],
+        depth: 0,
+        milliseconds: 0,
+        depthReached: true,
+        requestedDepth: options.depth ?? 20,
+      };
+      await writeAnalysis(key, terminal);
+      return terminal;
+    }
+    const expected = options.searchMove ? 1 : Math.min(PV_COUNT, chess.moves().length);
+    this.worker.postMessage(`setoption name MultiPV value ${options.searchMove ? 1 : PV_COUNT}`);
     await this.waitFor('isready', 'readyok', 10_000);
     if (this.disposed) throw new DOMException('Analysis cancelled', 'AbortError');
+    const started = performance.now();
     const result = await new Promise<Analysis>((resolve, reject) => {
       const depths = new Map<number, Map<number, EngineLine>>();
       const timer = setTimeout(
@@ -184,15 +219,30 @@ export class Engine {
             lines: [...complete[1].values()].sort((a, b) => a.rank - b.rank),
             depth: complete[0],
             milliseconds,
+            elapsedMs: Math.round(performance.now() - started),
+            requestedDepth: options.depth ?? 20,
+            depthReached: complete[0] >= (options.depth ?? 20),
           });
         }
       };
       this.worker.postMessage(
         `position fen ${initialFen}${moves.length ? ` moves ${moves.join(' ')}` : ''}`,
       );
-      this.worker.postMessage(`go movetime ${milliseconds} depth 20`);
+      this.worker.postMessage(
+        `go movetime ${milliseconds} depth ${options.depth ?? 20}${options.searchMove ? ` searchmoves ${options.searchMove}` : ''}`,
+      );
     });
-    void writeAnalysis(key, result);
+    if (options.playedMove && !result.lines.some((line) => line.moves[0] === options.playedMove)) {
+      const played = await this.analyze(initialFen, moves, milliseconds, {
+        depth: result.depth,
+        searchMove: options.playedMove,
+        refresh: options.refresh,
+      });
+      result.playedLine = { ...played.lines[0], rank: 9 };
+      result.depthReached = result.depthReached && played.depthReached;
+      result.elapsedMs = (result.elapsedMs ?? 0) + (played.elapsedMs ?? 0);
+    }
+    await writeAnalysis(key, result);
     return result;
   }
 

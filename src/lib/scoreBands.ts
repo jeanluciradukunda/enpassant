@@ -1,4 +1,5 @@
 import { scoreValue } from './games';
+import { candidates } from './semantics';
 import type { Analysis, Game, Score } from '../types/game';
 export const scoreY = (score: Score, side: 'w' | 'b' = 'w') => {
   const value = scoreValue(score) * (side === 'w' ? 1 : -1);
@@ -12,16 +13,25 @@ export function scoreBands(game: Game, analysis: Map<string, Analysis>, cursor: 
       .filter((p) => p.turn !== side)
       .map((pos) => {
         const root = analysis.get(`p${pos.ply - 1}`);
-        const result = analysis.get(pos.id);
+        const retained = root
+          ? candidates(root, pos.uci).filter((line) => line.depth === root.depth)
+          : [];
         const actual: Score | undefined = pos.mate
           ? { type: 'mate', value: pos.turn === 'w' ? -1 : 1 }
           : pos.draw
             ? { type: 'cp', value: 0 }
-            : result?.lines[0]?.score;
+            : retained.find((line) => line.moves[0] === pos.uci)?.score;
         if (!root?.lines.length || !actual) return null;
-        const estimates = root.lines.map((line) => scoreY(line.score, side));
+        const estimates = retained.map((line) => scoreY(line.score, side));
         const y = scoreY(actual, side);
-        return { pos, actual, y, low: Math.max(...estimates, y), high: Math.min(...estimates, y) };
+        return {
+          pos,
+          actual,
+          depth: root.depth,
+          y,
+          low: Math.max(...estimates, y),
+          high: Math.min(...estimates, y),
+        };
       }),
   }));
 }

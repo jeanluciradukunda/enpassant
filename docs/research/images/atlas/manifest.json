@@ -1,0 +1,93 @@
+{
+  "source": "https://people.cs.nycu.edu.tw/~yushuen/data/ChessVis14.pdf",
+  "sha256": "584bd5e16cfed095866c4b20651a737282a22ec69b28bce97611fe26abc61e7e",
+  "pageConvention": "Physical author PDF page, 1-based",
+  "rights": "Source artwork by Lu, Wang and Lin / rights holders; research excerpts, not application artwork or relicensed code.",
+  "figures": [
+    {
+      "figure": 1,
+      "page": 1,
+      "rotation": 0,
+      "bboxPoints": [287, 328, 526, 463],
+      "image": "figure-01.png"
+    },
+    {
+      "figure": 2,
+      "page": 4,
+      "rotation": 0,
+      "bboxPoints": [37, 54, 273, 357],
+      "image": "figure-02.png"
+    },
+    {
+      "figure": 3,
+      "page": 5,
+      "rotation": 0,
+      "bboxPoints": [36, 52, 527, 238],
+      "image": "figure-03.png"
+    },
+    {
+      "figure": 4,
+      "page": 6,
+      "rotation": 0,
+      "bboxPoints": [287, 53, 527, 143],
+      "image": "figure-04.png"
+    },
+    {
+      "figure": 5,
+      "page": 7,
+      "rotation": 0,
+      "bboxPoints": [36, 53.14, 526.168, 222.813],
+      "image": "figure-05.png"
+    },
+    {
+      "figure": 6,
+      "page": 7,
+      "rotation": 0,
+      "bboxPoints": [35.8, 299, 275, 465],
+      "image": "figure-06.png"
+    },
+    {
+      "figure": 7,
+      "page": 8,
+      "rotation": 90,
+      "bboxPoints": [27.4, 31, 722, 206.6],
+      "image": "figure-07.png"
+    },
+    {
+      "figure": 8,
+      "page": 8,
+      "rotation": 90,
+      "bboxPoints": [27.4, 263, 722, 495.4],
+      "image": "figure-08.png"
+    },
+    {
+      "figure": 9,
+      "page": 9,
+      "rotation": 0,
+      "bboxPoints": [36, 53, 275, 133],
+      "image": "figure-09.png"
+    },
+    {
+      "figure": 10,
+      "page": 11,
+      "rotation": 0,
+      "bboxPoints": [36, 54, 526, 211],
+      "image": "figure-10.png"
+    },
+    {
+      "figure": 11,
+      "page": 12,
+      "rotation": 0,
+      "bboxPoints": [291, 145, 526, 299],
+      "image": "figure-11.png"
+    }
+  ],
+  "figure9GrayCircle": {
+    "x0": 137.79807368696066,
+    "top": 64.98093077573503,
+    "width": 9.752630986470251,
+    "height": 9.752681431635096,
+    "non_stroking_color": [0.498, 0.498, 0.498],
+    "stroking_color": [1.0, 1.0, 1.0]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "input": "artifacts/paper-research/current-data.json",
+  "sha256": "049e7a80acff3016f696a7c0aa487c1fb7e391732fc4ec8982769dc193c7853e",
+  "frozenGraph": true,
+  "vertices": 1198,
+  "results": [
+    {
+      "name": "legacy-with-played-group",
+      "orderFans": false,
+      "playedWeight": 40,
+      "branchWeight": 8,
+      "compressedWeight": 2,
+      "groupPlayed": true,
+      "graphBounds": "0,0,2588.9,279.52",
+      "branchesAbove": 7,
+      "branchesBelow": 312,
+      "playedVerticalSpread": 0
+    },
+    {
+      "name": "legacy-mixed-weights",
+      "orderFans": false,
+      "playedWeight": 40,
+      "branchWeight": 8,
+      "compressedWeight": 2,
+      "graphBounds": "0,0,2588.9,357.04",
+      "branchesAbove": 165,
+      "branchesBelow": 144,
+      "playedVerticalSpread": 154
+    },
+    {
+      "name": "unordered-5-to-1",
+      "orderFans": false,
+      "playedWeight": 50,
+      "branchWeight": 10,
+      "graphBounds": "0,0,2588.9,331.04",
+      "branchesAbove": 156,
+      "branchesBelow": 147,
+      "playedVerticalSpread": 198
+    },
+    {
+      "name": "ordered-5-to-1",
+      "orderFans": true,
+      "playedWeight": 50,
+      "branchWeight": 10,
+      "graphBounds": "0,0,2588.9,375.04",
+      "branchesAbove": 190,
+      "branchesBelow": 124,
+      "playedVerticalSpread": 190
+    },
+    {
+      "name": "ordered-1-to-1",
+      "orderFans": true,
+      "playedWeight": 10,
+      "branchWeight": 10,
+      "graphBounds": "0,0,2588.9,575.04",
+      "branchesAbove": 178,
+      "branchesBelow": 128,
+      "playedVerticalSpread": 467
+    }
+  ]
+}

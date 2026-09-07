@@ -22,6 +22,7 @@ export function position(
     check: chess.isCheck(),
     mate: chess.isCheckmate(),
     draw: chess.isDraw(),
+    legalReplies: chess.moves().length,
   };
 }
 

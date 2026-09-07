@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { identifyInput, importLink, nextArchive } from '../lib/importers';
 import { parseGames } from '../lib/games';
 import type { Game } from '../types/game';
+import paperGame from '../../docs/research/deep-blue-kasparov-1997-game-2.pgn?raw';
 
 export function GameImporter({
   onChoose,
@@ -99,6 +100,13 @@ export function GameImporter({
           ×
         </button>
       </div>
+      <button
+        className="paper-game-example"
+        disabled={busy}
+        onClick={() => chooseGames(parseGames(paperGame))}
+      >
+        Try the paper’s game <span>Deep Blue / Kasparov · 1997 ↗</span>
+      </button>
       <div className="import-tabs">
         <button
           className={mode === 'link' ? 'active' : ''}

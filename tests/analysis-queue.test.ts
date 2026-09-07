@@ -9,6 +9,7 @@ const search = vi.hoisted(() => vi.fn(async () => ({ lines: [], depth: 0, millis
 vi.mock('../src/lib/engine', () => ({
   QUICK_MS: 400,
   DEEP_MS: 1800,
+  STUDY_MS: 60_000,
   Engine: class {
     analyze = search;
     dispose() {}
@@ -37,5 +38,11 @@ it('services an exploration queued while the initial graph is being arranged', a
     result.current.expand(result.current.graph.byId.get('p1')!);
     finish(result.current.graph);
   });
-  await waitFor(() => expect(search).toHaveBeenCalledWith(expect.any(String), ['e2e4'], 1800));
+  await waitFor(() =>
+    expect(search).toHaveBeenCalledWith(expect.any(String), ['e2e4'], 1800, {
+      depth: 20,
+      playedMove: 'e7e5',
+      refresh: true,
+    }),
+  );
 });

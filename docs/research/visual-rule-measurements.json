@@ -1,0 +1,46 @@
+{
+  "input": "deepblue-depth20-analysis.json.gz",
+  "sha256": "f6f60f7a79d0fab27d94e426392bb8858088a4c299783c5145584a54d65e4046",
+  "analysisRoots": 90,
+  "measurements": {
+    "caption-policy": {
+      "positions": 7132,
+      "merged": 288,
+      "shortened": 5609,
+      "vertices": 1235,
+      "edges": 1279,
+      "compressed": 562,
+      "returns": 0,
+      "shared": 106,
+      "checks": 127,
+      "width": 2542,
+      "height": 420.8
+    },
+    "event-chains": {
+      "positions": 7132,
+      "merged": 288,
+      "shortened": 5806,
+      "vertices": 1038,
+      "edges": 1082,
+      "compressed": 601,
+      "returns": 0,
+      "shared": 101,
+      "checks": 127,
+      "width": 2448,
+      "height": 444.8
+    },
+    "shared-positions": {
+      "positions": 7132,
+      "merged": 340,
+      "shortened": 5740,
+      "vertices": 1052,
+      "edges": 1114,
+      "compressed": 621,
+      "returns": 8,
+      "shared": 131,
+      "checks": 124,
+      "width": 2466.8,
+      "height": 434.8
+    }
+  }
+}

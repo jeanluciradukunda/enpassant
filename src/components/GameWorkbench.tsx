@@ -1,28 +1,60 @@
 import { Chess } from 'chess.js';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { visibleAt } from '../lib/evolution';
+import { unfoldGraph } from '../lib/unfold';
+import type { AnalysisProfile } from '../lib/engine';
+import { candidates } from '../lib/semantics';
+import type { CheckMode } from '../lib/diagramStyle';
 import { useAnalysis } from '../lib/useAnalysis';
 import { moveLabel, scoreLabel } from '../lib/games';
 import { ChessBoard } from './ChessBoard';
+import { DiagramKey } from './DiagramKey';
 import { EvolutionDiagram, GraphMarks } from './EvolutionDiagram';
 import type { EvolutionNode, Game } from '../types/game';
 
-export function GameWorkbench({ game, onImport }: { game: Game; onImport: () => void }) {
+type WorkbenchProps = { game: Game; onImport: () => void };
+export function GameWorkbench(props: WorkbenchProps) {
+  const [profile, setProfile] = useState<AnalysisProfile>('quick');
+  return (
+    <Workbench
+      key={`${props.game.id}:${profile}`}
+      {...props}
+      profile={profile}
+      onProfile={setProfile}
+    />
+  );
+}
+function Workbench({
+  game,
+  onImport,
+  profile,
+  onProfile,
+}: WorkbenchProps & { profile: AnalysisProfile; onProfile: (profile: AnalysisProfile) => void }) {
   const [cursor, setCursor] = useState(0);
   const [overview, setOverview] = useState(true);
   const [selectedId, setSelectedId] = useState('p0');
   const [playing, setPlaying] = useState(false);
-  const engine = useAnalysis(game, playing);
-  const { graph, analysis } = engine;
+  const engine = useAnalysis(game, playing, profile);
+  const { analysis } = engine;
   const [speed, setSpeed] = useState(1);
   const [flipped, setFlipped] = useState(false);
   const [isolated, setIsolated] = useState(false);
+  const [checkMode, setCheckMode] = useState<CheckMode>('retained');
   const [unfolded, setUnfolded] = useState<string[] | null>(null);
+  const graph = useMemo(() => unfoldGraph(engine.graph, unfolded), [engine.graph, unfolded]);
   const [exploringPly, setExploringPly] = useState<number | null>(null);
   const moveList = useRef<HTMLDivElement>(null);
   const selected = graph.byId.get(selectedId) ?? graph.byId.get('p0')!;
   const lastPly = game.positions.length - 1;
   const search = analysis.get(selected.id);
+  const routes =
+    graph.vertices
+      .find((v) => v.members.includes(selected.id))
+      ?.members.filter((id) => visibleAt(graph.byId.get(id)!, cursor, overview, exploringPly)) ??
+    [];
   const busy = engine.status === 'loading' || engine.status === 'analyzing';
+  const limited =
+    profile === 'study' && engine.status === 'complete' && engine.atDepth < engine.total;
 
   const goTo = useCallback(
     (ply: number) => {
@@ -142,6 +174,7 @@ export function GameWorkbench({ game, onImport }: { game: Game; onImport: () => 
     overview,
     selected,
     isolated,
+    checkMode,
     exploringPly,
     onSelect: select,
     onUnfold: setUnfolded,
@@ -239,11 +272,24 @@ export function GameWorkbench({ game, onImport }: { game: Game; onImport: () => 
         <span className="engine-name">
           Stockfish 18 <span className="muted">lite</span>
         </span>
+        <label className="analysis-profile">
+          <span hidden>Analysis quality</span>
+          <select
+            aria-label="Analysis quality"
+            value={profile}
+            onChange={(event) => onProfile(event.target.value as AnalysisProfile)}
+          >
+            <option value="quick">Quick preview</option>
+            <option value="study">Depth 20 study</option>
+          </select>
+        </label>
         <span className="analysis-status" role="status">
           {engine.status === 'loading'
             ? 'Preparing engine…'
             : engine.status === 'complete'
-              ? 'Game analyzed'
+              ? profile === 'study' && engine.atDepth < engine.total
+                ? 'Study finished · depth limited'
+                : 'Game analyzed'
               : engine.status === 'paused'
                 ? 'Analysis paused'
                 : engine.status === 'error'
@@ -253,12 +299,24 @@ export function GameWorkbench({ game, onImport }: { game: Game; onImport: () => 
         <progress aria-label="Game analysis progress" value={engine.completed} max={engine.total} />
         <span className="analysis-count">
           {engine.completed}/{engine.total}
+          {profile === 'study' && (
+            <span title="Includes terminal positions; both candidate and played-move searches must reach depth 20">
+              {' '}
+              · {engine.atDepth} at target
+            </span>
+          )}
         </span>
         <button
-          onClick={busy ? engine.pause : engine.resume}
-          disabled={engine.status === 'complete'}
+          onClick={busy ? engine.pause : limited ? engine.retryLimited : engine.resume}
+          disabled={engine.status === 'complete' && !limited}
         >
-          {busy ? 'Pause analysis' : engine.status === 'complete' ? 'Complete' : 'Resume analysis'}
+          {busy
+            ? 'Pause analysis'
+            : limited
+              ? 'Retry depth-limited searches'
+              : engine.status === 'complete'
+                ? 'Complete'
+                : 'Resume analysis'}
         </button>
       </div>
       {engine.error && (
@@ -363,13 +421,33 @@ export function GameWorkbench({ game, onImport }: { game: Game; onImport: () => 
               </span>
               <span>
                 <i className="legend-check" />
-                Check
+                {checkMode === 'retained' ? 'Retained check' : 'Evaluated check'}
               </span>
               <span>
                 <i className="legend-mate">▲</i>Mate
               </span>
+              <span title="A return to a represented position. The route picker preserves each move history.">
+                ↶ Repeat
+              </span>
             </div>
           </div>
+          <label className="check-display">
+            Check highlights
+            <select
+              aria-label="Check highlights"
+              value={checkMode}
+              onChange={(event) => setCheckMode(event.target.value as CheckMode)}
+            >
+              <option value="retained">Checks in retained lines</option>
+              <option value="assessed">Locally evaluated checks</option>
+            </select>
+            <span>
+              {checkMode === 'retained'
+                ? 'Shows legal checks in the chosen continuations; locally refuted checks stay hollow.'
+                : 'Highlights checks within 0.50 pawns of the best locally searched move.'}
+            </span>
+          </label>
+          <DiagramKey />
         </section>
         <aside className="position-panel" aria-label="Selected position">
           <div className="paper-detail-panel">
@@ -439,6 +517,13 @@ export function GameWorkbench({ game, onImport }: { game: Game; onImport: () => 
               </span>
             </div>
           </div>
+          {selected.legalReplies !== undefined && selected.legalReplies > 0 && !selected.draw && (
+            <p className="branch-help">
+              {selected.legalReplies === 1
+                ? 'One legal reply in this position.'
+                : `${selected.legalReplies} legal moves; the diagram shows selected engine continuations.`}
+            </p>
+          )}
           <div className="branch-controls">
             <button
               className="explore-button"
@@ -470,9 +555,48 @@ export function GameWorkbench({ game, onImport }: { game: Game; onImport: () => 
               ← Back to the played game
             </button>
           )}
+          {routes.some((id) => graph.byId.get(id)!.draw) && !selected.draw && (
+            <p className="branch-help">
+              A different route reaches a draw at this shared position. The selected history can
+              still continue.
+            </p>
+          )}
+          {routes.length > 1 && (
+            <label className="route-picker">
+              Route to this position
+              <select
+                aria-label="Route to this position"
+                value={selected.id}
+                onChange={(event) => select(graph.byId.get(event.target.value)!)}
+              >
+                {routes.map((id, i) => {
+                  const node = graph.byId.get(id)!;
+                  const routeBoard = new Chess(game.initialFen);
+                  const routeMoves = node.moves.map((move) => routeBoard.move(move).san);
+                  return (
+                    <option key={id} value={id}>
+                      {node.played ? 'Played' : `Route ${i + 1}`} · {routeMoves.slice(-6).join(' ')}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
+          )}
+          {selected.check && !selected.mate && !selected.draw && (
+            <p className="branch-help">
+              {selected.checkQuality === 'supported'
+                ? 'Checking move within 0.50 pawns of the best searched move.'
+                : selected.checkQuality === 'inferior'
+                  ? 'This check loses more than 0.50 pawns against the best searched move.'
+                  : 'Check observed. Its effectiveness has not been evaluated at this position.'}
+            </p>
+          )}
           {search?.lines.length ? (
             <div className="candidate-lines">
-              {search.lines
+              {candidates(
+                search,
+                selected.played ? game.positions[selected.ply + 1]?.uci : undefined,
+              )
                 .filter(
                   (line) =>
                     graph.byId.has(`${selected.id}/${line.moves[0]}`) ||
@@ -483,7 +607,7 @@ export function GameWorkbench({ game, onImport }: { game: Game; onImport: () => 
                     key={line.rank}
                     title={lineSan(line.moves)}
                     disabled={!graph.ready}
-                    aria-label={`Inspect candidate ${line.rank}: ${lineSan(line.moves)}`}
+                    aria-label={`Inspect ${line === search.playedLine ? 'played move outside top eight' : `candidate ${line.rank}`}: ${lineSan(line.moves)}`}
                     onClick={() => {
                       const uci = line.moves[0];
                       const id =
@@ -508,9 +632,13 @@ export function GameWorkbench({ game, onImport }: { game: Game; onImport: () => 
                 ? 'This line ends in checkmate.'
                 : selected.draw
                   ? 'This line reaches a drawn position.'
-                  : selected.played
-                    ? 'Alternatives appear as the engine reaches this move.'
-                    : 'Explore to search deeper and grow new branches here.'}
+                  : selected.continuationEnd
+                    ? selected.continuationEnd === 'display-limit'
+                      ? 'The 20-ply display limit ends here. Explore to continue this line.'
+                      : 'The returned engine line ends here. Legal moves remain; explore to continue.'
+                    : selected.played
+                      ? 'Alternatives appear as the engine reaches this move.'
+                      : 'Explore to search deeper and grow new branches here.'}
             </p>
           )}
 
