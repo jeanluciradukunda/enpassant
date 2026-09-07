@@ -1,43 +1,7 @@
 import type { Analysis, EvolutionEdge, EvolutionGraph, EvolutionNode, Score } from '../types/game';
 
-interface DotGraph {
-  bb: string;
-  objects: { name: string; pos?: string }[];
-  edges: { id?: string; pos?: string; _draw_?: { op: string; points?: number[][] }[] }[];
-}
-let worker: Worker | undefined;
-let sequence = 0;
-const pending = new Map<
-  number,
-  { resolve: (value: DotGraph) => void; reject: (error: Error) => void }
->();
-async function render(dot: string): Promise<DotGraph> {
-  if (import.meta.env.SSR) {
-    const { instance } = await import('@viz-js/viz');
-    return (await instance()).renderJSON(dot) as DotGraph;
-  }
-  if (!worker) {
-    worker = new Worker(new URL('./graphviz.worker.ts', import.meta.url), { type: 'module' });
-    worker.onmessage = ({ data }) => {
-      const job = pending.get(data.id);
-      pending.delete(data.id);
-      if (data.error) job?.reject(new Error(data.error));
-      else job?.resolve(data.result);
-    };
-    worker.onerror = () => {
-      for (const job of pending.values())
-        job.reject(new Error('The graph layout could not start. Resume analysis to retry.'));
-      pending.clear();
-      worker?.terminate();
-      worker = undefined;
-    };
-  }
-  return new Promise((resolve, reject) => {
-    const id = ++sequence;
-    pending.set(id, { resolve, reject });
-    worker!.postMessage({ id, dot });
-  });
-}
+import { renderGraph } from './graphviz';
+
 const numeric = (score: Score) =>
   score.type === 'cp' ? score.value : Math.sign(score.value) * (30000 - Math.abs(score.value));
 const event = (node: EvolutionNode) => node.check || node.mate || node.draw;
@@ -172,7 +136,7 @@ export async function layoutEvolution(
     );
   }
   lines.push('}');
-  const result = await render(lines.join('\n'));
+  const result = await renderGraph(lines.join('\n'));
   const bounds = result.bb.split(',').map(Number);
   const height = Math.max(220, bounds[3] + 36);
   const dotToId = new Map([...names].map(([id, name]) => [name, id]));

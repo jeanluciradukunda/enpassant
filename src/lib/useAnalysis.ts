@@ -51,6 +51,9 @@ export function useAnalysis(game: Game, replaying = false) {
             const layout = await builder.layout();
             if (stopped) break;
             publish(layout);
+            // An exploration can arrive while Graphviz is arranging the map.
+            // Drain it before declaring the run complete.
+            if (jobs.current.size) continue;
             setStatus('complete');
             setWorkingOn('');
             break;

@@ -1,53 +1,93 @@
-# enpassant
+<p align="center">
+  <img src="docs/images/readme-header.svg" alt="enpassant. Every move has a multiverse." width="100%">
+</p>
 
-Import a chess game and watch its possibilities unfold. The original **Chess Evolution Visualization** paper study remains at `/paper`; the new game tool is at `/`.
+<p align="center">
+  A quiet place to see what happened in a chess game—and what might have happened.
+  <br>
+  Import a game. Press play. Watch its possibilities unfold.
+</p>
 
-- Import PGN text/files, Chess.com profiles or game links, and public Lichess game/study links.
-- Explore real Stockfish alternatives with a synchronized chessboard and evaluation chart.
-- Switch to **Growing replay** and press Play, or step through moves. Each decision grows the diagram while earlier branches stay in place.
-- The paper’s compact branching, numbered circles, check/mate symbols, dotted quiet sequences, two score bands and linked red magnifier now also apply to imported games.
-- Click a dotted path to unfold its hidden moves. Click any position to inspect it, **Explore this position** to grow more variations, or isolate and magnify a branch.
-- Pause/resume analysis, change replay speed, scrub, pan and zoom. Analysis is cached in your browser.
+<p align="center">
+  <a href="#start-here">Start here</a> &nbsp; · &nbsp;
+  <a href="#a-game-in-three-moments">How it works</a> &nbsp; · &nbsp;
+  <a href="#from-paper-to-play">The paper</a> &nbsp; · &nbsp;
+  <a href="docs/DEVELOPMENT.md">Development</a>
+</p>
 
-The first visit opens indigojeans–GM-Shadi, a real Chess.com game from 10 August 2026. Your last imported PGN is remembered locally.
+<br>
 
-## Run
+<a href="docs/media/replay.mp4">
+  <picture>
+    <source media="(prefers-reduced-motion: reduce)" srcset="docs/media/replay-poster.png">
+    <img src="docs/media/replay.gif" alt="A real chess game replaying: the graph branches outward move by move while the board and score bands update." width="100%">
+  </picture>
+</a>
 
-Node 20.11+ and pnpm 10.33.4 (pinned in `package.json`):
+<p align="center">
+  <sub>indigojeans / GM-Shadi · 21 moves · growing replay at 4×</sub>
+  <br>
+  <a href="docs/media/replay.mp4">Watch the recording ↗</a> &nbsp; · &nbsp;
+  <a href="docs/images/game-visualizer.png">Explore the still image ↗</a>
+</p>
+
+<br>
+
+## A game, in three moments
+
+| 01 / Bring a game                                               | 02 / Let it unfold                                                                    | 03 / Follow a possibility                                                                |
+| :-------------------------------------------------------------- | :------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| Paste a PGN, upload a file, or use a Chess.com or Lichess link. | Step through the moves or press Play. The board, graph and score bands move together. | Select a branch, inspect it through the magnifier, and ask Stockfish to explore further. |
+
+The circles trace the played game. Squares mark alternative positions; dotted paths hold quiet sequences. Earlier branches stay rooted as new ones appear.
+
+**Runs in your browser.** No sign-in, API key or backend. Public imports contact the chess site; analysis and cached games stay on your device.
+
+## Start here
+
+Use **Node 24 LTS** and **pnpm 10.33.4**. With Node installed:
 
 ```sh
+corepack enable
+corepack prepare pnpm@10.33.4 --activate
 pnpm install
 pnpm dev
 ```
 
-Open http://localhost:5173. Development and build scripts prepare the local Stockfish worker and WASM automatically. No API keys or backend are required. Public game imports need network access; analysis runs locally.
+Open **[localhost:5173](http://localhost:5173)**. Your first visit loads the game shown above; after that, Enpassant remembers your last import. Stockfish’s local engine files are prepared automatically.
+
+Choose **Growing replay → Play**, or use **← / →** to step and **Space** to play or pause. Select a node to inspect it, scroll to zoom, and drag to pan.
+
+<details>
+<summary><strong>Supported games and useful limits</strong></summary>
+
+- **PGN:** paste text or upload a file, including collections and custom starting positions. Standard chess, up to 2 MB, 100 games per collection and 600 half-moves per game.
+- **Chess.com:** usernames, profiles and game links. A game link needs one participant’s username to locate its public archive.
+- **Lichess:** public completed games and study/chapter links.
+- **Analysis:** Stockfish 18 lite, up to eight candidates per position, with deeper searches on demand. The graph is a sample of engine continuations; each game has its own shape.
+
+[Import behavior, score semantics and layout details →](docs/game-visualizer.md)
+
+</details>
+
+## From paper to play
+
+Enpassant began with Lu, Wang & Lin’s _Chess Evolution Visualization_. The original diagram’s compact branches, restrained palette and linked magnifier still guide the design.
+
+Open **[/paper](http://localhost:5173/paper)** to explore the reconstructed Figure 5: **938 nodes · 972 connections · 54 played positions**. Its source-image comparison is independent of application screenshots.
+
+[Read the paper ↗](https://people.cs.nycu.edu.tw/~yushuen/data/ChessVis14.pdf) &nbsp; · &nbsp; [How the figure was recovered](docs/figure5-reconstruction.md)
+
+## Made to be worked on
 
 ```sh
-pnpm test
-pnpm type-check
-pnpm lint
-pnpm build
-pnpm test:e2e
+pnpm check       # Types, lint, formatting and unit tests
+pnpm build       # Production build, including the local engine
+pnpm test:e2e    # Real-engine browser and paper-fidelity tests
 ```
 
-Use `LIVE_IMPORTS=1 pnpm test:e2e tests/e2e/import-live.spec.ts` to check the external Chess.com and Lichess integrations. Browser tests require Playwright Chromium (`pnpm exec playwright install chromium`). If invoking Vite directly after a clean install, run `pnpm prepare:engine` first.
+Install Chromium once with `pnpm exec playwright install chromium`. The [development guide](docs/DEVELOPMENT.md) covers the code map, validation, media and hosting. The [repo audit](docs/audit-2026-09-07.md) records the fixes and remaining work; [SPEC.md](SPEC.md) preserves the longer-term roadmap.
 
-## Current scope
+---
 
-Standard chess, including custom starting FENs and special moves. The initial pass uses Stockfish 18 **lite**, up to eight candidate lines and a short search budget; deeper searches are available on demand. The graph shows sampled engine variations rather than every legal continuation. Chess.com game URLs need a participant's username to locate the game in their published monthly archives.
-
-[Dynamic tool architecture and limits](docs/game-visualizer.md) describes import behavior, replay, score semantics, history-safe caching and the paper-based layout.
-
-## The paper study
-
-`/paper` reconstructs Figure 5 from Lu, Wang & Lin (IEEE TVCG, 2014) using **938 SVG nodes, 972 edges, 54 played positions and 22 mate markers**. Selection, linked magnification, isolation and pan/zoom remain available. **Original paper** switches to an independently rasterized source figure.
-
-The recovered fixture is visual evidence, with no FENs or engine scores; it is separate from the dynamic game model. The source-image tests still require less than 12% color difference, at least 85% dark-pixel precision and 90% recall, allowing two pixels of rasterization tolerance. Updating app snapshots cannot rewrite that reference.
-
-[Figure 5 reconstruction notes](docs/figure5-reconstruction.md) · [Original roadmap](SPEC.md)
-
-## Source and license
-
-Application code is GPL-3.0-or-later. Stockfish.js is GPLv3; its pinned source and license are linked from the tool. The paper figure and recovered geometry retain their original rights and attribution.
-
-[Author-hosted paper](https://people.cs.nycu.edu.tw/~yushuen/data/ChessVis14.pdf) · [DOI](https://doi.org/10.1109/TVCG.2014.2299803)
+<sub>Built with React, TypeScript, chess.js, Stockfish and Graphviz. Application code: <a href="LICENSE">GPL-3.0-or-later</a>. The paper artwork retains its original rights. <a href="docs/ATTRIBUTION.md">Sources &amp; attribution</a>.</sub>
