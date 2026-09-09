@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/readme-header.svg" alt="enpassant. Every move has a multiverse." width="100%">
+  <img src="docs/images/readme-header.png" alt="enpassant. Every move has a multiverse." width="100%">
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
 
 <br>
 
-<a href="docs/media/replay.mp4">
+<a href="docs/media/replay.gif">
   <picture>
     <source media="(prefers-reduced-motion: reduce)" srcset="docs/media/replay-poster.png">
     <img src="docs/media/replay.gif" alt="A real chess game replaying: the graph branches outward move by move while the board and score bands update." width="100%">
@@ -27,7 +27,8 @@
 <p align="center">
   <sub>indigojeans / GM-Shadi · 21 moves · growing replay at 4×</sub>
   <br>
-  <a href="docs/media/replay.mp4">Watch the recording ↗</a> &nbsp; · &nbsp;
+  <a href="docs/media/replay.gif">View the replay (GIF) ↗</a> &nbsp; · &nbsp;
+  <a href="docs/media/replay.mp4">MP4 file ↗</a> &nbsp; · &nbsp;
   <a href="docs/images/game-visualizer.png">Explore the still image ↗</a>
 </p>
 

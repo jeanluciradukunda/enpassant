@@ -4,7 +4,7 @@
 
 **Research artwork.** Lu, Wang & Lin, _Chess Evolution Visualization_, IEEE TVCG 20(5), 2014. [Author-hosted paper](https://people.cs.nycu.edu.tw/~yushuen/data/ChessVis14.pdf) · [DOI](https://doi.org/10.1109/TVCG.2014.2299803).
 
-`public/reference/figure5.png`, the recovered geometry in `src/fixtures/figure5.json`, and the small graph motif in `docs/images/readme-header.svg` derive from Figure 5. Their original rights remain with the respective rights holders; the application license does not relicense the paper artwork. [Reconstruction and extraction details](figure5-reconstruction.md).
+`public/reference/figure5.png`, the recovered geometry in `src/fixtures/figure5.json`, and the small graph motif in `docs/images/readme-header.svg` (also rendered in `docs/images/readme-header.png`) derive from Figure 5. Their original rights remain with the respective rights holders; the application license does not relicense the paper artwork. [Reconstruction and extraction details](figure5-reconstruction.md).
 
 **Engine.** Stockfish.js 18.0.8, lite single-thread build, GPLv3. [Pinned source revision](https://github.com/nmrugg/stockfish.js/tree/93c994592dcf3b4b21052ab925e9b534df9c0918). The preparation script copies the package’s `Copying.txt` to `public/engine/COPYING.txt`, and the app links both license and corresponding source.
 

@@ -56,11 +56,21 @@ A layout must rank the **shortened graph**, not reserve a column for every hidde
 ## Visual references and media
 
 - `public/reference/figure5.png` is an independent raster of the author’s PDF. Do not replace it with an application screenshot to make a test pass.
-- `docs/images/readme-header.svg` is the editable README wordmark composition. The right-hand motif uses a crop of the attributed Figure 5 vectors.
-- `docs/images/game-visualizer.png` shows the real bundled game. `docs/media/replay.gif` and `replay.mp4` are recordings of that game at 4× speed.
+- `docs/images/readme-header.svg` is the editable README wordmark composition. The README uses its 2× PNG export, `docs/images/readme-header.png`, for consistent font rendering. The right-hand motif uses a crop of the attributed Figure 5 vectors.
+- `docs/images/game-visualizer.png` shows the real bundled game. `docs/media/replay.gif` and `replay.mp4` are recordings of that game at 4× speed. The GIF is both the README preview and its primary replay link; the MP4 is a separate file link.
 - `scripts/capture-paper-replay.mjs` captures a production preview, checks fixed coordinates through replay and saves evidence under ignored `artifacts/`. Start `pnpm preview` first. `PREVIEW_URL` overrides its default port 4173.
 
 Keep recordings small and readable; use relative README asset links so forks and branches work. Source artwork, engine binaries and application screenshots have distinct provenance: [attribution](ATTRIBUTION.md).
+
+If GitHub cannot display an asset, check the public URL's HTTP response before changing the artwork or codec. On 9 September 2026, the raw SVG and MP4 URLs returned `503 Backend.max_conn reached` from GitHub's delivery service while the GIF returned `200 image/gif`. The SVG rendered locally and the complete MP4 decoded without errors (H.264, yuv420p, with its playback metadata at the start). This evidence points to a delivery failure; it does not establish an SVG syntax or video compatibility defect. For a native GitHub video player, use [GitHub's attachment workflow](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files) when publishing the recording.
+
+After editing the header SVG, regenerate its PNG with `rsvg-convert` (from librsvg):
+
+```sh
+rsvg-convert --width 2560 --height 720 --output docs/images/readme-header.png docs/images/readme-header.svg
+```
+
+Use a machine with Georgia and Arial installed, then visually check the export before committing it.
 
 ## Hosting
 
