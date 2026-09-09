@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/readme-header.png" alt="enpassant. Every move has a multiverse." width="100%">
+  <img src="https://github.com/user-attachments/assets/8ecf7313-401b-4457-944c-65524b91c606" alt="enpassant. Every move has a multiverse." width="100%">
 </p>
 
 <p align="center">
@@ -17,18 +17,18 @@
 
 <br>
 
-<a href="docs/media/replay.gif">
+<a href="https://github.com/user-attachments/assets/a0d80e0d-07ff-4c2d-809d-33aa4442b238">
   <picture>
-    <source media="(prefers-reduced-motion: reduce)" srcset="docs/media/replay-poster.png">
-    <img src="docs/media/replay.gif" alt="A real chess game replaying: the graph branches outward move by move while the board and score bands update." width="100%">
+    <source media="(prefers-reduced-motion: reduce)" srcset="https://github.com/user-attachments/assets/9bc612f0-6252-4215-be0a-37d01ef44a69">
+    <img src="https://github.com/user-attachments/assets/af2a5b4f-2d95-4db3-8076-c1492f5837ee" alt="A real chess game replaying: the graph branches outward move by move while the board and score bands update." width="100%">
   </picture>
 </a>
 
 <p align="center">
   <sub>indigojeans / GM-Shadi · 21 moves · growing replay at 4×</sub>
   <br>
-  <a href="docs/media/replay.gif">View the replay (GIF) ↗</a> &nbsp; · &nbsp;
-  <a href="docs/media/replay.mp4">MP4 file ↗</a> &nbsp; · &nbsp;
+  <a href="https://github.com/user-attachments/assets/af2a5b4f-2d95-4db3-8076-c1492f5837ee">Animated preview ↗</a> &nbsp; · &nbsp;
+  <a href="https://github.com/user-attachments/assets/a0d80e0d-07ff-4c2d-809d-33aa4442b238">Watch the recording ↗</a> &nbsp; · &nbsp;
   <a href="docs/images/game-visualizer.png">Explore the still image ↗</a>
 </p>
 
