@@ -1,0 +1,308 @@
+{
+  "d7en76": {
+    "p16": {
+      "text": "Ha — this is one of mine, so forgive me if I defend it. The engine at depth 14 puts c6 ninth on its list, yet gives it exactly the same number as its first choice, a6, and if you follow its own a6 line it plays c6 anyway two moves later; a machine that ranks a move last and then plays it itself is not disagreeing with you, it is just shuffling. Nothing has turned here, the game is still quiet and level — the forest comes later, and this little pawn move is simply me choosing which path into it I want.",
+      "label": "8… c6",
+      "depth": 14,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": 1,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    },
+    "p30": {
+      "text": "Ah, this one I know from the inside. Look at what the engine's shortlist at depth 12 wants from me: Qd8, then Qf8, the queen tiptoeing home while the knight goes to e8 to guard things — a perfectly sensible plan for a perfectly sensible man, and Botvinnik was sitting across the board waiting for exactly that. Instead the knight jumps to h5, and the engine puts it ninth while admitting the difference is fourteen centipawns, which is to say no difference at all — it simply doesn't like the smell of the move yet. That is the whole idea: take Botvinnik into the deep dark forest where 2+2=5, and let a shallow engine complain about the road.",
+      "label": "15… Nh5",
+      "depth": 12,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": 14,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    },
+    "p18": {
+      "text": "Ah — this one I remember from the inside. The engine at depth 13 would rather I play …Re8 or simply …exd4, quiet moves that keep the centre tidy, and it files …Qb6 ninth on its shortlist, forty centipawns down, because White can answer c5 and after dxc5 dxe5 my knight has to retreat to e8 while Na4 comes hunting the queen. But look at what …Qb6 actually does: it drags Botvinnik into deciding the centre right now, with pawn captures flying, and a position where every move must be found rather than remembered. A shallow engine calls that a small concession; I call it the entrance to the forest where 2+2=5, and I have never been sorry to pay forty centipawns for the ticket.",
+      "label": "9… Qb6",
+      "depth": 13,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": 39,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    },
+    "p8": {
+      "text": "Ah, this one I remember — that is my own hand tucking the king away against Botvinnik. The engine, at depth 13, puts castling ninth on its little list behind d5 and c6 and the rest, but look at the numbers: everything from d5 down to 4…O-O lives within a few centipawns of each other, which is to say the machine is shrugging in nine different ways. Notice too that its own line after castling simply plays d5 and Nxd5 anyway, so the move order is a matter of taste, not of truth. The deep dark forest is still some way off here; this is just a man putting on his coat before the walk.",
+      "label": "4… O-O",
+      "depth": 13,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": 6,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    },
+    "p34": {
+      "text": "Ah, so you are replaying my old quarrel with Mikhail Moiseevich — and you have arrived at 17…Rc4, which the engine at depth twelve puts ninth on its list, behind a whole committee of quiet moves like Qc4 and a6. Look at the numbers, though: twenty centipawns separate my rook from its favourite, which is to say nothing at all; the machine simply has not yet decided which of nine equal roads it dislikes least. Every one of those lines has Botvinnik answering Rfc1 anyway, so the question was never \"which move\" but \"which move leads him into the forest\" — and a rook striding forward to c4 asks him a question that a6 does not. Shallow engines count; I preferred to make him think.",
+      "label": "17… Rc4",
+      "depth": 12,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": 20,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    },
+    "p71": {
+      "text": "Ah, this one I remember from the other side of the board — and here the great Botvinnik, already deep in the forest, reaches out and takes a pawn with 36. Rxa7, because a pawn is a pawn and Mikhail Moiseevich never liked to leave one lying about. The engine's shortlist at depth 14 had it ninth of nine, roughly a pawn worse than Rc6, but honestly, by this point the position was already lost by more than three pawns' worth, so the exact choice of exit hardly matters. What the line shows is the real story: after Bc4 and Ra8+ Kg7, the bishops come in with Bd4+ and White's king is simply being chased around while the rook takes pawns on the far side of the board. Where the game turned was long before this move — here Botvinnik is only choosing which way to fall.",
+      "label": "36. Rxa7",
+      "depth": 14,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": 96,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    },
+    "p42": {
+      "text": "Ah, this one I remember rather well. The engine at depth 12 lists Nf6 a notch above my Nf4, but the gap is fifteen centipawns, which is to say nothing at all — and one of those moves quietly retreats while the other invites gxf4, exf4 and a board where Botvinnik must find a3 and Bxa7 with his heart pounding. There are two types of sacrifices: correct ones, and mine, and the joy of this one is that even the machine cannot decide which kind it is. When the cost of the forest is fifteen centipawns, you walk in.",
+      "label": "21… Nf4",
+      "depth": 12,
+      "depthReached": false,
+      "playedRank": 2,
+      "evalDeltaCp": 15,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p76": {
+      "text": "Ah, this one I remember — and the machine, at depth 16, says my own king took a wrong turn. It wants 38…Kg8, letting Botvinnik's rook chase with Ra8+ and Ra7+ while the king slips to h6 and the checks simply run out; instead my Ke6 walks toward the centre, and after Ra4 and d5 he gets Ng3 in and I am pushing Bh4 with about half the advantage I had a move earlier. Still a winning position, mind you, and the result on the scoresheet did not complain. But it is a good lesson: in the deep dark forest, even the man who dug the paths sometimes takes the wider, prettier one instead of the one that is only wide enough for him.",
+      "label": "38… Ke6",
+      "depth": 16,
+      "depthReached": false,
+      "playedRank": 3,
+      "evalDeltaCp": 209,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p89": {
+      "text": "Ah, this one I know from the other side of the board. The engine at depth 13 puts Ra7 ninth on its shortlist, and yet its own number tells you it is worth exactly the same as the moves above it — it even lists Ra5+ twice, so forgive the poor machine, it has a hangover. The truth is that Botvinnik here is not choosing between winning and losing; the forest was entered many moves ago and there was only one path out, and it was mine. Ra7, c3, Rc7 and the king strolling to d4 — the rook can check and shuffle all evening, but nearly four pawns of evaluation do not come back because a rook chose a slightly different square.",
+      "label": "45. Ra7",
+      "depth": 13,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": -11,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    },
+    "p93": {
+      "text": "Ah, this one I remember from the other side of the board. At depth 13 the engine's shortlist would rather shuffle the king — Kg4, Kh4, Kf3 — while 47. Rd7+ chases mine with checks, and in its own line the king simply strolls Ke3, Kd2, Kc1 away from the rook and toward the pawn. But look at the numbers: minus four hundred in every line, the difference between the checks and the king moves is a rounding error at this depth. The game did not turn here; here Botvinnik was already in the forest, and only one of us had the map.",
+      "label": "47. Rd7+",
+      "depth": 13,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": 63,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    }
+  },
+  "esbgw1": {
+    "p31": {
+      "text": "Ah, this one I remember rather well. The knight goes to d5 to be taken — exd5, exd5, and the pawn that arrives there is worth more than the horse ever was, because the whole board changes shape and Larsen must find f5 and Rf7 just to breathe. Your engine at depth 12 shrugs and says Nd5, Na4 and Ne2 are all the same half-pawn, a few centipawns apart, which is to say it has not yet walked far enough into the forest to notice that only one of these paths has room for a single traveller. There are two types of sacrifices, correct ones and mine; let the machine run to depth twenty and then we'll argue about which this was.",
+      "label": "16. Nd5",
+      "depth": 12,
+      "depthReached": false,
+      "playedRank": 1,
+      "evalDeltaCp": 0,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p19": {
+      "text": "Ah, this one I remember — and the engine, at its depth of eleven, puts my Ndb5 dead last on a shortlist of nine, some forty centipawns behind the quiet Nb3. Its own line is the joke: the knight leaps to b5, chases the queen to b8, I throw in g4, and then the knight strolls back to d4 as if nothing happened. But look at what the little tour bought: Larsen's queen is on b8 instead of where she wanted to be, and the pawn is already on g4 — the trees are closing in behind us. A shallow engine sees a knight that wasted two moves; I saw an opponent who had to spend two moves answering questions, and in that forest the arithmetic is mine.",
+      "label": "10. Ndb5",
+      "depth": 11,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": 42,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    },
+    "p36": {
+      "text": "Ah, this one I remember from the other side of the board. Bent's 18… Rf7 is a defender's move, and look what the engine's shortlist at depth 13 says the rook is signing up for: h4, then h5, then that pawn simply walks through g6 as if nobody lives there. The little machine claims Bd8 was the way — Qh5, Nc5, Bxg7, Nxd3+ and the knight lands with check — but that is a deep dark forest where 2+2=5, and I was rather counting on Bent not wanting to walk into it. The eval swings two full pawns here, though I confess the position looked far wilder from the inside than any number suggests.",
+      "label": "18… Rf7",
+      "depth": 13,
+      "depthReached": false,
+      "playedRank": 4,
+      "evalDeltaCp": 207,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p35": {
+      "text": "Ah, this one I remember — and I confess, looking at it now, the rook choice was a matter of taste rather than arithmetic. The engine's shortlist at depth 12 puts Rde1 fifth, about half a pawn behind its favourite Rhe1, and it wants the other rook to swing over so that after Rf7 and Bxf5 the bishop can wander to e6 and trade itself off. Trading off! I brought the rook from d1 so that after Bd8 I could give the bishop on g7, take the king out with Kxg7, and bring the queen to h3 with the g8 rook the only thing standing in the way of a very unpleasant afternoon for Bent. There are two types of sacrifices: correct ones, and mine — and at depth 12, my friend, the engine has not yet found the path out of the forest.",
+      "label": "18. Rde1",
+      "depth": 12,
+      "depthReached": false,
+      "playedRank": 5,
+      "evalDeltaCp": 52,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p56": {
+      "text": "Ah, this one I remember from the other side of the board. The engine's shortlist at depth 14 wants Bent to go 28…Qf7 and simply offer the queens — Qxf7+ Kxf7 Bc5 Re8 Rxe8 — trading his way into a worse but breathing ending, and honestly a queen trade was the last thing I wanted to see. Instead 28…Qd6 keeps the ladies on, and after Qf4 Rf8 Qe4 he even gets a check on f1, which looks lively but the count says it cost him about a pawn and a half of the position. That is the trouble with the deep dark forest: Larsen wandered in after me, and the path out was only wide enough for one.",
+      "label": "28… Qd6",
+      "depth": 14,
+      "depthReached": false,
+      "playedRank": 3,
+      "evalDeltaCp": 142,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p39": {
+      "text": "Ah, this one I remember from the inside. The engine's shortlist at depth 12 wants me to shuffle pawns forward with h5 or g6 and let the position ripen — very sensible, very Danish. But I gave up the bishop on f5 so that after Rxf5 the rook lands on e7, and that is the kind of position I understand better than any machine counting to twelve. It still says White is comfortably ahead after Bxf5, so we are only arguing about how much of the forest I dragged Larsen into — and I chose the darkest path on purpose.",
+      "label": "20. Bxf5",
+      "depth": 12,
+      "depthReached": false,
+      "playedRank": 6,
+      "evalDeltaCp": 99,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p60": {
+      "text": "Look, by now the forest has already closed behind us, and the engine at depth 14 says every path out costs Black about four pawns' worth of daylight — b3 simply takes the widest one and pays a little extra for the view. Its shortlist wanted Rf1+ first, a check that asks my king a question, or Qg6, offering to trade queens off the board entirely, which is the sober man's way to lose more slowly. I understand b3 completely, though: when the position is going to be counted against you anyway, a pawn thrust at the king at least insists that the accountant look up from his ledger. A shallow engine calls it fourth; I call it the only move here with a pulse.",
+      "label": "30… b3",
+      "depth": 14,
+      "depthReached": false,
+      "playedRank": 4,
+      "evalDeltaCp": 54,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p38": {
+      "text": "Ah, this one I remember from the other side of the board. The engine at depth 11 puts Bb7 at the bottom of its shortlist, half a pawn behind g6, and I understand why: in every line White plays h5 anyway, and after Bb7 Bent finds himself giving up the bishop on g5 and then watching his knight land on e5 only to be taken there. The bishop on b7 points somewhere far away while the fight is happening on the h-file, and that is the whole trouble. Mind you, a depth-11 engine on a position like this is a tourist with a map in a forest where 2+2=5, so I would not swear the numbers are gospel; but I would swear that Black needed to look at the h5 push, not the long diagonal, and that here is where the path began to narrow to one man's width.",
+      "label": "19… Bb7",
+      "depth": 11,
+      "depthReached": false,
+      "playedRank": 5,
+      "evalDeltaCp": 58,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p67": {
+      "text": "Ah, this one I remember rather well. The engine at depth 14 puts Bc5 ninth on its shortlist, behind quiet things like b4 and c4 and even Ke2 — and then, if you read its own number, it scores the bishop offer higher than anything else on the list. Larsen takes with Qxc5, Re8+ forces Rf8, and Qe6+ drives the king into the corner: the whole point is that the bishop was never the piece that mattered.\n\nThere are two types of sacrifices, correct ones and mine, and it is a rare pleasure when the machine admits, however grudgingly, that this one belonged to both categories.",
+      "label": "34. Bc5",
+      "depth": 14,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": -4,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    },
+    "p64": {
+      "text": "Ah, Bent, my old friend — the check, of course the check; when the house is on fire one still likes to make a little noise. But look at what 32… Qb4+ actually does: after c3 the queen simply walks back to d6, the b-pawn arrives at b4, and the bishop's desperate Bxd5 is met by Qxd5+ — the whole excursion has cost him a tempo and something like a pawn's worth of hope. The engine at depth 13 wanted the quiet Rf8 or h6, and I will not call anything \"best\" at that depth, but I will say none of it saves him; White is already more than five pawns to the good in every line. This is the deep dark forest, you see — I have gone in ahead, the path out is only wide enough for one, and Larsen is merely choosing which tree to bump into on the way.",
+      "label": "32… Qb4+",
+      "depth": 13,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": 127,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    }
+  },
+  "xopv3t": {
+    "p8": {
+      "text": "Ah, this one I remember from the other side of the board. The engine at depth 12 puts Bd6 at the top of its shortlist and shrugs at your Nd7 as third, half a pawn behind, but a shallow engine is like a young man with strong opinions: it will change its mind by dinner. What Nd7 actually does is invite d4, and after Bd6 and the exchanges on d5 and e5 the centre opens completely, which is exactly the sort of clearing where I like to build my forest. Smyslov played it against me and I was delighted; whether the engine approves in eight more plies is a question for the engine, not for us.",
+      "label": "4… Nd7",
+      "depth": 12,
+      "depthReached": false,
+      "playedRank": 3,
+      "evalDeltaCp": 45,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p26": {
+      "text": "Ah, this is the moment I remember best from that whole tournament. Vasily plays 13…Bd8, which looks so sensible, and after 14.Nxg7 Kxg7 15.Bb3 the forest closes behind him — the engine at depth 14 only puts it around two-thirds of a pawn behind 13…Bc5, and I would not trust a machine at that depth to see everything that happens after Qh4 in either line, but I knew at the board that this was the path only wide enough for one. The retreat to Bd8 wasn't a blunder; it was an invitation, and I have never in my life declined one of those.",
+      "label": "13… Bd8",
+      "depth": 14,
+      "depthReached": false,
+      "playedRank": 2,
+      "evalDeltaCp": 68,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p27": {
+      "text": "Ah, this one I remember — and look, the engine at depth 10 wants me to play Nh6+ first and let him take with gxh6, then swing the queen to h4 anyway. I chose to put the queen on h4 straight away and keep the knight sacrifice in my pocket; the machine calls that a quarter of a pawn, which after ten plies of thinking is not an opinion, it is a shrug. Smyslov is being invited to take on c4 and collect on a2 while the queen goes h4, g5 — the forest is already dark enough that one of us is not coming out, and I preferred to decide myself which move lights the match. There are two types of sacrifices, you know: correct ones, and mine — and this position was patient enough to wait for either.",
+      "label": "14. Qh4",
+      "depth": 10,
+      "depthReached": false,
+      "playedRank": 5,
+      "evalDeltaCp": 39,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p23": {
+      "text": "Ah, this one I remember well, and you see the machine at depth eleven already wants to cash the ticket: Bxf7+, Rxf7, Nxf7, Kxf7 and a pawn in the pocket with a quiet Rhe1 to follow. Bd2 instead simply steps the bishop back and asks Smyslov to keep breathing in a position where nothing has been exchanged and everything is still pointed at his king — the shortlist gives it fifty-five centipawns less, and I would happily pay that toll again. A pawn on f7 is a fact; a forest is an experience, and only one of us knew the way out.",
+      "label": "12. Bd2",
+      "depth": 11,
+      "depthReached": false,
+      "playedRank": 2,
+      "evalDeltaCp": 55,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p37": {
+      "text": "Ah, this one I remember — Smyslov sitting across from me, and the queen goes to f7 where it can simply be taken. The engine's shortlist at depth 15 puts Qxf7 at the top by a wide margin, and everything else — Qe5, the immediate Nxf7+, Ne5 — falls back to level or worse, so for once a sacrifice of mine and a correct one turn out to be the same move. Look at the line it gives: Black gets his check on a1, the king steps to d2 quite calmly, the rook takes the queen, and the knight recaptures on f7 with check — Black has bought a queen for a rook and a knight and finds himself down material anyway. That is the deep dark forest: the capture is forced, the recapture is forced, and only one of us knew where the path came out.",
+      "label": "19. Qxf7",
+      "depth": 15,
+      "depthReached": false,
+      "playedRank": 1,
+      "evalDeltaCp": 0,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p46": {
+      "text": "Look at what Vasily does here — the engine at depth 17 wants the king to slip back to f8 or g8, quiet and sensible, and instead he walks it forward with Ke6, and after Rhe1 it goes on to d5, right into the middle of the board where I have every piece staring at it. It cost him only about half a pawn by the numbers, and White was already well ahead, so this is not where the game turned — but it is where a proud king decided to come and argue with me personally. I confess I was delighted. When the opponent's king volunteers to enter the deep dark forest, you do not need to drag him in; you simply make sure the path out is very narrow.",
+      "label": "23… Ke6",
+      "depth": 17,
+      "depthReached": false,
+      "playedRank": 3,
+      "evalDeltaCp": 51,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p36": {
+      "text": "Here it is, my friend — this is the moment the forest closes behind him. After 18…Nf6 the engine's shallow shortlist at depth 13 wants me to play Qxf7 anyway, and after Qa1+ Kd2 Rxf7 Nxf7+ the queen is gone but the knight arrives with check, and a champion is suddenly playing for his life. The dull truth is that Bf6 or Bc7 would have kept the balance — Bf6 even offers to swap off my knight after Ng5 Bxg5+ Qxg5 — but Smyslov, of all people, chose to walk toward the sacrifice, and I have never once complained when an opponent does that. There are two types of sacrifices: correct ones, and mine — and on this occasion, I believe, it was both.",
+      "label": "18… Nf6",
+      "depth": 13,
+      "depthReached": false,
+      "playedRank": 9,
+      "evalDeltaCp": 317,
+      "outsideTopEight": true,
+      "model": "claude-fable-5-1"
+    },
+    "p45": {
+      "text": "Ah, this one I remember from the inside — Smyslov's king already wandering, and the knight goes to e5 with check because a knight that gives check is a knight that is enjoying itself. The engine's shortlist at depth 14 puts Rhe1 first and my Ne5+ a half-pawn behind, but look: in its own line the rook comes to e1 anyway, only one move later, and Kg8 is forced either way. Half a pawn is the price of making the opponent answer a check before he has finished thinking about where his king lives, and at plus three I would pay it every time. The position is already won; the question is only whether you win it as an accountant or as a man.",
+      "label": "23. Ne5+",
+      "depth": 14,
+      "depthReached": false,
+      "playedRank": 2,
+      "evalDeltaCp": 49,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p51": {
+      "text": "Ah, this one I remember — Smyslov's face at this moment was worth more than the sixty centipawns the engine says I dropped. At depth fourteen it wants my king to walk out and take on e4 with its own hands; I preferred to put the bishop on d4 and let the knight come to e5 in the line it shows, because a king should arrive at the feast after the table is set, not carry the plates. Both roads lead home, so I would not call this a mistake — only a matter of taste, and my taste has always run toward the piece that can be admired rather than the one that can be counted. There are two types of sacrifices, and there are also two types of winning moves: the engine's, and mine.",
+      "label": "26. Bd4",
+      "depth": 14,
+      "depthReached": false,
+      "playedRank": 2,
+      "evalDeltaCp": 60,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    },
+    "p47": {
+      "text": "Ah, you've found me in a good mood here — White is already a whole piece of daylight ahead, and I simply take on c6 because taking is more fun than tidying. The engine's shortlist at depth 14 puts the rook moves Rhe1 and Rhd1 above it, and yes, after Nxc6 Smyslov gets to make a little noise with Ne4+ and Bg5+ before scooping the pawn on c3 — but a forty-centipawn quarrel when you are nearly four pawns up is not a quarrel, it is a difference in taste. Rhe1 tucks the rook away and waits; Nxc6 says \"come, show me your checks,\" and when they run out the position is still mine. There are two types of sacrifices, correct ones and mine — and this one is barely even a sacrifice, which I find slightly embarrassing.",
+      "label": "24. Nxc6",
+      "depth": 14,
+      "depthReached": false,
+      "playedRank": 3,
+      "evalDeltaCp": 40,
+      "outsideTopEight": false,
+      "model": "claude-fable-5-1"
+    }
+  }
+}
