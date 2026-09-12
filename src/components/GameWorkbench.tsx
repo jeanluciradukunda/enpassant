@@ -7,6 +7,7 @@ import { candidates } from '../lib/semantics';
 import type { CheckMode } from '../lib/diagramStyle';
 import { useAnalysis } from '../lib/useAnalysis';
 import { moveLabel, scoreLabel } from '../lib/games';
+import { toSan } from '../lib/san';
 import { ChessBoard } from './ChessBoard';
 import { DiagramKey } from './DiagramKey';
 import { EvolutionDiagram, GraphMarks } from './EvolutionDiagram';
@@ -179,18 +180,7 @@ function Workbench({
     onSelect: select,
     onUnfold: setUnfolded,
   };
-  const lineSan = (moves: string[]) => {
-    const chess = new Chess(selected.fen);
-    const san: string[] = [];
-    for (const move of moves.slice(0, 7)) {
-      try {
-        san.push(chess.move(move).san);
-      } catch {
-        break;
-      }
-    }
-    return san.join(' ');
-  };
+  const lineSan = (moves: string[]) => toSan(selected.fen, moves.slice(0, 7)).join(' ');
 
   return (
     <main className="workbench" data-testid="game-workbench">
