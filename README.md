@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://enpassant-f0e.pages.dev/"><strong>Open the live app ↗</strong></a> &nbsp; · &nbsp;
   <a href="#start-here">Start here</a> &nbsp; · &nbsp;
   <a href="#a-game-in-three-moments">How it works</a> &nbsp; · &nbsp;
   <a href="#from-paper-to-play">The paper</a> &nbsp; · &nbsp;
@@ -46,7 +47,9 @@ The circles trace the played game. Squares mark alternative positions; dotted pa
 
 ## Start here
 
-Use **Node 24 LTS** and **pnpm 10.33.4**. With Node installed:
+The app is live at **[enpassant-f0e.pages.dev](https://enpassant-f0e.pages.dev/)**. Nothing to install: open it, pick a Tal game from **Import game**, and Mikhail Tal narrates the turning points.
+
+To run it locally, use **Node 24 LTS** and **pnpm 10.33.4**. With Node installed:
 
 ```sh
 corepack enable
