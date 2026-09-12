@@ -1,0 +1,2556 @@
+[
+  {
+    "id": "botvinnik-tal-1960",
+    "title": "Botvinnik / Tal",
+    "engine": "stockfish-18.0.8-lite-single",
+    "profile": "quick",
+    "budgetMs": 400,
+    "requestedDepth": 20,
+    "multiPv": 8,
+    "displayHorizon": 20,
+    "plies": 93,
+    "positionsAnalyzed": 94,
+    "terminalRoots": 0,
+    "depth": {
+      "min": 11,
+      "median": 14,
+      "max": 19
+    },
+    "atTarget": 0,
+    "playedFallbacks": 8,
+    "returnedPvLength": {
+      "min": 1,
+      "median": 14,
+      "max": 39
+    },
+    "graph": {
+      "positions": 5422,
+      "merged": 288,
+      "shortened": 3819,
+      "visible": 1315,
+      "edges": 1364,
+      "compressedEdges": 775,
+      "sharedGlyphs": 131,
+      "returns": 12,
+      "recurrences": 0,
+      "checks": 390,
+      "mates": 0,
+      "draws": 0,
+      "width": 2607.1,
+      "height": 802.3
+    },
+    "checkpoints": [
+      {
+        "ply": 41,
+        "move": "21. Ra1",
+        "fen": "2r3k1/pp4bp/3p2p1/3Ppb1n/1qr5/2N1B1PP/PP2QPBK/R1R5 b - - 1 21",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 55
+              },
+              "moves": [
+                "h5f6",
+                "g3g4",
+                "f5d7",
+                "h2g1",
+                "h7h5",
+                "g4g5",
+                "f6e8",
+                "a2a3",
+                "b4a5",
+                "c3e4",
+                "c4c1",
+                "e3c1"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 70
+              },
+              "moves": [
+                "h5f4",
+                "g3f4",
+                "e5f4",
+                "a2a3",
+                "b4b3",
+                "e3a7",
+                "g7e5",
+                "h2g1",
+                "c8a8",
+                "g2f1",
+                "c4c3",
+                "c1c3",
+                "e5c3",
+                "b2c3",
+                "a8a7",
+                "e2e8",
+                "g8g7",
+                "e8e7",
+                "g7g8",
+                "e7d8",
+                "g8g7",
+                "a1e1",
+                "b3c3"
+              ]
+            },
+            {
+              "rank": 3,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 82
+              },
+              "moves": [
+                "f5d7",
+                "a2a3",
+                "b4b3",
+                "c3e4",
+                "c4c1",
+                "a1c1",
+                "c8c1",
+                "e3c1",
+                "h5f6",
+                "e4d6",
+                "f6d5",
+                "e2e4",
+                "d7c6"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 150
+              },
+              "moves": [
+                "e5e4",
+                "a2a3",
+                "b4b3",
+                "g3g4",
+                "g7e5",
+                "h2h1",
+                "h5f4",
+                "e3f4",
+                "e5f4",
+                "g4f5",
+                "f4c1",
+                "a1c1",
+                "g6f5",
+                "c1g1",
+                "g8h8",
+                "g2f1",
+                "c4c7",
+                "e2e3",
+                "c8g8",
+                "g1g8",
+                "h8g8",
+                "e3g5",
+                "g8h8"
+              ]
+            },
+            {
+              "rank": 5,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 155
+              },
+              "moves": [
+                "c4d4",
+                "e3d4",
+                "e5d4",
+                "e2b5",
+                "b4c5",
+                "b5c5",
+                "d6c5",
+                "c3e4",
+                "f5e4",
+                "g2e4",
+                "g7h6",
+                "c1e1",
+                "c5c4",
+                "d5d6",
+                "h5f6",
+                "e4g2"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 180
+              },
+              "moves": [
+                "g8h8",
+                "g3g4",
+                "h5f4",
+                "e3f4",
+                "e5f4",
+                "g4f5",
+                "f4f3",
+                "g2f3",
+                "g7e5",
+                "h2h1",
+                "g6f5",
+                "a2a3",
+                "b4b3",
+                "f3g2"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 213
+              },
+              "moves": [
+                "a7a5",
+                "g3g4",
+                "h5f4",
+                "e3f4",
+                "e5f4",
+                "g4f5",
+                "f4f3",
+                "g2f3",
+                "g7e5",
+                "h2g2",
+                "g6f5",
+                "c1g1"
+              ]
+            },
+            {
+              "rank": 8,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 221
+              },
+              "moves": [
+                "g7f6",
+                "g3g4",
+                "h5f4",
+                "e3f4",
+                "c4c3",
+                "c1c3",
+                "b4f4",
+                "h2g1",
+                "c8c3",
+                "b2c3",
+                "f5d7",
+                "a1b1"
+              ]
+            }
+          ],
+          "depth": 12,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 2
+      },
+      {
+        "ply": 42,
+        "move": "21… Nf4",
+        "fen": "2r3k1/pp4bp/3p2p1/3Ppb2/1qr2n2/2N1B1PP/PP2QPBK/R1R5 w - - 2 22",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": 87
+              },
+              "moves": [
+                "g3f4",
+                "e5f4",
+                "a2a3",
+                "b4b3",
+                "e3a7",
+                "g7e5",
+                "f2f3",
+                "b7b6",
+                "a3a4",
+                "c8c7",
+                "g2f1",
+                "c4c3",
+                "b2c3",
+                "c7a7",
+                "e2b5",
+                "b3b5",
+                "a4b5",
+                "a7a1",
+                "c1a1",
+                "e5c3",
+                "a1a8",
+                "g8g7",
+                "a8a7",
+                "g7h6",
+                "a7c7"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -73
+              },
+              "moves": [
+                "e2d2",
+                "f4g2",
+                "h2g2",
+                "h7h5",
+                "f2f3",
+                "e5e4",
+                "c3e4",
+                "b4d2",
+                "e3d2",
+                "c4c2"
+              ]
+            },
+            {
+              "rank": 3,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -128
+              },
+              "moves": [
+                "e3f4",
+                "e5f4",
+                "a2a3",
+                "f4g3",
+                "f2g3",
+                "b4b6",
+                "c1f1",
+                "g7e5",
+                "a1e1",
+                "a7a5",
+                "f1f2",
+                "c8f8"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -216
+              },
+              "moves": [
+                "e2e1",
+                "f4g2",
+                "h2g2",
+                "b4b2",
+                "e3d2",
+                "b7b6",
+                "g3g4",
+                "f5d3",
+                "c3d1",
+                "b2b5"
+              ]
+            },
+            {
+              "rank": 5,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -221
+              },
+              "moves": [
+                "e2d1",
+                "b4b2",
+                "c3a4",
+                "b2a3",
+                "g2f1",
+                "c4c2",
+                "a4c5",
+                "c8c5",
+                "e3c5",
+                "a3c5",
+                "c1c2",
+                "f5c2",
+                "d1d2",
+                "c5d4",
+                "d2c2",
+                "d4a1"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -254
+              },
+              "moves": [
+                "e2f1",
+                "f4g2",
+                "f1g2",
+                "b4b2",
+                "c3d1",
+                "b2e2",
+                "c1c4",
+                "c8c4",
+                "e3a7",
+                "e5e4",
+                "a1b1",
+                "e4e3",
+                "b1b7",
+                "e2d1",
+                "b7b8",
+                "g8f7"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -256
+              },
+              "moves": [
+                "a2a3",
+                "f4e2",
+                "a3b4",
+                "e2c1",
+                "e3c1",
+                "c4b4",
+                "a1a7",
+                "f5d3",
+                "c3a2",
+                "b4b6",
+                "a2c3",
+                "e5e4",
+                "c3e4",
+                "d3e4",
+                "g2e4",
+                "b6b4",
+                "e4d3",
+                "c8c1"
+              ]
+            },
+            {
+              "rank": 8,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -268
+              },
+              "moves": [
+                "e2f3",
+                "f4g2",
+                "h2g2",
+                "b4b2",
+                "c3d1",
+                "b2b5",
+                "a2a4",
+                "b5d7",
+                "c1c4",
+                "c8c4",
+                "f3e2",
+                "f5e4",
+                "g2h2",
+                "e4d5",
+                "e3a7",
+                "c4a4",
+                "a1a4",
+                "d7a4"
+              ]
+            }
+          ],
+          "depth": 15,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 1
+      },
+      {
+        "ply": 44,
+        "move": "22… exf4",
+        "fen": "2r3k1/pp4bp/3p2p1/3P1b2/1qr2p2/2N1B2P/PP2QPBK/R1R5 w - - 0 23",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": 98
+              },
+              "moves": [
+                "a2a3",
+                "b4b3",
+                "e3a7",
+                "b7b6",
+                "a3a4",
+                "g7e5",
+                "g2f3",
+                "b3b4",
+                "a4a5",
+                "b6a5",
+                "a1a3",
+                "f5e4",
+                "c1g1",
+                "e4f3",
+                "e2f3"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": 36
+              },
+              "moves": [
+                "e3d2",
+                "g7e5",
+                "f2f3",
+                "b4b2",
+                "c3d1",
+                "b2a1",
+                "c1a1",
+                "e5a1",
+                "e2e1",
+                "a1e5",
+                "g2f1",
+                "c4c2",
+                "h2g1",
+                "b7b6",
+                "a2a4",
+                "c8c7",
+                "g1h1",
+                "c2a2"
+              ]
+            },
+            {
+              "rank": 3,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": -15
+              },
+              "moves": [
+                "e3a7",
+                "b4a5",
+                "g2f1",
+                "g7e5",
+                "h2g1",
+                "e5c3",
+                "c1c3",
+                "c4c3",
+                "b2c3",
+                "a5a7",
+                "a1e1",
+                "a7a5",
+                "c3c4",
+                "a5c3",
+                "e2e7",
+                "f5h3",
+                "f1h3"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": -170
+              },
+              "moves": ["e3f4", "c4f4", "c3d1", "g7e5", "h2g1", "b4a5", "c1c8", "f5c8"]
+            },
+            {
+              "rank": 5,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": -215
+              },
+              "moves": [
+                "g2f1",
+                "f4e3",
+                "e2e3",
+                "g7d4",
+                "e3g5",
+                "b4b2",
+                "f1c4",
+                "b2f2",
+                "g5g2",
+                "d4e5",
+                "h2h1",
+                "f2g2",
+                "h1g2",
+                "c8c4",
+                "c3e2",
+                "f5e4",
+                "g2f2"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": -240
+              },
+              "moves": [
+                "c3e4",
+                "f4e3",
+                "c1c4",
+                "c8c4",
+                "e4g3",
+                "g7e5",
+                "e2e3",
+                "b4b2",
+                "a1d1",
+                "b2a2",
+                "h2g1",
+                "c4c3",
+                "g3f5",
+                "c3e3"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": -241
+              },
+              "moves": [
+                "b2b3",
+                "g7e5",
+                "h2g1",
+                "c4c3",
+                "e3d2",
+                "c3c2",
+                "d2b4",
+                "c2e2",
+                "c1c8",
+                "f5c8",
+                "a1c1",
+                "c8f5",
+                "g2f3",
+                "e2a2",
+                "c1c7",
+                "a2a1",
+                "g1g2"
+              ]
+            },
+            {
+              "rank": 8,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": -248
+              },
+              "moves": [
+                "e3c5",
+                "b4c5",
+                "c3e4",
+                "f5e4",
+                "c1c4",
+                "c5c4",
+                "e2e4",
+                "c4e4",
+                "g2e4",
+                "g7b2",
+                "a1b1"
+              ]
+            }
+          ],
+          "depth": 14,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 2
+      }
+    ],
+    "elapsedMs": 47056,
+    "browserErrors": [],
+    "browser": "153.0.8010.12",
+    "recordedAt": "2026-09-08T16:01:51.007Z",
+    "pgnSha256": "dd622aabeadcf87f0090f0b03665a0b741335eac8c371ac65f372bdb858cd329",
+    "analysisSha256": "1ad411ef680af1ba26837f157e52300e458a2b949eaa15c8b1602341f9b84ffe"
+  },
+  {
+    "id": "tal-larsen-1965",
+    "title": "Tal / Larsen",
+    "engine": "stockfish-18.0.8-lite-single",
+    "profile": "quick",
+    "budgetMs": 400,
+    "requestedDepth": 20,
+    "multiPv": 8,
+    "displayHorizon": 20,
+    "plies": 73,
+    "positionsAnalyzed": 74,
+    "terminalRoots": 0,
+    "depth": {
+      "min": 11,
+      "median": 13,
+      "max": 18
+    },
+    "atTarget": 0,
+    "playedFallbacks": 3,
+    "returnedPvLength": {
+      "min": 2,
+      "median": 14,
+      "max": 29
+    },
+    "graph": {
+      "positions": 3936,
+      "merged": 137,
+      "shortened": 2823,
+      "visible": 976,
+      "edges": 1001,
+      "compressedEdges": 550,
+      "sharedGlyphs": 68,
+      "returns": 5,
+      "recurrences": 0,
+      "checks": 298,
+      "mates": 1,
+      "draws": 0,
+      "width": 2074.7,
+      "height": 419.8
+    },
+    "checkpoints": [
+      {
+        "ply": 30,
+        "move": "15… b4",
+        "fen": "rqb2rk1/3nbppp/p2pp3/6P1/1p1BPP2/2NB1Q2/PPP4P/2KR3R w - - 0 16",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 55
+              },
+              "moves": [
+                "c3d5",
+                "e6d5",
+                "e4d5",
+                "f7f5",
+                "h1e1",
+                "f8f7",
+                "d3f5",
+                "d7f8",
+                "f5e6",
+                "c8e6",
+                "d5e6"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 45
+              },
+              "moves": ["c3a4", "b8c7", "b2b3", "c8b7", "f3g4"]
+            },
+            {
+              "rank": 3,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 36
+              },
+              "moves": [
+                "c3e2",
+                "e6e5",
+                "d4e3",
+                "e5f4",
+                "e2f4",
+                "d7e5",
+                "f3g3",
+                "c8g4",
+                "f4d5",
+                "b8b7",
+                "d1d2",
+                "g4e6",
+                "d3e2",
+                "e6d5",
+                "d2d5"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": -28
+              },
+              "moves": [
+                "f3h5",
+                "b4c3",
+                "d4c3",
+                "d7c5",
+                "h1g1",
+                "b8b6",
+                "g1g3",
+                "c5d3",
+                "g3d3",
+                "c8b7",
+                "d3h3",
+                "b7e4",
+                "c3g7",
+                "g8g7",
+                "h5h6",
+                "g7h8"
+              ]
+            },
+            {
+              "rank": 5,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": -64
+              },
+              "moves": ["h1g1", "b4c3", "d4c3", "b8b6", "f3h3", "d7c5", "g1g3", "c5d3", "d1d3"]
+            },
+            {
+              "rank": 6,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": -93
+              },
+              "moves": [
+                "c3b1",
+                "e6e5",
+                "d4e3",
+                "e5f4",
+                "e3f4",
+                "d7e5",
+                "f4e5",
+                "d6e5",
+                "h2h4",
+                "c8e6",
+                "b1d2",
+                "f8c8",
+                "c1b1",
+                "a6a5",
+                "d2f1",
+                "a5a4",
+                "f1e3"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": -95
+              },
+              "moves": [
+                "f3h3",
+                "b4c3",
+                "d4c3",
+                "d7c5",
+                "h1g1",
+                "c5d3",
+                "d1d3",
+                "e6e5",
+                "f4f5",
+                "b8b6",
+                "g1g3",
+                "c8d7"
+              ]
+            },
+            {
+              "rank": 8,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": -111
+              },
+              "moves": ["h1f1", "b4c3", "d4c3", "d7c5", "f3h5", "c8b7", "f1f3", "b7e4"]
+            }
+          ],
+          "depth": 12,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 1
+      },
+      {
+        "ply": 31,
+        "move": "16. Nd5",
+        "fen": "rqb2rk1/3nbppp/p2pp3/3N2P1/1p1BPP2/3B1Q2/PPP4P/2KR3R b - - 1 16",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 16,
+              "score": {
+                "type": "cp",
+                "value": -8
+              },
+              "moves": [
+                "e6d5",
+                "f3h5",
+                "d7c5",
+                "d4g7",
+                "c5d3",
+                "d1d3",
+                "g8g7",
+                "f4f5",
+                "f8g8",
+                "f5f6",
+                "g7h8",
+                "f6e7",
+                "c8e6",
+                "h1e1"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 16,
+              "score": {
+                "type": "cp",
+                "value": 173
+              },
+              "moves": [
+                "f8e8",
+                "d5f6",
+                "g7f6",
+                "g5f6",
+                "e7f6",
+                "f3g4",
+                "g8h8",
+                "d4f6",
+                "d7f6",
+                "g4g5",
+                "f6g8"
+              ]
+            },
+            {
+              "rank": 3,
+              "depth": 16,
+              "score": {
+                "type": "cp",
+                "value": 270
+              },
+              "moves": [
+                "e7d8",
+                "d5f6",
+                "d8f6",
+                "g5f6",
+                "g7g6",
+                "h2h4",
+                "e6e5",
+                "f4e5",
+                "d6e5",
+                "d4e3",
+                "b8d6",
+                "h1f1",
+                "d7c5",
+                "d3c4",
+                "d6c7",
+                "h4h5",
+                "c8e6",
+                "h5g6",
+                "f7g6"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 16,
+              "score": {
+                "type": "cp",
+                "value": 288
+              },
+              "moves": [
+                "e7g5",
+                "h1g1",
+                "e6d5",
+                "g1g5",
+                "f7f6",
+                "g5g7",
+                "g8g7",
+                "f3h5",
+                "f8g8",
+                "e4d5",
+                "g7f8",
+                "d3h7",
+                "g8h8",
+                "d1g1",
+                "f8e7",
+                "g1e1",
+                "d7e5"
+              ]
+            },
+            {
+              "rank": 5,
+              "depth": 16,
+              "score": {
+                "type": "cp",
+                "value": 463
+              },
+              "moves": [
+                "g8h8",
+                "d5e7",
+                "b8c7",
+                "f4f5",
+                "c8b7",
+                "f5f6",
+                "g7g6",
+                "h2h4",
+                "h7h5",
+                "g5h6",
+                "h8h7",
+                "h1g1"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 16,
+              "score": {
+                "type": "cp",
+                "value": 464
+              },
+              "moves": [
+                "e6e5",
+                "d5e7",
+                "g8h8",
+                "d4e3",
+                "a6a5",
+                "f4f5",
+                "b4b3",
+                "a2a3",
+                "c8b7",
+                "f5f6",
+                "g7g6",
+                "f3h3",
+                "b3c2",
+                "d3c2",
+                "f8c8",
+                "c1b1"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 16,
+              "score": {
+                "type": "cp",
+                "value": 464
+              },
+              "moves": [
+                "a6a5",
+                "d5e7",
+                "g8h8",
+                "f4f5",
+                "e6e5",
+                "d4e3",
+                "b4b3",
+                "a2a3",
+                "c8a6",
+                "f5f6",
+                "a6d3",
+                "d1d3",
+                "b3c2"
+              ]
+            },
+            {
+              "rank": 8,
+              "depth": 16,
+              "score": {
+                "type": "cp",
+                "value": 472
+              },
+              "moves": [
+                "d7c5",
+                "d5e7",
+                "g8h8",
+                "f4f5",
+                "c8b7",
+                "f5f6",
+                "g7g6",
+                "h2h4",
+                "h7h5",
+                "g5h6",
+                "b8c7",
+                "h1g1",
+                "c5d3",
+                "f3d3",
+                "h8h7",
+                "h4h5"
+              ]
+            }
+          ],
+          "depth": 16,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 1
+      },
+      {
+        "ply": 33,
+        "move": "17. exd5",
+        "fen": "rqb2rk1/3nbppp/p2p4/3P2P1/1p1B1P2/3B1Q2/PPP4P/2KR3R b - - 0 17",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": -17
+              },
+              "moves": [
+                "g7g6",
+                "h1e1",
+                "f8e8",
+                "c1b1",
+                "d7c5",
+                "d4c5",
+                "d6c5",
+                "d5d6",
+                "c8b7",
+                "d3e4",
+                "b7e4",
+                "e1e4",
+                "e7d6",
+                "e4e8",
+                "b8e8"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 13
+              },
+              "moves": [
+                "f7f5",
+                "f3e2",
+                "e7d8",
+                "e2e6",
+                "f8f7",
+                "g5g6",
+                "h7g6",
+                "e6e8",
+                "f7f8",
+                "e8g6",
+                "f8f7",
+                "h1e1",
+                "d8f6",
+                "d3f5",
+                "d7f8",
+                "e1e8"
+              ]
+            },
+            {
+              "rank": 3,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 90
+              },
+              "moves": [
+                "b4b3",
+                "f3e4",
+                "g7g6",
+                "e4e7",
+                "b3a2",
+                "b2b3",
+                "b8b4",
+                "d3c4",
+                "b4a3",
+                "c1d2",
+                "d7c5",
+                "h1e1",
+                "c8f5"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 135
+              },
+              "moves": ["d7e5", "f4e5", "d6e5", "d4e3", "a6a5", "h2h4", "a5a4", "f3e4"]
+            },
+            {
+              "rank": 5,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 160
+              },
+              "moves": [
+                "e7g5",
+                "f4g5",
+                "d7e5",
+                "d4e5",
+                "d6e5",
+                "h2h4",
+                "b8d6",
+                "h4h5",
+                "a8b8",
+                "f3e4",
+                "g7g6",
+                "h5g6",
+                "f7g6"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 214
+              },
+              "moves": [
+                "c8b7",
+                "f3e4",
+                "g7g6",
+                "e4e7",
+                "b8c7",
+                "h1e1",
+                "b7d5",
+                "c1b1",
+                "a8c8",
+                "h2h4"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 220
+              },
+              "moves": [
+                "f8d8",
+                "f3e4",
+                "d7f8",
+                "e4e7",
+                "c8g4",
+                "d1e1",
+                "g4f3",
+                "h1g1",
+                "f8g6",
+                "e7e3",
+                "f3d5",
+                "f4f5",
+                "g6e5",
+                "g5g6",
+                "f7g6",
+                "f5g6"
+              ]
+            },
+            {
+              "rank": 8,
+              "depth": 12,
+              "score": {
+                "type": "cp",
+                "value": 225
+              },
+              "moves": [
+                "a8a7",
+                "f3e4",
+                "f7f5",
+                "e4e6",
+                "f8f7",
+                "d3f5",
+                "d7f8",
+                "e6c8",
+                "b8c8",
+                "f5c8",
+                "a7c7",
+                "c8a6",
+                "f7f4",
+                "c1b1",
+                "e7g5",
+                "a6b5",
+                "f8g6",
+                "h1f1",
+                "g6e5",
+                "f1f4",
+                "g5f4"
+              ]
+            }
+          ],
+          "depth": 12,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 2
+      }
+    ],
+    "elapsedMs": 35824,
+    "browserErrors": [],
+    "browser": "153.0.8010.12",
+    "recordedAt": "2026-09-08T16:02:29.484Z",
+    "pgnSha256": "3a910183b8296e461bbe86fcea78e0c3adceb19cd69a748c50deaffea44121ca",
+    "analysisSha256": "bc898969228f1c44c2884ff2d87619f01e5f1dc69d2f01217cd73e11944a4993"
+  },
+  {
+    "id": "tal-smyslov-1959",
+    "title": "Tal / Smyslov",
+    "engine": "stockfish-18.0.8-lite-single",
+    "profile": "quick",
+    "budgetMs": 400,
+    "requestedDepth": 20,
+    "multiPv": 8,
+    "displayHorizon": 20,
+    "plies": 51,
+    "positionsAnalyzed": 52,
+    "terminalRoots": 0,
+    "depth": {
+      "min": 10,
+      "median": 14,
+      "max": 20
+    },
+    "atTarget": 1,
+    "playedFallbacks": 1,
+    "returnedPvLength": {
+      "min": 2,
+      "median": 14,
+      "max": 32
+    },
+    "graph": {
+      "positions": 2568,
+      "merged": 45,
+      "shortened": 1839,
+      "visible": 684,
+      "edges": 696,
+      "compressedEdges": 381,
+      "sharedGlyphs": 30,
+      "returns": 6,
+      "recurrences": 0,
+      "checks": 269,
+      "mates": 1,
+      "draws": 0,
+      "width": 1472.2,
+      "height": 390.8
+    },
+    "checkpoints": [
+      {
+        "ply": 36,
+        "move": "18… Nf6",
+        "fen": "r1bb1r1k/p4ppp/2p2n1N/7Q/2p5/2B2N2/qPP2PPP/2KR3R w - - 2 19",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": 353
+              },
+              "moves": [
+                "h5f7",
+                "a2a1",
+                "c1d2",
+                "f8f7",
+                "h6f7",
+                "h8g8",
+                "d1a1",
+                "g8f7",
+                "h1e1",
+                "f6d5",
+                "c3d4",
+                "a7a5",
+                "g2g3",
+                "d8c7",
+                "f3e5",
+                "f7g8"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": 0
+              },
+              "moves": ["h5e5", "c8e6", "f3g5", "a2a1", "c1d2", "a1a6", "g5e6", "f7e6"]
+            },
+            {
+              "rank": 3,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -75
+              },
+              "moves": [
+                "h6f7",
+                "h8g8",
+                "f7h6",
+                "g7h6",
+                "h5h6",
+                "c8f5",
+                "f3h4",
+                "f5e4",
+                "h1e1",
+                "a2a1",
+                "c1d2",
+                "a1a4",
+                "h6e3"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -136
+              },
+              "moves": [
+                "f3e5",
+                "a2a1",
+                "c1d2",
+                "f6h5",
+                "e5f7",
+                "f8f7",
+                "h6f7",
+                "h8g8",
+                "f7h6",
+                "g7h6",
+                "d1a1",
+                "c8f5",
+                "c3d4",
+                "d8g5",
+                "d2c3",
+                "a7a5",
+                "c3c4"
+              ]
+            },
+            {
+              "rank": 5,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -143
+              },
+              "moves": [
+                "f3g5",
+                "a2a1",
+                "c1d2",
+                "f6h5",
+                "g5f7",
+                "f8f7",
+                "h6f7",
+                "h8g8",
+                "f7h6",
+                "g7h6",
+                "d1a1",
+                "c8f5",
+                "c3d4",
+                "a7a5",
+                "a1a4"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -162
+              },
+              "moves": [
+                "h5c5",
+                "a2a1",
+                "c1d2",
+                "f6e4",
+                "d2e3",
+                "e4c5",
+                "d1d8",
+                "f8d8",
+                "h1a1",
+                "d8e8",
+                "e3d4",
+                "c5e6",
+                "d4c4",
+                "e8f8"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -180
+              },
+              "moves": [
+                "h5h4",
+                "c8e6",
+                "h4f4",
+                "f6d5",
+                "d1d5",
+                "e6d5",
+                "f4d6",
+                "f8e8",
+                "h1d1",
+                "f7f6",
+                "d1d5",
+                "c6d5",
+                "d6d7",
+                "e8e7",
+                "h6f7",
+                "e7f7",
+                "d7f7"
+              ]
+            },
+            {
+              "rank": 8,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -243
+              },
+              "moves": [
+                "h5g5",
+                "a2a1",
+                "c1d2",
+                "f6e4",
+                "d2e3",
+                "d8g5",
+                "f3g5",
+                "e4g5",
+                "d1a1",
+                "f7f6",
+                "f2f3",
+                "g7h6",
+                "h2h4"
+              ]
+            }
+          ],
+          "depth": 15,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 1
+      },
+      {
+        "ply": 37,
+        "move": "19. Qxf7",
+        "fen": "r1bb1r1k/p4Qpp/2p2n1N/8/2p5/2B2N2/qPP2PPP/2KR3R b - - 0 19",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": 354
+              },
+              "moves": [
+                "a2a1",
+                "c1d2",
+                "f8f7",
+                "h6f7",
+                "h8g8",
+                "d1a1",
+                "g8f7",
+                "h1e1",
+                "c8f5",
+                "d2c1",
+                "f6e4",
+                "f3e5",
+                "f7g8",
+                "e5c4",
+                "e4c3",
+                "b2c3"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": 411
+              },
+              "moves": [
+                "d8e7",
+                "f7e7",
+                "c8e6",
+                "h1e1",
+                "a8e8",
+                "e7a3",
+                "a2a3",
+                "b2a3",
+                "f6d5",
+                "c3d4",
+                "f8f4",
+                "f3g5",
+                "c6c5",
+                "e1e6",
+                "e8e6",
+                "d4g7",
+                "h8g7",
+                "g5e6",
+                "g7h6",
+                "e6f4"
+              ]
+            },
+            {
+              "rank": 3,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": 839
+              },
+              "moves": ["f8e8", "f3g5", "a2b2", "c3b2", "c8g4", "h6g4", "d8e7", "h1e1", "e7d6"]
+            },
+            {
+              "rank": 4,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": 851
+              },
+              "moves": [
+                "a2a3",
+                "b2a3",
+                "d8e7",
+                "f7e7",
+                "c8g4",
+                "h6g4",
+                "a8e8",
+                "e7c7",
+                "h8g8",
+                "g4f6",
+                "f8f6",
+                "c7a5"
+              ]
+            },
+            {
+              "rank": 5,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": 881
+              },
+              "moves": [
+                "a2b2",
+                "c3b2",
+                "d8e7",
+                "f7e7",
+                "c8e6",
+                "e7e6",
+                "a8b8",
+                "f3g5",
+                "b8b7",
+                "g5f7",
+                "b7f7",
+                "h6f7",
+                "f8f7",
+                "e6f7"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 14,
+              "score": {
+                "type": "cp",
+                "value": 990
+              },
+              "moves": [
+                "a2b1",
+                "c1b1",
+                "d8e7",
+                "f7e7",
+                "c8g4",
+                "h6g4",
+                "a8e8",
+                "e7c7",
+                "h8g8",
+                "h1g1",
+                "f6h5",
+                "g4e3",
+                "h5f6",
+                "e3f5"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 14,
+              "score": {
+                "type": "mate",
+                "value": 3
+              },
+              "moves": ["f8f7", "d1d8", "f7f8", "d8f8", "f6g8", "f8g8"]
+            },
+            {
+              "rank": 8,
+              "depth": 14,
+              "score": {
+                "type": "mate",
+                "value": 2
+              },
+              "moves": ["f8g8", "f7g8", "f6g8", "h6f7"]
+            }
+          ],
+          "depth": 14,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 1
+      },
+      {
+        "ply": 39,
+        "move": "20. Kd2",
+        "fen": "r1bb1r1k/p4Qpp/2p2n1N/8/2p5/2B2N2/1PPK1PPP/q2R3R b - - 2 20",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 365
+              },
+              "moves": [
+                "f8f7",
+                "h6f7",
+                "h8g8",
+                "d1a1",
+                "g8f7",
+                "h1e1",
+                "c8f5",
+                "d2c1",
+                "f6e4",
+                "c3e5",
+                "e4f2",
+                "a1a6"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 443
+              },
+              "moves": [
+                "a1a3",
+                "b2a3",
+                "f8f7",
+                "h6f7",
+                "h8g8",
+                "f7d8",
+                "f6e4",
+                "d2c1",
+                "e4c3",
+                "h1e1",
+                "h7h5",
+                "d1d4",
+                "c6c5",
+                "d4c4"
+              ]
+            },
+            {
+              "rank": 3,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 452
+              },
+              "moves": [
+                "f6e4",
+                "d2e3",
+                "d8b6",
+                "e3e4",
+                "f8f7",
+                "h6f7",
+                "h8g8",
+                "d1a1",
+                "c8e6",
+                "e4f4",
+                "a8f8",
+                "f4g3",
+                "f8f7",
+                "h1e1",
+                "e6d7",
+                "c3e5",
+                "f7f6",
+                "e5f6",
+                "g7f6",
+                "f3d2"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 477
+              },
+              "moves": [
+                "a1d1",
+                "h1d1",
+                "f8f7",
+                "h6f7",
+                "h8g8",
+                "f7d8",
+                "c8g4",
+                "d8c6",
+                "f6e4",
+                "d2c1",
+                "a8f8",
+                "c6e7",
+                "g8f7",
+                "e7d5",
+                "f7e6",
+                "d5c7",
+                "e6f5",
+                "c7b5"
+              ]
+            },
+            {
+              "rank": 5,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 564
+              },
+              "moves": [
+                "f8e8",
+                "d1a1",
+                "c8e6",
+                "f3g5",
+                "f6e4",
+                "d2e1",
+                "d8f6",
+                "c3f6",
+                "e4f6",
+                "g5e6",
+                "e8e6",
+                "f7e6",
+                "a8e8",
+                "h6f7",
+                "h8g8",
+                "f7d8",
+                "e8e6",
+                "d8e6",
+                "f6e4",
+                "a1a7"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 631
+              },
+              "moves": [
+                "d8e7",
+                "f7e7",
+                "a1d1",
+                "h1d1",
+                "c8e6",
+                "e7e6",
+                "a8e8",
+                "h6f7",
+                "h8g8",
+                "e6c6",
+                "f6e4",
+                "c6e4",
+                "e8e4",
+                "f7e5",
+                "f8d8",
+                "d2c1",
+                "d8d1",
+                "c1d1",
+                "e4e5",
+                "c3e5"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 939
+              },
+              "moves": [
+                "a1c1",
+                "d2c1",
+                "d8e7",
+                "f7e7",
+                "c8e6",
+                "e7e6",
+                "a8e8",
+                "e6c4",
+                "e8e4",
+                "c4c5",
+                "e4e8",
+                "h1e1",
+                "f6d5",
+                "e1e8",
+                "f8e8",
+                "d1d5",
+                "c6d5"
+              ]
+            },
+            {
+              "rank": 8,
+              "depth": 13,
+              "score": {
+                "type": "mate",
+                "value": 2
+              },
+              "moves": ["f8g8", "f7g8", "f6g8", "h6f7"]
+            }
+          ],
+          "depth": 13,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 1
+      }
+    ],
+    "elapsedMs": 24643,
+    "browserErrors": [],
+    "browser": "153.0.8010.12",
+    "recordedAt": "2026-09-08T16:02:55.805Z",
+    "pgnSha256": "51d35c5620ea4f16b333ff38164a2845c774a1332822a083f3bc2b77adc0b12b",
+    "analysisSha256": "706c8ec300fd594e7d15fcadbd6c12179697a824d609477f2fc42e3e14002900"
+  },
+  {
+    "id": "indigojeans-gm-shadi",
+    "title": "indigojeans / GM-Shadi",
+    "engine": "stockfish-18.0.8-lite-single",
+    "profile": "quick",
+    "budgetMs": 400,
+    "requestedDepth": 20,
+    "multiPv": 8,
+    "displayHorizon": 20,
+    "plies": 41,
+    "positionsAnalyzed": 42,
+    "terminalRoots": 0,
+    "depth": {
+      "min": 11,
+      "median": 13,
+      "max": 17
+    },
+    "atTarget": 0,
+    "playedFallbacks": 9,
+    "returnedPvLength": {
+      "min": 2,
+      "median": 14,
+      "max": 23
+    },
+    "graph": {
+      "positions": 3187,
+      "merged": 99,
+      "shortened": 2469,
+      "visible": 619,
+      "edges": 633,
+      "compressedEdges": 349,
+      "sharedGlyphs": 33,
+      "returns": 1,
+      "recurrences": 0,
+      "checks": 96,
+      "mates": 0,
+      "draws": 0,
+      "width": 1234.2,
+      "height": 336.8
+    },
+    "checkpoints": [
+      {
+        "ply": 30,
+        "move": "15… d4",
+        "fen": "r3k2r/1ppqbppp/p7/4n3/3p4/P1N1PPPb/1PPBQ2N/R3K1R1 w Qkq - 0 16",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -71
+              },
+              "moves": [
+                "e3d4",
+                "e5c6",
+                "d4d5",
+                "c6d4",
+                "e2e4",
+                "c7c5",
+                "d5c6",
+                "b7c6",
+                "d2e3",
+                "d4f5",
+                "a1d1",
+                "f5d6",
+                "e4f4",
+                "d7e6",
+                "g1h1"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -266
+              },
+              "moves": [
+                "e1c1",
+                "d4c3",
+                "d2c3",
+                "d7e6",
+                "c1b1",
+                "h7h5",
+                "g3g4",
+                "e5d7",
+                "g1g3",
+                "h5g4",
+                "f3g4",
+                "f7f5",
+                "c3g7",
+                "e8c8",
+                "g7h8",
+                "d8h8",
+                "g4f5",
+                "h3f5",
+                "e3e4",
+                "e6e4",
+                "e2e4",
+                "f5e4"
+              ]
+            },
+            {
+              "rank": 3,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -361
+              },
+              "moves": [
+                "e3e4",
+                "d4c3",
+                "d2c3",
+                "e5g6",
+                "c3g7",
+                "h8g8",
+                "a1d1",
+                "d7c6",
+                "g7c3",
+                "g6f8",
+                "f3f4",
+                "h7h5",
+                "f4f5"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -364
+              },
+              "moves": [
+                "c3e4",
+                "d4d3",
+                "e2d1",
+                "e8c8",
+                "e4f2",
+                "h8e8",
+                "c2d3",
+                "e5d3",
+                "f2d3",
+                "d7d3",
+                "a1c1",
+                "h3e6",
+                "d1c2"
+              ]
+            },
+            {
+              "rank": 5,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -372
+              },
+              "moves": [
+                "f3f4",
+                "d4c3",
+                "d2c3",
+                "e5g4",
+                "h2f3",
+                "e7f6",
+                "c3f6",
+                "g4f6",
+                "f3e5",
+                "d7b5"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -372
+              },
+              "moves": [
+                "e2f2",
+                "d4c3",
+                "d2c3",
+                "e5g6",
+                "c3g7",
+                "h8g8",
+                "a1d1",
+                "d7c6",
+                "g7c3",
+                "h3e6",
+                "g1h1",
+                "a8d8",
+                "d1d8",
+                "e7d8"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -412
+              },
+              "moves": [
+                "c3a2",
+                "d4d3",
+                "e2d1",
+                "e8c8",
+                "a2b4",
+                "d7e6",
+                "a1c1",
+                "e7b4",
+                "a3b4",
+                "d3c2",
+                "c1c2"
+              ]
+            },
+            {
+              "rank": 8,
+              "depth": 15,
+              "score": {
+                "type": "cp",
+                "value": -427
+              },
+              "moves": [
+                "a1c1",
+                "d4d3",
+                "e2d1",
+                "e8c8",
+                "c3e4",
+                "d3c2",
+                "d1c2",
+                "e5d3",
+                "e1e2",
+                "d3c1",
+                "g1c1",
+                "c8b8",
+                "d2c3",
+                "d7b5",
+                "e2f2"
+              ]
+            }
+          ],
+          "depth": 15,
+          "milliseconds": 400,
+          "elapsedMs": 401,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 1
+      },
+      {
+        "ply": 31,
+        "move": "16. exd4",
+        "fen": "r3k2r/1ppqbppp/p7/4n3/3P4/P1N2PPb/1PPBQ2N/R3K1R1 b Qkq - 0 16",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": -58
+              },
+              "moves": [
+                "e5c6",
+                "d4d5",
+                "c6d4",
+                "e2e4",
+                "c7c5",
+                "d5c6",
+                "b7c6",
+                "d2e3",
+                "d4f5",
+                "a1d1",
+                "f5d6",
+                "e4f4",
+                "d7e6",
+                "e1f2",
+                "e8g8"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": -37
+              },
+              "moves": [
+                "e5g6",
+                "e1c1",
+                "e8c8",
+                "d2e3",
+                "h7h5",
+                "e2f2",
+                "d8e8",
+                "c1b1",
+                "h5h4",
+                "g3g4"
+              ]
+            },
+            {
+              "rank": 3,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": -20
+              },
+              "moves": [
+                "d7d4",
+                "e1c1",
+                "d4c5",
+                "d2f4",
+                "e5g6",
+                "f4e3",
+                "c5c6",
+                "g3g4",
+                "h7h5",
+                "g4h5",
+                "h8h5",
+                "f3f4",
+                "h5h4",
+                "h2f3",
+                "h3g4",
+                "g1g4",
+                "h4g4",
+                "f4f5",
+                "g6h4"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 260
+              },
+              "moves": [
+                "e5d3",
+                "e2d3",
+                "h3f5",
+                "d3e2",
+                "f5c2",
+                "d2e3",
+                "c2b3",
+                "h2f1",
+                "e8c8",
+                "f1d2",
+                "b3e6",
+                "e1c1",
+                "h8e8",
+                "g1e1"
+              ]
+            },
+            {
+              "rank": 5,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 285
+              },
+              "moves": [
+                "h3f5",
+                "e2e5",
+                "e8c8",
+                "e1c1",
+                "e7f6",
+                "e5a5",
+                "f6d4",
+                "d2f4",
+                "c8b8",
+                "g1e1",
+                "f5c2",
+                "c1c2",
+                "d4c3",
+                "d1d7",
+                "c3a5"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 288
+              },
+              "moves": ["e8c8", "d4e5", "e7c5", "d2e3", "d7c6", "g3g4", "h7h5"]
+            },
+            {
+              "rank": 7,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 288
+              },
+              "moves": ["e5f3", "h2f3", "e8c8", "e1c1", "e7a3", "d1e1"]
+            },
+            {
+              "rank": 8,
+              "depth": 13,
+              "score": {
+                "type": "cp",
+                "value": 312
+              },
+              "moves": ["e7a3", "e2e5", "a3e7", "c3d5", "a8d8", "e5e7", "d7e7", "d5e7", "d8d4"]
+            }
+          ],
+          "depth": 13,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 3
+      },
+      {
+        "ply": 33,
+        "move": "17. O-O-O",
+        "fen": "r3k2r/1pp1bppp/p7/4n3/3q4/P1N2PPb/1PPBQ2N/2KR2R1 b kq - 1 17",
+        "analysis": {
+          "lines": [
+            {
+              "rank": 1,
+              "depth": 11,
+              "score": {
+                "type": "cp",
+                "value": 0
+              },
+              "moves": [
+                "e5g6",
+                "g3g4",
+                "e8c8",
+                "g1g3",
+                "e7a3",
+                "b2a3",
+                "d4d6",
+                "e2f2",
+                "d6a3",
+                "c1b1",
+                "a3b4",
+                "b1c1",
+                "b4a3"
+              ]
+            },
+            {
+              "rank": 2,
+              "depth": 11,
+              "score": {
+                "type": "cp",
+                "value": 37
+              },
+              "moves": [
+                "d4c5",
+                "g3g4",
+                "e8c8",
+                "f3f4",
+                "e5c4",
+                "b2b4",
+                "c5c6",
+                "e2e7",
+                "d8d2",
+                "d1d2",
+                "c4d2",
+                "e7e3",
+                "d2c4",
+                "e3h3",
+                "c6d6",
+                "g4g5",
+                "c8b8"
+              ]
+            },
+            {
+              "rank": 3,
+              "depth": 11,
+              "score": {
+                "type": "cp",
+                "value": 98
+              },
+              "moves": [
+                "e5c6",
+                "d2g5",
+                "d4c5",
+                "c3d5",
+                "e8f8",
+                "g5e3",
+                "c5b5",
+                "c2c4",
+                "b5a5",
+                "g3g4",
+                "h7h5",
+                "e2c2",
+                "a8e8",
+                "c1b1"
+              ]
+            },
+            {
+              "rank": 4,
+              "depth": 11,
+              "score": {
+                "type": "cp",
+                "value": 167
+              },
+              "moves": [
+                "e7a3",
+                "b2a3",
+                "e8c8",
+                "e2e3",
+                "d4d6",
+                "c3b1",
+                "e5c4",
+                "e3a7",
+                "c4b6",
+                "d2f4"
+              ]
+            },
+            {
+              "rank": 5,
+              "depth": 11,
+              "score": {
+                "type": "cp",
+                "value": 188
+              },
+              "moves": [
+                "e8c8",
+                "d2f4",
+                "d4b6",
+                "f4e5",
+                "e7c5",
+                "d1d8",
+                "h8d8",
+                "g1e1",
+                "c5f2",
+                "e1d1",
+                "d8e8",
+                "g3g4",
+                "b6e3",
+                "d1d2",
+                "e3e5",
+                "e2e5"
+              ]
+            },
+            {
+              "rank": 6,
+              "depth": 11,
+              "score": {
+                "type": "cp",
+                "value": 209
+              },
+              "moves": [
+                "h3e6",
+                "d2f4",
+                "d4c3",
+                "b2c3",
+                "e5c4",
+                "d1d4",
+                "c4a3",
+                "e2d3",
+                "e8g8",
+                "f4c7",
+                "f8c8"
+              ]
+            },
+            {
+              "rank": 7,
+              "depth": 11,
+              "score": {
+                "type": "cp",
+                "value": 209
+              },
+              "moves": [
+                "h3e6",
+                "d2f4",
+                "d4c3",
+                "b2c3",
+                "e5c4",
+                "d1d4",
+                "c4a3",
+                "e2d3",
+                "e8g8",
+                "f4c7",
+                "f8c8"
+              ]
+            },
+            {
+              "rank": 8,
+              "depth": 11,
+              "score": {
+                "type": "cp",
+                "value": 223
+              },
+              "moves": ["e7d6", "f3f4", "e8c8", "d2e3", "d4c4", "f4e5", "c4e2", "c3e2", "d6e5"]
+            }
+          ],
+          "depth": 11,
+          "milliseconds": 400,
+          "elapsedMs": 400,
+          "requestedDepth": 20,
+          "depthReached": false
+        },
+        "playedRank": 6
+      }
+    ],
+    "elapsedMs": 20661,
+    "browserErrors": [],
+    "browser": "153.0.8010.12",
+    "recordedAt": "2026-09-08T16:03:18.202Z",
+    "pgnSha256": "37f82b03d5f97089c957113ee024aa52775a35f8b35e76148905093d327596b6",
+    "analysisSha256": "a29969b5eca201740e4ba55e8420515980b66ce3a2dbafff13609a42b7aa4d97"
+  }
+]
