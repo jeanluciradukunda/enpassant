@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { identifyInput, importLink, nextArchive } from '../lib/importers';
 import { parseGames } from '../lib/games';
+import { TAL_GAMES } from '../lib/studyGames';
 import type { Game } from '../types/game';
 import paperGame from '../../docs/research/deep-blue-kasparov-1997-game-2.pgn?raw';
 
@@ -20,6 +21,7 @@ export function GameImporter({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [showTal, setShowTal] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   let needsPlayer = false;
@@ -100,13 +102,49 @@ export function GameImporter({
           ×
         </button>
       </div>
-      <button
-        className="paper-game-example"
-        disabled={busy}
-        onClick={() => chooseGames(parseGames(paperGame))}
-      >
-        Try the paper’s game <span>Deep Blue / Kasparov · 1997 ↗</span>
-      </button>
+      <div className="example-games">
+        <button
+          className="paper-game-example tal-collection-toggle"
+          aria-expanded={showTal}
+          aria-controls="tal-collection"
+          disabled={busy}
+          onClick={() => setShowTal((shown) => !shown)}
+        >
+          Explore Mikhail Tal <span>Three games. An invitation into the complications.</span>
+        </button>
+        {showTal && (
+          <div
+            id="tal-collection"
+            className="tal-collection"
+            role="region"
+            aria-label="Mikhail Tal games"
+          >
+            {TAL_GAMES.map((study, index) => (
+              <button
+                key={study.id}
+                className="tal-game"
+                disabled={busy}
+                onClick={() => chooseGames(parseGames(study.pgn))}
+              >
+                <span className="tal-game-number">0{index + 1}</span>
+                <span className="tal-game-copy">
+                  <strong>{study.title}</strong>
+                  <span>{study.context}</span>
+                  <span className="tal-game-note">{study.note}</span>
+                </span>
+                <span aria-hidden="true">↗</span>
+              </button>
+            ))}
+          </div>
+        )}
+        <button
+          className="paper-game-example"
+          disabled={busy}
+          onClick={() => chooseGames(parseGames(paperGame))}
+        >
+          Try the paper’s game <span>Deep Blue / Kasparov · 1997 ↗</span>
+        </button>
+      </div>
       <div className="import-tabs">
         <button
           className={mode === 'link' ? 'active' : ''}

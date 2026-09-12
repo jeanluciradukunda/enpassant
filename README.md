@@ -59,6 +59,8 @@ Open **[localhost:5173](http://localhost:5173)**. Your first visit loads the gam
 
 Choose **Growing replay → Play**, or use **← / →** to step and **Space** to play or pause. Select a node to inspect it, scroll to zoom, and drag to pan.
 
+For a little Tal magic, choose **Import game → Explore Mikhail Tal**: Botvinnik (1960), Larsen (1965) and Smyslov (1959). [The games, key moments and comparison study →](docs/research/tal-collection.md)
+
 <details>
 <summary><strong>Supported games and useful limits</strong></summary>
 
