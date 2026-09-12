@@ -1,0 +1,43 @@
+digraph aws_runtime {
+  graph [rankdir=TB, bgcolor="#f5f2e9", pad=0.35, nodesep=0.55, ranksep=0.65, compound=true, fontname="Helvetica", fontsize=12, fontcolor="#183923", label="ENPASSANT  /  PROPOSED DIRECT-HOST BASELINE\nN. Virginia / candidate 2 GiB / 30 GB total disk / USD 22-27 before tax and operator time\nCapacity and ancillary allowances unproved; optional studies and labs are separate.", labelloc=t, labeljust=l, splines=polyline];
+  node [shape=box, style="rounded,filled", color="#789581", fillcolor="#fffdf7", fontname="Helvetica", fontsize=12, fontcolor="#183923", margin="0.20,0.15", penwidth=1.1];
+  edge [color="#789581", arrowsize=0.65, fontname="Helvetica", fontsize=10, fontcolor="#375c43", penwidth=1.2];
+
+  browser [label=<<B>Browser</B><BR/><FONT POINT-SIZE="11">React / Graphviz / local Stockfish<BR/>Replay and ordinary analysis</FONT>>, fillcolor="#dcebd7"];
+  dns [label=<<B>Route 53</B><BR/><FONT POINT-SIZE="11">Domain resolves to the host IP<BR/>DNS is separate from HTTPS</FONT>>];
+  { rank=same; browser; dns; }
+
+  subgraph cluster_vpc {
+    label="AWS VPC\nPublic subnet routes through an internet gateway"; labeljust=r; style="rounded"; color="#a2b59e"; margin=22;
+    subgraph cluster_host {
+      label="EC2 + COMPOSE\nRuns continuously"; labeljust=r; style="rounded,filled"; fillcolor="#e7eddf"; color="#a2b59e"; margin=18;
+      ingress [label=<<B>Caddy</B><BR/><FONT POINT-SIZE="11">HTTPS / static assets / API routing<BR/>Only intended web ports are public</FONT>>];
+      api [label=<<B>TypeScript API + authentication</B><BR/><FONT POINT-SIZE="11">Private libraries / saved analysis<BR/>Ownership and diagram revisions</FONT>>, fillcolor="#183923", fontcolor="#fffdf7", color="#183923"];
+      jobs [label=<<B>Import worker + coordinator</B><BR/><FONT POINT-SIZE="11">Bounded imports / cache lookup<BR/>Admit and dispatch optional studies</FONT>>];
+      db [label=<<B>PostgreSQL + private artifacts</B><BR/><FONT POINT-SIZE="11">Persistent EBS / durable job state<BR/>Analysis and graph results retained</FONT>>];
+      ingress -> api;
+      api -> db [label="authorized read / write"];
+      api -> jobs [label="durable jobs", style=dashed];
+      jobs -> db [label="checkpoints / reservations"];
+      { rank=same; api; jobs; }
+    }
+    task [label=<<B>Optional ECS Fargate task</B><BR/><FONT POINT-SIZE="11">Start / analyse / save / exit<BR/>No inbound network access<BR/>1 vCPU / 2 GB, Linux x86, N. Virginia<BR/>20 billed hours: about $1.09 compute + IP</FONT>>, style="rounded,dashed,filled", color="#a06752", fillcolor="#f0e3d4"];
+  }
+
+  providers [label=<<B>Chess providers</B><BR/><FONT POINT-SIZE="11">Lichess / Chess.com<BR/>Resumable completed-game imports</FONT>>];
+  backups [label=<<B>Off-host content backups</B><BR/><FONT POINT-SIZE="11">Encrypted DB + artifacts + manifests<BR/>Scheduled content recovery</FONT>>];
+  journal [label=<<B>Independent revocation journal</B><BR/><FONT POINT-SIZE="11">Append before user acknowledgment<BR/>Complete cutoff required for restore</FONT>>];
+  deadlines [label=<<B>Independent task registry</B><BR/><FONT POINT-SIZE="11">Launch ID / deadline / allocation<BR/>Durable before dispatch; host-independent</FONT>>];
+  reaper [label=<<B>Independent deadline reaper</B><BR/><FONT POINT-SIZE="11">Reconcile while EC2 is unavailable<BR/>Implementation and cost remain a gate</FONT>>, style="rounded,dashed,filled", fillcolor="#f0e3d4", color="#a06752"];
+  browser -> dns [label="name lookup", style=dashed];
+  browser -> ingress [label="HTTPS to resolved host"];
+  jobs -> providers [label="bounded HTTPS fetches"];
+  jobs -> task [label="ECS dispatch after cache miss", style=dashed];
+  task -> api [label="outbound HTTPS: scoped input / result grants", constraint=false];
+  db -> backups [label="scheduled consistent backups"];
+  api -> journal [label="durable append before ack"];
+  jobs -> deadlines [label="record funded deadline", style=dashed];
+  reaper -> deadlines [label="read / reconcile", style=dashed];
+  reaper -> task [label="stop overdue / orphan", style=dashed];
+  { rank=same; providers; backups; journal; }
+}

@@ -1,0 +1,329 @@
+{
+  "capturedAt": "2026-09-09T14:01:58.844403+00:00",
+  "head": "e87e8a73b9857e022daefab150023a7a6a6be374",
+  "originMain": "e87e8a73b9857e022daefab150023a7a6a6be374",
+  "originMainDate": "2026-09-07T17:45:56+02:00",
+  "upstreamVerification": "Parent performed successful origin fetch and confirmed PR #5 merge SHA via GitHub; this lane independently checked current local refs and their date. No checkout/reset of dirty worktree.",
+  "files": [
+    {
+      "path": "src/App.tsx",
+      "sha256": "de932da3a7ccc0c65c958cef4dca731839cc7db520bbf43c70c3d80caa97f027",
+      "bytes": 2700,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/main.tsx",
+      "sha256": "3e5eec79bd7716c14ee206dde05376adea9d3b82cdcf23ecf0bd7c2234f6b14e",
+      "bytes": 374,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/vite-env.d.ts",
+      "sha256": "a16b3ee9aeef894f9c9797241d0cac69eab8ed0bf22668488d86db3a79a7bbd2",
+      "bytes": 108,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/PaperStudy.tsx",
+      "sha256": "2d90d98b9907ecf6be7723ac735d97226f9af60325f1e0730fb86552ee3be8e8",
+      "bytes": 12084,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/types/paper.ts",
+      "sha256": "b17fc651ed0d77b5d4b0a299c72f537e9d4c5ce1bc63bdacd8cd399e09f29f51",
+      "bytes": 1043,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/types/game.ts",
+      "sha256": "0c991bb91f95a7c55e0babcc9948103852d7767184cb9932e35be46b3208b213",
+      "bytes": 2056,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/styles/study.css",
+      "sha256": "e191cd4a18f3c2cb367ae97ae988f3aae9b0112b391039ad38f144f0c937468c",
+      "bytes": 4852,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/styles/global.css",
+      "sha256": "c074de6dedf6e995b6dc10de6432e94c9d5607284d43a985794cdbd2375c848b",
+      "bytes": 1094,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/styles/tokens.css",
+      "sha256": "e5b1b77d867856762d0dc9091bcb657a33b0a4a77ac917ee6cde895dd21585d9",
+      "bytes": 2257,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/styles/workbench.css",
+      "sha256": "72a67ce04b4795a5bccd77e763e5a5be5a812d73f9c2f08ea2c0dbd715bf3754",
+      "bytes": 21233,
+      "headStatus": "modified tracked"
+    },
+    {
+      "path": "src/components/EvolutionDiagram.tsx",
+      "sha256": "e6976ff20d1dcc09e413328507c5744ae43095012455ef86d6806ca4eb9a8dd0",
+      "bytes": 10248,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/components/PaperGraph.tsx",
+      "sha256": "f3661ea6ebdb2595fae49a1f001652841cf143c4f74ea2152b1d0fc9ee99b892",
+      "bytes": 3624,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/components/GameImporter.tsx",
+      "sha256": "3478e49b096efdbff119d950562ce3756442891c300f35c6c34e6e5d75da352c",
+      "bytes": 10592,
+      "headStatus": "modified tracked"
+    },
+    {
+      "path": "src/components/EvolutionMarks.tsx",
+      "sha256": "9067b6242b8da10707ab6318c270ab10dcc1a538d75bde69dcbc4d687f4acb05",
+      "bytes": 9936,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/components/GameWorkbench.tsx",
+      "sha256": "c22284b000cb97233fb30bdce08f6d67a440a60ba5453d63fa44dc4810312ffc",
+      "bytes": 25571,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/components/ChessBoard.tsx",
+      "sha256": "e2ba2b222ed307c407e36ba659290fa92c3dac36b3e1731251e166f4b846dc09",
+      "bytes": 3930,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/components/DiagramKey.tsx",
+      "sha256": "a6b234165e04f06d15202a59486565cd65d0c124bc0b7acc0b2057fbff966b1f",
+      "bytes": 3082,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/components/PaperChart.tsx",
+      "sha256": "573286c490e865046abbf84a5261f09116778e01a08faac910d136eb28f4e9e6",
+      "bytes": 1653,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/graphviz.worker.ts",
+      "sha256": "645bb0ef6be5581c419b975c1ce2fd6f219a77a1c4f8a7d09939dc5d515e2156",
+      "bytes": 390,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/studyGames.ts",
+      "sha256": "01a8ddc2051081d81cd41a7f6b5e327e1b0c1cbd2dd5369ef840d31241725587",
+      "bytes": 1020,
+      "headStatus": "untracked"
+    },
+    {
+      "path": "src/lib/evolutionLayout.ts",
+      "sha256": "5a09cecffaa5a55210e6f1c5b497d2639357964c1893e96cb8fbf1b5ab7705f6",
+      "bytes": 12678,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/useAnalysis.ts",
+      "sha256": "44e9eb8a6b080c432931b14d05c755dcbfe6ace2a82d8a86e226612506366570",
+      "bytes": 4684,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/engine.ts",
+      "sha256": "94ea15e1a1547cb71a350e77ea221a4ec8a7bfc0d3cb0e5c9cdd6fce04ad53d8",
+      "bytes": 9378,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/diagramStyle.ts",
+      "sha256": "5b4af29fa3c8e4f6877f098ff66cc4e09a632b084a13a9d025a91bca65392d28",
+      "bytes": 455,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/games.ts",
+      "sha256": "a457f4c4a7f4859f67eac990470cb8c006b74888e034714b63ed26e2151f783f",
+      "bytes": 3642,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/importers.ts",
+      "sha256": "ebcceda233bbb3f8ccb50145cec6f6674e665c7a2413a7dfcf8afa7647504728",
+      "bytes": 6089,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/paper.ts",
+      "sha256": "b8a6d0586427cc5d5e8fd4492c2a66d21ccb72b127bfca9da2041f2a71f168e9",
+      "bytes": 1493,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/evolution.ts",
+      "sha256": "bcbdfde4f8964762bd6234b5e4d5470d1f8e727c77fb8b136c4d3cb0503fe66f",
+      "bytes": 6585,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/semantics.ts",
+      "sha256": "d3a3573585dc9150efb10b10a8211e6812b3f13e30a078aa74c7ae815106d719",
+      "bytes": 2803,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/unfold.ts",
+      "sha256": "63d5da27f2ae066757e943ab343cea6e25c296c671d56b7037f066d4adbfb4fa",
+      "bytes": 3234,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/scoreBands.ts",
+      "sha256": "8a8c571f431678500bbc55fbb363a2323a6d9319a68ade83db8c61aa6196b43b",
+      "bytes": 1410,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/graphviz.ts",
+      "sha256": "cca9c365b7307669f066ceea051abc2cb97a01c3cb9f2c09cc8f2332520cf5f1",
+      "bytes": 1818,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/lib/evolutionDot.ts",
+      "sha256": "4b20fd79610f9e6fcdc898cad804d39fb4d61802b17b5f060b4e7de1b4956994",
+      "bytes": 2439,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "src/fixtures/figure5.json",
+      "sha256": "77dc9ccfc4a3953a668fb8c75e5433010d0f49bd6483adf973c9db6187583aba",
+      "bytes": 366722,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "package.json",
+      "sha256": "344968befa14e8e1cee9b13d45504bf759c3ca2a00452044919d317b11e97711",
+      "bytes": 1799,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "13ddc02d92e2f95d7a68722a54d221f6741315cbb7760357dfb3c9a98aa15b92",
+      "bytes": 109623,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "scripts/prepare-engine.mjs",
+      "sha256": "7a8cda0b6e9862e10412bd12e96825de6d472f8613464b5ea3eb49274e1850ee",
+      "bytes": 1192,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "docs/platform/README.md",
+      "sha256": "73b4cfb1034d7ccee6a9f2c8e3090914a3506cdcf85a92339825a80ade51401a",
+      "bytes": 20834,
+      "headStatus": "untracked"
+    },
+    {
+      "path": "docs/platform/data-and-analysis.md",
+      "sha256": "a3d60f2395865f06fa7847bf480854ae1f10cb6614b42b721859351f23aa5ab3",
+      "bytes": 33213,
+      "headStatus": "untracked"
+    },
+    {
+      "path": "docs/platform/aws-baseline.md",
+      "sha256": "60fc6af9b26842b7d31c8dbb3716aa0be1fd47617eee34a0ccf39f0c7cfff0a2",
+      "bytes": 14478,
+      "headStatus": "untracked"
+    },
+    {
+      "path": "docs/platform/infrastructure-and-delivery.md",
+      "sha256": "77e89cb18e438bb3bb07968a3c73aa99b682fc6da7d1da913a76cb6ad591ee3b",
+      "bytes": 20209,
+      "headStatus": "untracked"
+    },
+    {
+      "path": "docs/research/tal-quick/measurements.json",
+      "sha256": "10d62c99de53a8e6633c283d484eabd65f10a1601dd0a9886028f75614b7d5b0",
+      "bytes": 60722,
+      "headStatus": "untracked"
+    },
+    {
+      "path": "tests/engine-search.test.ts",
+      "sha256": "be896399e19b3503ecf4c1f55745ca59a41b2e93d82624d433c593a5281e3cbf",
+      "bytes": 3519,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "tests/analysis-queue.test.ts",
+      "sha256": "3cf976e158c5bd7e4897082784ca8d248db3075dadad7892fa84434f7533bfe0",
+      "bytes": 1627,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "tests/e2e/game.spec.ts",
+      "sha256": "4f26101201ec7e8edac9fbaa6032c89e4e3211a8c0469cd32a7e7d50e47d57cb",
+      "bytes": 9994,
+      "headStatus": "matches HEAD"
+    },
+    {
+      "path": "tests/figure7-layout.test.ts",
+      "sha256": "3c01cf078dd41f4e549f4cfc5899675034dba4eb9f4d94a3e0a6073a0b777747",
+      "bytes": 1776,
+      "headStatus": "matches HEAD"
+    }
+  ],
+  "absenceSearches": [
+    {
+      "pattern": "indexedDB|localStorage|sessionStorage|CacheStorage|caches\\.|persist\\(",
+      "surface": [
+        "src/**",
+        "scripts/**",
+        "tests/**",
+        "public/** excluding vendor public/engine/**",
+        "package.json",
+        ".github/**"
+      ],
+      "exitCode": 0,
+      "stdout": "scripts/inspect-paper-layout.mjs:23:const state = await context.storageState({ indexedDB: true });\nsrc/lib/engine.ts:48:    if (!globalThis.indexedDB) return resolve(null);\nsrc/lib/engine.ts:49:    const request = indexedDB.open('enpassant-analysis', 1);\nsrc/App.tsx:23:          saved = localStorage.getItem('enpassant-last-game');\nsrc/App.tsx:71:              localStorage.setItem('enpassant-last-game', next.pgn);\nscripts/research-paper-game.mjs:16:  await context.addInitScript((pgn) => localStorage.setItem('enpassant-last-game', pgn), pgn);\nscripts/research-paper-game.mjs:139:    JSON.stringify(await context.storageState({ indexedDB: true })),\nscripts/research-tal-games.mjs:43:      (pgn) => localStorage.setItem('enpassant-last-game', pgn),\nscripts/research-tal-games.mjs:179:        indexedDB: true,\ntests/e2e/structure.spec.ts:8:    localStorage.setItem(\ntests/e2e/structure.spec.ts:36:    localStorage.setItem(\n",
+      "stderr": ""
+    },
+    {
+      "pattern": "lifetime|atlas_|atlasSnapshot|atlas_snapshot|Redis|Valkey|redis|valkey",
+      "surface": [
+        "src/**",
+        "scripts/**",
+        "tests/**",
+        "public/** excluding vendor public/engine/**",
+        "package.json",
+        ".github/**"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "pattern": "ucinewgame|Clear Hash|navigator\\.locks|BroadcastChannel|SharedWorker|inflight|inFlight",
+      "surface": [
+        "src/**",
+        "scripts/**",
+        "tests/**",
+        "public/** excluding vendor public/engine/**",
+        "package.json",
+        ".github/**"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

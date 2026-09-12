@@ -1,0 +1,37 @@
+digraph data {
+  graph [rankdir=TB, bgcolor="#f5f2e9", pad=0.35, nodesep=0.42, ranksep=0.62, fontname="Helvetica", fontsize=12, fontcolor="#183923", label="ENPASSANT  /  CORE DATA RELATIONSHIPS\nOwnership, played encounters and derived views stay distinct", labelloc=t, labeljust=l, splines=polyline];
+  node [shape=box, style="rounded,filled", color="#789581", fillcolor="#fffdf7", fontname="Helvetica", fontsize=12, fontcolor="#183923", margin="0.20,0.15", penwidth=1.1];
+  edge [color="#789581", arrowsize=0.65, fontname="Helvetica", fontsize=10, fontcolor="#375c43", penwidth=1.2];
+
+  user [label=<<B>App user</B><BR/><FONT POINT-SIZE="11">Stable internal identity<BR/>Owner of private resources</FONT>>, fillcolor="#183923", fontcolor="#fffdf7", color="#183923"];
+  identity [label=<<B>Identity / session / profile</B><BR/><FONT POINT-SIZE="11">Sign-in and public presentation<BR/>Separate from chess handles</FONT>>];
+  account [label=<<B>External account</B><BR/><FONT POINT-SIZE="11">Provider ID + observed handles<BR/>Many public watchers</FONT>>];
+  connection [label=<<B>Verified connection</B><BR/><FONT POINT-SIZE="11">Proof of control<BR/>Credential retention is conditional<BR/>At most one active owner</FONT>>];
+  source [label=<<B>Library source</B><BR/><FONT POINT-SIZE="11">Player perspective + sync state<BR/>Public, verified or uploaded</FONT>>];
+  encounter [label=<<B>Game encounter</B><BR/><FONT POINT-SIZE="11">One actual played game<BR/>Deduplicate by provider game ID</FONT>>, fillcolor="#dcebd7"];
+  revision [label=<<B>Game revision</B><BR/><FONT POINT-SIZE="11">Immutable metadata + content ref<BR/>Corrections create a new revision</FONT>>, fillcolor="#dcebd7"];
+  content [label=<<B>Game content</B><BR/><FONT POINT-SIZE="11">Initial position + ordered moves<BR/>Same moves can occur in many games</FONT>>];
+  analysis [label=<<B>Analysis root result</B><BR/><FONT POINT-SIZE="11">Full history + engine manifest<BR/>Immutable search artifact</FONT>>];
+  atlas [label=<<B>Atlas snapshot</B><BR/><FONT POINT-SIZE="11">Selected encounter contributions<BR/>Played prefixes + outcome counts</FONT>>];
+  study [label=<<B>Study revision</B><BR/><FONT POINT-SIZE="11">Pinned inputs + renderer policy<BR/>Notes / selections / saved view</FONT>>];
+  share [label=<<B>Share</B><BR/><FONT POINT-SIZE="11">Exact published snapshot<BR/>Revocable token + redaction</FONT>>, fillcolor="#f0e3d4", color="#a06752"];
+
+  user -> identity [label="has"];
+  user -> source [label="owns"];
+  user -> connection [label="controls"];
+  account -> source [label="watched by", style=dashed];
+  account -> connection [label="verified through", style=dashed];
+  connection -> source [label="optional credential", style=dashed, constraint=false];
+  source -> encounter [label="imports + source refs"];
+  encounter -> revision [label="has revisions"];
+  revision -> content [label="references"];
+  revision -> analysis [label="selected occurrences"];
+  revision -> atlas [label="contributes once / perspective"];
+  analysis -> study [label="pins result IDs"];
+  atlas -> study [label="pins cohort"];
+  study -> share [label="explicit publication"];
+
+  { rank=same; user; account; }
+  { rank=same; identity; source; connection; }
+  { rank=same; analysis; content; atlas; }
+}
