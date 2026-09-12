@@ -10,6 +10,7 @@ import { moveLabel, scoreLabel } from '../lib/games';
 import { toSan } from '../lib/san';
 import { ChessBoard } from './ChessBoard';
 import { DiagramKey } from './DiagramKey';
+import { TalPanel } from './TalPanel';
 import { EvolutionDiagram, GraphMarks } from './EvolutionDiagram';
 import type { EvolutionNode, Game } from '../types/game';
 
@@ -507,6 +508,7 @@ function Workbench({
               </span>
             </div>
           </div>
+          <TalPanel gameId={game.id} nodeId={selected.id} />
           {selected.legalReplies !== undefined && selected.legalReplies > 0 && !selected.draw && (
             <p className="branch-help">
               {selected.legalReplies === 1
