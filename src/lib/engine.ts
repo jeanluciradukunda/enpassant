@@ -67,7 +67,7 @@ export async function readAnalysis(key: string): Promise<Analysis | null> {
     return null;
   }
 }
-async function writeAnalysis(key: string, value: Analysis) {
+export async function writeAnalysis(key: string, value: Analysis) {
   try {
     const database = await db();
     if (!database) return;

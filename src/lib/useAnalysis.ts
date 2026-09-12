@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { DEEP_MS, Engine, QUICK_MS, STUDY_MS } from './engine';
 import type { AnalysisProfile } from './engine';
 import { EvolutionBuilder } from './evolution';
+import { seedBundledAnalysis } from './seedAnalysis';
 import type { Analysis, EvolutionNode, Game } from '../types/game';
 
 export function useAnalysis(game: Game, replaying = false, profile: AnalysisProfile = 'quick') {
@@ -42,7 +43,10 @@ export function useAnalysis(game: Game, replaying = false, profile: AnalysisProf
     setError('');
     async function work() {
       try {
+        // Bundled games ship their searches; seed the cache so no engine run is needed.
+        const seeded = seedBundledAnalysis(game, profile).catch(() => 0);
         engine = new Engine();
+        await seeded;
         while (!stopped) {
           const deep = jobs.current.values().next().value as EvolutionNode | undefined;
           const next =
