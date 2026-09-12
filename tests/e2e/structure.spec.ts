@@ -44,7 +44,7 @@ test('repetition back links preserve the timeline and gray draw event even in ch
   await expect(graph.locator('[data-played="true"]')).toHaveCount(9);
   expect(await graph.locator('[data-recurrence="true"]').count()).toBeGreaterThan(0);
   await expect(graph.locator('[data-position="p8"]')).toHaveAttribute('data-event', 'draw');
-  await expect(graph.locator('[data-position="p8"] circle[fill="#7f7f7f"]')).toHaveCount(1);
+  await expect(graph.locator('[data-position="p8"]')).toHaveAttribute('data-fill', '#7f7f7f');
   await page.getByRole('button', { name: 'Growing replay', exact: true }).click();
   await expect(graph.locator('[data-recurrence="true"]')).toHaveCount(0);
   await page.getByRole('button', { name: 'Last move', exact: true }).click();

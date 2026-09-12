@@ -21,7 +21,7 @@ test('real Stockfish, fixed replay, branch exploration, board and cached reopen'
   expect(await graph.locator('[data-compressed="true"]').count()).toBeGreaterThan(20);
   await expect(page.getByTestId('live-detail')).toBeVisible();
   const checkHighlights = page.getByLabel('Check highlights', { exact: true });
-  const unassessedWhite = graph.locator('[data-event="unassessed"] rect[fill="#fff"]');
+  const unassessedWhite = graph.locator('[data-event="unassessed"][data-fill="#fff"]');
   expect(await unassessedWhite.count()).toBeGreaterThan(0);
   await checkHighlights.selectOption('assessed');
   await expect(unassessedWhite).toHaveCount(0);

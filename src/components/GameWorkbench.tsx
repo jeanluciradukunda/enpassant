@@ -8,11 +8,11 @@ import type { CheckMode } from '../lib/diagramStyle';
 import { bundledStudyFor } from '../lib/seedAnalysis';
 import { useAnalysis } from '../lib/useAnalysis';
 import { moveLabel, scoreLabel } from '../lib/games';
-import { toSan } from '../lib/san';
 import { ChessBoard } from './ChessBoard';
 import { DiagramKey } from './DiagramKey';
 import { TalPanel } from './TalPanel';
-import { EvolutionDiagram, GraphMarks } from './EvolutionDiagram';
+import { DetailLens } from './DetailLens';
+import { EvolutionDiagram } from './EvolutionDiagram';
 import type { EvolutionNode, Game } from '../types/game';
 
 type WorkbenchProps = { game: Game; onImport: () => void };
@@ -183,7 +183,44 @@ function Workbench({
     onSelect: select,
     onUnfold: setUnfolded,
   };
-  const lineSan = (moves: string[]) => toSan(selected.fen, moves.slice(0, 7)).join(' ');
+  // Candidate SAN comes from the graph's own legally replayed occurrences and
+  // is derived once per selection. Replaying every line through chess.js on
+  // each render used to dominate the cost of a replay step.
+  const candidateLines = useMemo(() => {
+    if (!search?.lines.length) return [];
+    const lineSan = (moves: string[]) => {
+      const san: string[] = [];
+      let parent: EvolutionNode = selected;
+      const shown = moves.slice(0, 7);
+      for (const uci of shown) {
+        const ply = parent.ply + 1;
+        const id =
+          parent.played && game.positions[ply]?.uci === uci ? `p${ply}` : `${parent.id}/${uci}`;
+        const node = graph.byId.get(id);
+        if (!node) break;
+        san.push(node.san);
+        parent = node;
+      }
+      if (san.length < shown.length) {
+        const chess = new Chess(parent.fen);
+        for (const move of shown.slice(san.length)) {
+          try {
+            san.push(chess.move(move).san);
+          } catch {
+            break;
+          }
+        }
+      }
+      return san.join(' ');
+    };
+    return candidates(search, selected.played ? game.positions[selected.ply + 1]?.uci : undefined)
+      .filter(
+        (line) =>
+          graph.byId.has(`${selected.id}/${line.moves[0]}`) ||
+          (selected.played && game.positions[selected.ply + 1]?.uci === line.moves[0]),
+      )
+      .map((line) => ({ line, san: lineSan(line.moves) }));
+  }, [search, selected, game, graph]);
 
   return (
     <main className="workbench" data-testid="game-workbench">
@@ -445,13 +482,7 @@ function Workbench({
         <aside className="position-panel" aria-label="Selected position">
           <div className="paper-detail-panel">
             <span className="eyebrow">DETAIL / SELECT A POSITION</span>
-            <svg
-              data-testid="live-detail"
-              viewBox={`${selected.x - 85} ${selected.y - 70} 170 140`}
-              className="live-detail"
-            >
-              <GraphMarks {...diagramProps} detail />
-            </svg>
+            <DetailLens {...diagramProps} />
           </div>
           {unfolded && (
             <section className="quiet-sequence" aria-label="Unfolded quiet sequence">
@@ -587,38 +618,29 @@ function Workbench({
           )}
           {search?.lines.length ? (
             <div className="candidate-lines">
-              {candidates(
-                search,
-                selected.played ? game.positions[selected.ply + 1]?.uci : undefined,
-              )
-                .filter(
-                  (line) =>
-                    graph.byId.has(`${selected.id}/${line.moves[0]}`) ||
-                    (selected.played && game.positions[selected.ply + 1]?.uci === line.moves[0]),
-                )
-                .map((line) => (
-                  <button
-                    key={line.rank}
-                    title={lineSan(line.moves)}
-                    disabled={!graph.ready}
-                    aria-label={`Inspect ${line === search.playedLine ? 'played move outside top eight' : `candidate ${line.rank}`}: ${lineSan(line.moves)}`}
-                    onClick={() => {
-                      const uci = line.moves[0];
-                      const id =
-                        selected.played && game.positions[selected.ply + 1]?.uci === uci
-                          ? `p${selected.ply + 1}`
-                          : `${selected.id}/${uci}`;
-                      const node = graph.byId.get(id);
-                      if (node) {
-                        if (!overview && !node.played) setExploringPly(node.originPly);
-                        select(node);
-                      }
-                    }}
-                  >
-                    <span>{scoreLabel(line.score)}</span>
-                    <p>{lineSan(line.moves)}</p>
-                  </button>
-                ))}
+              {candidateLines.map(({ line, san }) => (
+                <button
+                  key={line.rank}
+                  title={san}
+                  disabled={!graph.ready}
+                  aria-label={`Inspect ${line === search.playedLine ? 'played move outside top eight' : `candidate ${line.rank}`}: ${san}`}
+                  onClick={() => {
+                    const uci = line.moves[0];
+                    const id =
+                      selected.played && game.positions[selected.ply + 1]?.uci === uci
+                        ? `p${selected.ply + 1}`
+                        : `${selected.id}/${uci}`;
+                    const node = graph.byId.get(id);
+                    if (node) {
+                      if (!overview && !node.played) setExploringPly(node.originPly);
+                      select(node);
+                    }
+                  }}
+                >
+                  <span>{scoreLabel(line.score)}</span>
+                  <p>{san}</p>
+                </button>
+              ))}
             </div>
           ) : (
             <p className="branch-help">

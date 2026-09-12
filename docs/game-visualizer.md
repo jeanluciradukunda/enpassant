@@ -42,6 +42,10 @@ Played circles have side-to-move borders; ordinary alternative squares have blac
 
 Edge quality and Graphviz placement weights are independent. Quality uses a monotone `log1p` adaptation of Eq. 2 on retained, comparable siblings, normalized to 1–30 and rendered at one tenth that scale. Weak played moves receive no artificial minimum. Unsearched downstream edges and ambiguous multi-route comparisons remain neutral. Chart x coordinates and camera match the played graph positions.
 
+## Rendering
+
+One pure scene builder (`buildScene`) decides which glyphs and edges are visible at a replay instant, their fills, widths, dashes and dimming. Three consumers read it: the WebGL renderer, the invisible hit overlay and the native SVG marks. In the browser the marks are painted with three.js: all edges form one anti-aliased stroke mesh with an analytic dash rule (sub-pixel dashes become the correct grey instead of aliasing), glyphs are signed-distance instanced quads, and move numbers and mate crowns are sprites from a Georgia digit atlas. The camera is a uniform, so panning and zooming never rebuild geometry or touch the DOM beyond the overlay `viewBox`. Edge reveal (180 ms) and unfold (260 ms) animations run on the GPU and honour `prefers-reduced-motion`. The detail lens is a second camera on the same scene. The overlay keeps one transparent hit shape and tooltip per visible glyph and edge, so clicks, Enter, roving focus and the `data-position`, `data-x`, `data-y`, `data-edge` and `.compressed-target` contract are unchanged. Server-side rendering and browsers without WebGL2 use the SVG marks.
+
 ## Engine packaging
 
 `pnpm dev` and `pnpm build` copy the pinned lite worker, its WASM and GPL license from the installed npm package into ignored `public/engine/`. Only that flavor enters the production output (about 7 MB); no third-party CDN or cross-origin-isolation setup is required. Direct Vite/Playwright invocation requires `pnpm prepare:engine` after a clean install.
