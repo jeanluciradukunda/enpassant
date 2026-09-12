@@ -21,9 +21,12 @@ export default defineConfig({
   build: {
     target: 'es2022',
     sourcemap: true,
+    // three.js is deliberately one cacheable chunk, loaded only by the WebGL path.
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         manualChunks(id) {
+          if (id.includes('/node_modules/three/')) return 'three';
           if (id.endsWith('/fixtures/figure5.json')) return 'figure5';
         },
       },

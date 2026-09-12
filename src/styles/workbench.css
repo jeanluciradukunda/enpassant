@@ -1210,3 +1210,30 @@
   display: block;
   font-weight: 500;
 }
+
+/* WebGL stage: the canvas paints the marks; the transparent SVG above it keeps
+   hit targets, tooltips and keyboard focus at the same graph coordinates. */
+.live-graph-stage {
+  position: relative;
+  width: 100%;
+}
+.live-graph-stage .live-graph-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.live-graph-stage .live-graph-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+.branch-hit {
+  pointer-events: stroke;
+}
+canvas.live-detail {
+  display: block;
+}

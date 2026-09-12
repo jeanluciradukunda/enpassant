@@ -1,6 +1,6 @@
 # Working on Enpassant
 
-The app has two routes: `/` for real games and `/paper` for the recovered Figure 5 study. Both render native SVG; the original React Flow prototype has been removed.
+The app has two routes: `/` for real games and `/paper` for the recovered Figure 5 study. The paper study renders native SVG. The live graph paints its marks with WebGL through three.js and keeps an invisible SVG layer above the canvas for hit targets, tooltips, keyboard focus and the `data-*` attributes that tests and research scripts read. Server-side rendering for the research scripts, and browsers without WebGL2, draw the same scene with the native SVG marks. The original React Flow prototype has been removed.
 
 ## Local setup
 
@@ -37,17 +37,18 @@ The GitHub Actions workflow runs the deterministic suite on pull requests and `m
 
 ## Where things live
 
-| Area                                       | Entry point                                                                      |
-| ------------------------------------------ | -------------------------------------------------------------------------------- |
-| Routing and remembered game                | `src/App.tsx`                                                                    |
-| Imports and legal PGN replay               | `src/lib/importers.ts`, `src/lib/games.ts`                                       |
-| Stockfish and history-sensitive cache      | `src/lib/engine.ts`                                                              |
-| Analysis scheduling and replay publication | `src/lib/useAnalysis.ts`                                                         |
-| Move occurrences and display graph         | `src/lib/evolution.ts`, `src/lib/evolutionLayout.ts`                             |
-| Layout worker and recovery                 | `src/lib/graphviz.ts`, `src/lib/graphviz.worker.ts`                              |
-| Game interface and SVG marks               | `src/components/GameWorkbench.tsx`, `EvolutionDiagram.tsx`, `EvolutionMarks.tsx` |
-| Original paper study                       | `src/PaperStudy.tsx`, `src/fixtures/figure5.json`                                |
-| Brand and layout styles                    | `src/styles/study.css`, `src/styles/workbench.css`                               |
+| Area                                       | Entry point                                                                                                       |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Routing and remembered game                | `src/App.tsx`                                                                                                     |
+| Imports and legal PGN replay               | `src/lib/importers.ts`, `src/lib/games.ts`                                                                        |
+| Stockfish and history-sensitive cache      | `src/lib/engine.ts`                                                                                               |
+| Analysis scheduling and replay publication | `src/lib/useAnalysis.ts`                                                                                          |
+| Move occurrences and display graph         | `src/lib/evolution.ts`, `src/lib/evolutionLayout.ts`                                                              |
+| Layout worker and recovery                 | `src/lib/graphviz.ts`, `src/lib/graphviz.worker.ts`                                                               |
+| Game interface and SVG marks               | `src/components/GameWorkbench.tsx`, `EvolutionDiagram.tsx`, `EvolutionMarks.tsx`                                  |
+| Shared scene, WebGL renderer, hit overlay  | `src/lib/graphScene.ts`, `src/lib/webgl/`, `src/components/HitMarks.tsx`, `EvolutionCanvas.tsx`, `DetailLens.tsx` |
+| Original paper study                       | `src/PaperStudy.tsx`, `src/fixtures/figure5.json`                                                                 |
+| Brand and layout styles                    | `src/styles/study.css`, `src/styles/workbench.css`                                                                |
 
 The displayed graph can merge equivalent positions while their full occurrence histories remain separate. Preserve that distinction: engine searches, repetition detection and board replay must use the selected occurrence’s complete move path.
 

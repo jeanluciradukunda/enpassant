@@ -97,4 +97,4 @@ Install Chromium once with `pnpm exec playwright install chromium`. The [develop
 
 ---
 
-<sub>Built with React, TypeScript, chess.js, Stockfish and Graphviz. Application code: <a href="LICENSE">GPL-3.0-or-later</a>. The paper artwork retains its original rights. <a href="docs/ATTRIBUTION.md">Sources &amp; attribution</a>.</sub>
+<sub>Built with React, TypeScript, chess.js, Stockfish, Graphviz and three.js. Application code: <a href="LICENSE">GPL-3.0-or-later</a>. The paper artwork retains its original rights. <a href="docs/ATTRIBUTION.md">Sources &amp; attribution</a>.</sub>
