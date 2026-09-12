@@ -49,9 +49,7 @@ The circles trace the played game. Squares mark alternative positions; dotted pa
 
 The app is live at **[enpassant-f0e.pages.dev](https://enpassant-f0e.pages.dev/)**. Nothing to install: open it, pick a Tal game from **Import game**, and Mikhail Tal narrates the turning points.
 
-To run it locally:
-
-Use **Node 24 LTS** and **pnpm 10.33.4**. With Node installed:
+To run it locally, use **Node 24 LTS** and **pnpm 10.33.4**. With Node installed:
 
 ```sh
 corepack enable
