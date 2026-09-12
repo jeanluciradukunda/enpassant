@@ -1,0 +1,65 @@
+{
+  "measuredAt": "2026-09-09T14:03:21.303Z",
+  "method": "One frozen Botvinnik–Tal fixture; production builder and SVG component through Vite SSR; one Mac run. Gunzip, JSON parse and Map reindex measured together. No network, engine search, cloud deployment or browser interaction.",
+  "fixturePath": "docs/research/tal-quick/botvinnik-tal-1960-analysis.json.gz",
+  "fixtureSha256": "76c1b1e8493f0bb1b55036b5c832fb8456d86cfe1d916b4de7fd65dc620f7e7c",
+  "sizes": {
+    "analysisGzip": 25436,
+    "placedJson": 5218002,
+    "placedGzip": 407659
+  },
+  "timingsMs": {
+    "build": 3951.6839169999994,
+    "layout": 403.62733300000036,
+    "restoreIncludingGunzip": 15.55724999999984
+  },
+  "verified": {
+    "nodes": 5422,
+    "renderCases": [
+      {
+        "name": "opening replay",
+        "identicalSvg": true,
+        "svgSha256": "4a20f54d2bfa38ca047d7795e3ed277d3f5d804d3640ab90a50a4b4b39544e5e",
+        "svgBytes": 951
+      },
+      {
+        "name": "middle replay",
+        "identicalSvg": true,
+        "svgSha256": "be3e7dd36e8578bb3a3272e6e132dd80c27c6cf0595f56c2948c4290df9daff4",
+        "svgBytes": 517132
+      },
+      {
+        "name": "complete overview",
+        "identicalSvg": true,
+        "svgSha256": "e886fbf3fc016495f7c94ff4bf2d672fdbc4b857ac13b16faa7dcf4437c61d35",
+        "svgBytes": 1508047
+      },
+      {
+        "name": "isolated played root",
+        "identicalSvg": true,
+        "svgSha256": "ed2e5f0b794122480dacbf034708719639bca38b3e117f6895f7a71cce728530",
+        "svgBytes": 1513326
+      },
+      {
+        "name": "isolated alternative",
+        "identicalSvg": true,
+        "svgSha256": "978454de5c7a66fec68d64f51bfcc191e690a7d414b4e378d5dda7e79af46b25",
+        "svgBytes": 1513398
+      },
+      {
+        "name": "detail assessed checks",
+        "identicalSvg": true,
+        "svgSha256": "f542e74655b1220f1642057db9b909e7e0bec93c2a60ff2565a2ce30935f106c",
+        "svgBytes": 1231673
+      }
+    ],
+    "engineSearchesOnRestore": 0,
+    "graphvizCallsOnRestore": 0
+  },
+  "limitations": [
+    "No claim about browser parse/render latency or memory peak.",
+    "A deployed snapshot needs schema and byte/node limits, owner authorization, content digest, policy/renderer/engine revisions and invalidation.",
+    "Restoring a placed view does not reconstruct private mutable EvolutionBuilder state for incremental searches.",
+    "SVG equality covers these six component states; it does not test mouse, keyboard or unfolded-path interaction."
+  ]
+}

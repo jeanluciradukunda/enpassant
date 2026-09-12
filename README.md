@@ -83,6 +83,8 @@ Open **[/paper](http://localhost:5173/paper)** to explore the reconstructed Figu
 
 ## Made to be worked on
 
+The [platform design](docs/platform/README.md) proposes accounts, connected chess sources, a durable library and lifetime diagrams. Its [AWS baseline](docs/platform/aws-baseline.md) targets roughly $25/month on EC2, with saved analysis and optional Fargate studies budgeted separately.
+
 ```sh
 pnpm check       # Types, lint, formatting and unit tests
 pnpm build       # Production build, including the local engine

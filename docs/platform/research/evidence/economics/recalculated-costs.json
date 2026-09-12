@@ -1,0 +1,24 @@
+{
+  "assumptions": {
+    "currency": "USD",
+    "region": "us-east-1",
+    "month_hours": 730,
+    "tax_credits_excluded": true,
+    "not_benchmark_or_invoice": true
+  },
+  "ec2_small_core": 18.854,
+  "ec2_medium_core": 31.117999999999995,
+  "cape_small_core": 23.171999999999997,
+  "ec2_small_full_cpu_surplus_steady_state": 46.72,
+  "fargate_hour_1cpu_2gb_ipv4": 0.05437,
+  "fargate_20h": 1.0874000000000001,
+  "fargate_arm_20h": 0.8899999999999999,
+  "alb_two_ips": 23.725,
+  "nat_one_ip": 36.5,
+  "rds_small_20gb": 25.66,
+  "waf_2rules_100k": 7.06,
+  "lambda_100k_512mb_200ms": 0.18666700000000003,
+  "http_api_100k": 0.1,
+  "ddb_scenario_200kRRU_50kWRU_5GB_PITR": 2.30625,
+  "managed_core_without_waf": 71.59505
+}

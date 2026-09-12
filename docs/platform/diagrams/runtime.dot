@@ -1,0 +1,41 @@
+digraph runtime {
+  graph [rankdir=TB, bgcolor="#f5f2e9", pad=0.35, nodesep=0.70, ranksep=0.85, compound=true, fontname="Helvetica", fontsize=12, fontcolor="#183923", label="ENPASSANT  /  EARLIER MANAGED ALTERNATIVE\nRender + Supabase / not the accepted EC2 baseline", labelloc=t, labeljust=l, splines=spline];
+  node [shape=box, style="rounded,filled", color="#789581", fillcolor="#fffdf7", fontname="Helvetica", fontsize=12, fontcolor="#183923", margin="0.20,0.15", penwidth=1.1];
+  edge [color="#789581", arrowsize=0.65, fontname="Helvetica", fontsize=10, fontcolor="#375c43", penwidth=1.2];
+
+  browser [label=<<B>React workbench</B><BR/><FONT POINT-SIZE="11">Board / Graphviz / local Stockfish<BR/>Opaque session cookie</FONT>>, fillcolor="#dcebd7"];
+
+  subgraph cluster_render {
+    label="RENDER"; style="rounded"; color="#a2b59e"; margin=22;
+    api [label=<<B>TypeScript API + job broker</B><BR/><FONT POINT-SIZE="11">Sessions / ownership / library / budgets<BR/>Serves React assets from the same origin</FONT>>, fillcolor="#183923", fontcolor="#fffdf7", color="#183923"];
+    importer [label=<<B>Import worker + coordinator</B><BR/><FONT POINT-SIZE="11">Resumable sync / provider limiter<BR/>Scoped connector credentials</FONT>>];
+    engine [label=<<B>Native Stockfish worker</B><BR/><FONT POINT-SIZE="11">Bounded CPU / memory / time<BR/>Assigned-job grants only</FONT>>];
+    { rank=same; importer; engine; }
+    api -> importer [label="enqueue / reclaim", style=dashed];
+    api -> engine [label="lease + input / fenced commit", dir=both];
+  }
+
+  subgraph cluster_managed {
+    label="SUPABASE"; style="rounded,filled"; color="#a2b59e"; fillcolor="#e7eddf"; margin=22;
+    auth [label=<<B>Auth</B><BR/><FONT POINT-SIZE="11">Google + email OTP<BR/>Server-managed tokens</FONT>>];
+    db [label=<<B>PostgreSQL</B><BR/><FONT POINT-SIZE="11">Tenant data / durable jobs<BR/>Reservations / current revisions</FONT>>];
+    storage [label=<<B>Private object storage</B><BR/><FONT POINT-SIZE="11">Raw imports / immutable results<BR/>Separate object backups</FONT>>];
+    { rank=same; auth; db; storage; }
+  }
+
+  providers [label=<<B>Lichess / Chess.com</B><BR/><FONT POINT-SIZE="11">Completed public games<BR/>Lichess verified connection</FONT>>];
+  friend [label=<<B>Optional external worker</B><BR/><FONT POINT-SIZE="11">Public study inputs only<BR/>No database or OAuth secrets</FONT>>, style="rounded,dashed,filled", color="#a06752", fillcolor="#f0e3d4"];
+
+  browser -> api [label="HTTPS /api/v1"];
+  api -> auth [label="sign-in / refresh"];
+  api -> db [label="tenant queries"];
+  api -> storage [label="authorize upload / download", constraint=false];
+  importer -> db [label="checkpoint + revisions"];
+  importer -> providers [label="serialized fetch / OAuth"];
+  importer -> storage [label="raw artifacts", constraint=false];
+  engine -> storage [label="short-lived upload grant"];
+  friend -> api [label="restricted broker access", style=dashed, constraint=false];
+  { rank=same; providers; friend; }
+  db -> providers [style=invis];
+  storage -> friend [style=invis];
+}

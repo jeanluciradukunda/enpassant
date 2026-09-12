@@ -1,0 +1,33 @@
+digraph jobs {
+  graph [rankdir=TB, bgcolor="#f5f2e9", pad=0.35, nodesep=0.50, ranksep=0.62, fontname="Helvetica", fontsize=12, fontcolor="#183923", label="ENPASSANT  /  REUSABLE COMPUTATION\nProposed contract: one owner scope, independent request subscribers", labelloc=t, labeljust=l, splines=spline];
+  node [shape=box, style="rounded,filled", color="#789581", fillcolor="#fffdf7", fontname="Helvetica", fontsize=12, fontcolor="#183923", margin="0.22,0.15", penwidth=1.1];
+  edge [color="#789581", arrowsize=0.65, fontname="Helvetica", fontsize=10, fontcolor="#375c43", penwidth=1.2];
+
+  reserve [label=<<B>Admit or join within one owner</B><BR/><FONT POINT-SIZE="11">Computation + subscriber + reservation + outbox<BR/>Atomic miss; ready hit needs no execution</FONT>>, fillcolor="#dcebd7"];
+  lease [label=<<B>Lease computation attempt</B><BR/><FONT POINT-SIZE="11">Independent generation + bounded owner task<BR/>Enrollment and attempt-scoped grants</FONT>>];
+  run [label=<<B>Run bounded search</B><BR/><FONT POINT-SIZE="11">Pinned engine + full legal history<BR/>Heartbeat / child process limits</FONT>>];
+  upload [label=<<B>Stage immutable artifact</B><BR/><FONT POINT-SIZE="11">Upload / verify hash and schema<BR/>Not visible as an active result yet</FONT>>];
+  publish [label=<<B>Publish computation result</B><BR/><FONT POINT-SIZE="11">Live scope epoch + demand + attempt + deadline?<BR/>Commit immutable result; settle usage idempotently</FONT>>, fillcolor="#183923", fontcolor="#fffdf7", color="#183923"];
+  done [label=<<B>Attach to active subscribers</B><BR/><FONT POINT-SIZE="11">Check each target revision and authorization<BR/>Cancelled A gets no attachment; active B can</FONT>>, fillcolor="#dcebd7"];
+  retry [label=<<B>Crash / expired lease</B><BR/><FONT POINT-SIZE="11">Fence old generation; reconcile old task<BR/>Keep unknown obligations reserved<BR/>Admit replacement only with funded capacity</FONT>>, fillcolor="#f0e3d4", color="#a06752"];
+  detach [label=<<B>Cancel request A</B><BR/><FONT POINT-SIZE="11">Detach only A's subscribers<BR/>Keep execution if B still needs it</FONT>>, fillcolor="#f0e3d4", color="#a06752"];
+  cancel [label=<<B>No demand / deleted owner</B><BR/><FONT POINT-SIZE="11">Invalidate generation or scope epoch; stop<BR/>Keep unknown obligations until reconciled</FONT>>, fillcolor="#f0e3d4", color="#a06752"];
+  stale [label=<<B>Reject stale publication</B><BR/><FONT POINT-SIZE="11">No active result or second settlement<BR/>Garbage-collect unattached artifacts</FONT>>, fillcolor="#f0e3d4", color="#a06752"];
+
+  reserve -> lease;
+  lease -> run;
+  run -> upload [weight=10];
+  upload -> publish;
+  publish -> done [label="valid generation"];
+  run -> retry [label="failure", style=dashed];
+  upload -> retry [style=dashed, constraint=false];
+  retry:w -> lease:w [style=dashed, constraint=false];
+  run -> detach [label="request cancellation", style=dashed];
+  detach -> cancel [label="last subscriber gone", style=dashed];
+  publish -> stale [label="invalid / cancelled", color="#a06752"];
+  cancel -> stale [style=dashed];
+  { rank=same; upload; retry; cancel; }
+  retry -> upload [style=invis];
+  upload -> cancel [style=invis];
+  { rank=same; done; stale; }
+}

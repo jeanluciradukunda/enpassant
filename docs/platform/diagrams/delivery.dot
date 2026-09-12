@@ -1,0 +1,22 @@
+digraph delivery {
+  graph [rankdir=TB, bgcolor="#f5f2e9", pad=0.35, nodesep=0.60, ranksep=0.50, fontname="Helvetica", fontsize=12, fontcolor="#183923", label="ENPASSANT  /  PROPOSED DELIVERY\nBuild once. Test in staging. Promote the same release.", labelloc=t, labeljust=l, splines=polyline];
+  node [shape=box, style="rounded,filled", color="#789581", fillcolor="#fffdf7", fontname="Helvetica", fontsize=12, fontcolor="#183923", margin="0.22,0.15", penwidth=1.1];
+  edge [color="#789581", arrowsize=0.65, fontname="Helvetica", fontsize=10, fontcolor="#375c43", penwidth=1.2];
+
+  verify [label=<<B>PR verification</B><BR/><FONT POINT-SIZE="11">Types / tests / build / browser<BR/>Ephemeral data; no cloud secrets</FONT>>, fillcolor="#dcebd7"];
+  build [label=<<B>Trusted main release</B><BR/><FONT POINT-SIZE="11">Verify merged commit / build images<BR/>GHCR digests + release manifest</FONT>>];
+  staging [label=<<B>Staging</B><BR/><FONT POINT-SIZE="11">Compatible migrations / deploy / smoke tests<BR/>Separate identity, data and credentials</FONT>>];
+  promote [label=<<B>Explicit promotion</B><BR/><FONT POINT-SIZE="11">Authorized maintainer / protected ref<BR/>Validate the staging-tested digests</FONT>>, fillcolor="#f0e3d4", color="#a06752"];
+  production [label=<<B>Production</B><BR/><FONT POINT-SIZE="11">Same artifacts / compatible migrations<BR/>Readiness, smoke checks and release ledger</FONT>>, fillcolor="#183923", fontcolor="#fffdf7", color="#183923"];
+  rollback [label=<<B>Rollback</B><BR/><FONT POINT-SIZE="11">Previous compatible artifact<BR/>Data repair / restore is a separate operation</FONT>>];
+  infra [label=<<B>Infrastructure path</B><BR/><FONT POINT-SIZE="11">Trusted revision / private Terraform plan<BR/>Explicit apply of that exact plan / state lock</FONT>>, fillcolor="#f0e3d4", color="#a06752"];
+
+  verify -> build [label="merge + checks pass"];
+  build -> staging;
+  staging -> promote [label="release verified"];
+  promote -> production [label="serialized rollout"];
+  production -> rollback [label="rollout failure / operator decision"];
+  infra -> staging [label="provision / change resources", style=dashed];
+  infra -> production [style=dashed, constraint=false];
+  { rank=same; build; infra; }
+}

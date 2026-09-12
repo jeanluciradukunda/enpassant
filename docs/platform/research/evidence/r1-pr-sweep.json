@@ -1,0 +1,56 @@
+{
+  "channel": "GitHub connector search_prs(state=all, topn=20), then fetch_pr for each returned PR",
+  "verified_on": "2026-09-09",
+  "pull_requests": [
+    {
+      "number": 1,
+      "title": "chore: add foundation files (SPEC, LICENSE, .gitignore)",
+      "state": "closed",
+      "merged": true,
+      "merge_commit_sha": "4f8e7e9f1d5415ccacff0bee3d873e396f669df8",
+      "head_sha": "9634330adee12f5f63177c7ffa6f6910000ba622",
+      "base_sha": "df355bd269dc258d9b1f5bd0d4a4974a81bc7f6b",
+      "url": "https://github.com/jeanluciradukunda/enpassant/pull/1"
+    },
+    {
+      "number": 2,
+      "title": "spec: rewrite as V0→V4 phased build contract",
+      "state": "closed",
+      "merged": true,
+      "merge_commit_sha": "2a0903da49a9211d7f8c47c31609afef2efd13e6",
+      "head_sha": "70c96e558dc0213d2027912c3687ada0e1f416c7",
+      "base_sha": "4f8e7e9f1d5415ccacff0bee3d873e396f669df8",
+      "url": "https://github.com/jeanluciradukunda/enpassant/pull/2"
+    },
+    {
+      "number": 3,
+      "title": "feat: paper-faithful chess visualization, game imports and growing replay",
+      "state": "closed",
+      "merged": true,
+      "merge_commit_sha": "205977cd5c650e083e8f4b94f81b41f05afe4465",
+      "head_sha": "f4bcc03671c7f64871c6b2ba38cc06c2ee55ee84",
+      "base_sha": "2a0903da49a9211d7f8c47c31609afef2efd13e6",
+      "url": "https://github.com/jeanluciradukunda/enpassant/pull/3"
+    },
+    {
+      "number": 4,
+      "title": "Refresh the README and address repository audit findings",
+      "state": "closed",
+      "merged": true,
+      "merge_commit_sha": "568daf86ecfecba4921f247f8a5196d5fb7218de",
+      "head_sha": "ca20907cd6003d3f0bffb06d2a97273c721911bd",
+      "base_sha": "205977cd5c650e083e8f4b94f81b41f05afe4465",
+      "url": "https://github.com/jeanluciradukunda/enpassant/pull/4"
+    },
+    {
+      "number": 5,
+      "title": "Align generated chess diagrams with the paper’s visual rules",
+      "state": "closed",
+      "merged": true,
+      "merge_commit_sha": "e87e8a73b9857e022daefab150023a7a6a6be374",
+      "head_sha": "e9df715c76a2fecd1cce079ab04e0cde9b784b66",
+      "base_sha": "568daf86ecfecba4921f247f8a5196d5fb7218de",
+      "url": "https://github.com/jeanluciradukunda/enpassant/pull/5"
+    }
+  ]
+}

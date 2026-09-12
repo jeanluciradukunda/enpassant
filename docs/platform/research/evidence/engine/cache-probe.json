@@ -1,0 +1,46 @@
+{
+  "measuredAt": "2026-09-09T14:01:39.693Z",
+  "browser": "153.0.8010.12",
+  "method": "Production engine bundled with esbuild; real browser IndexedDB; all Worker UCI output is mocked; routed synthetic origin has no network.",
+  "results": {
+    "partialCacheHit": {
+      "workerInstances": 1,
+      "searchCommands": 0,
+      "commands": [
+        "uci",
+        "setoption name Hash value 32",
+        "setoption name MultiPV value 8",
+        "isready"
+      ],
+      "returnedDepth": 12,
+      "requestedDepth": 20,
+      "depthReached": false
+    },
+    "differentPlayedMoveSameSiblingSearch": {
+      "searches": 2,
+      "keys": [
+        "stockfish-18.0.8-lite-single:v2:pv8:400:depth20:playede2e4:only:rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:",
+        "stockfish-18.0.8-lite-single:v2:pv8:400:depth20:playedd2d4:only:rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:"
+      ]
+    },
+    "refreshTwice": {
+      "searches": 2,
+      "entries": 1
+    },
+    "identicalConcurrentEngines": {
+      "searches": 2,
+      "workerInstances": 2,
+      "entries": 1
+    },
+    "sameEngineConcurrent": {
+      "settledWithin50ms": [false, true],
+      "searchCommands": 2,
+      "caveat": "Direct API stress probe; production hook serializes calls. Dangling promise need not mean current UI bug."
+    },
+    "eviction": {
+      "entries": 2800,
+      "freshlyWrittenKeyStillPresent": false,
+      "explanation": "All seeded keys sort after the fresh real cache key; default cursor deletes ascending keys."
+    }
+  }
+}

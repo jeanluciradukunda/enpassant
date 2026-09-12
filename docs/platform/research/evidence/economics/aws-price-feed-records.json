@@ -1,0 +1,178 @@
+[
+  {
+    "url": "https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/ec2/USD/current/ebs.json",
+    "retrieved_at": "2026-09-09T14:04:18.126120+00:00",
+    "manifest": {
+      "serviceId": "ec2",
+      "accessType": "publish",
+      "esIndex": "plc-ec2-usd-20260909004605",
+      "hawkFilePublicationDate": "2026-09-09T00:46:05Z",
+      "ETLIngestionTriggerDate": "2026-09-09T00:46:05Z",
+      "currencyCode": "USD",
+      "source": "ebs",
+      "isMapped": "true"
+    },
+    "selected_regions": {
+      "US East (N. Virginia)": {
+        "Storage Snapshot Amazon S3 GB Mo": {
+          "rateCode": "7U7TWP44UP36AT3R.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0500000000",
+          "RegionlessRateCode": "f_A2xjuNjrHtG_PwDhPG-eVYI0tCL21jtlbqYUqRg-s"
+        },
+        "Storage General Purpose gp3 GB Mo": {
+          "rateCode": "JG3KUJMBRGHV3N8G.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0800000000",
+          "RegionlessRateCode": "rfOvvXHDAJRZK8rCe8ThxmpU_7SjA3m6T5_yeV0z0FQ"
+        }
+      },
+      "Africa (Cape Town)": {
+        "Storage Snapshot Amazon S3 GB Mo": {
+          "rateCode": "P2C3ZE7ZCZXGMHVX.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0595000000",
+          "RegionlessRateCode": "f_A2xjuNjrHtG_PwDhPG-eVYI0tCL21jtlbqYUqRg-s"
+        },
+        "Storage General Purpose gp3 GB Mo": {
+          "rateCode": "XWCTMRRUJM7TGYST.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.1047000000",
+          "RegionlessRateCode": "rfOvvXHDAJRZK8rCe8ThxmpU_7SjA3m6T5_yeV0z0FQ"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/rds/USD/current/rds-postgresql-ondemand.json",
+    "retrieved_at": "2026-09-09T14:06:44.650420+00:00",
+    "manifest": {
+      "serviceId": "rds",
+      "accessType": "publish",
+      "esIndex": "plc-rds-usd-20260904172716",
+      "hawkFilePublicationDate": "2026-09-04T17:27:16Z",
+      "ETLIngestionTriggerDate": "2026-09-04T17:27:16Z",
+      "currencyCode": "USD",
+      "source": "rds-postgresql-ondemand",
+      "isMapped": "true"
+    },
+    "selected_regions": {
+      "US East (N. Virginia)": {
+        "Database Instance PostgreSQL No license required db t4g.micro General purpose Single-AZ Current Generation": {
+          "rateCode": "9HPEGXQTDDGH53C9.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0160000000",
+          "RegionlessRateCode": "D4PgUdxH8n0zohQzVE_cWJnapjOYrVigtSZENYXVtLw",
+          "Instance Type": "db.t4g.micro",
+          "Memory": "1 GiB",
+          "vCPU": "2",
+          "Network Performance": "Up to 5 Gigabit"
+        },
+        "Database Instance PostgreSQL No license required db t4g.small General purpose Single-AZ Current Generation": {
+          "rateCode": "S9H3AXMBHSKRFJTA.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0320000000",
+          "RegionlessRateCode": "lX4y99Ks_wJEwrUwyJT8k3SYqJbiQPxGPP8y3_CSrBs",
+          "Instance Type": "db.t4g.small",
+          "Memory": "2 GiB",
+          "vCPU": "2",
+          "Network Performance": "Up to 5 Gigabit"
+        },
+        "Database Storage Single AZ General Purpose-GP3": {
+          "rateCode": "KYVYY29G957PKY3B.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.1150000000",
+          "RegionlessRateCode": "_zLweIpUMZGdoYP3NHvHfQnKmde3qQbtuZrJxDF4XyE"
+        }
+      },
+      "Africa (Cape Town)": {
+        "Database Instance PostgreSQL No license required db t4g.micro General purpose Single-AZ Current Generation": {
+          "rateCode": "BU3HZACX7G5CWPFY.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0210000000",
+          "RegionlessRateCode": "D4PgUdxH8n0zohQzVE_cWJnapjOYrVigtSZENYXVtLw",
+          "Instance Type": "db.t4g.micro",
+          "Memory": "1 GiB",
+          "vCPU": "2",
+          "Network Performance": "Up to 5 Gigabit"
+        },
+        "Database Instance PostgreSQL No license required db t4g.small General purpose Single-AZ Current Generation": {
+          "rateCode": "7GR8QF4XW7UV474S.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0410000000",
+          "RegionlessRateCode": "lX4y99Ks_wJEwrUwyJT8k3SYqJbiQPxGPP8y3_CSrBs",
+          "Instance Type": "db.t4g.small",
+          "Memory": "2 GiB",
+          "vCPU": "2",
+          "Network Performance": "Up to 5 Gigabit"
+        },
+        "Database Storage Single AZ General Purpose-GP3": {
+          "rateCode": "RCZXUW834TQ3FJ4D.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.1510000000",
+          "RegionlessRateCode": "_zLweIpUMZGdoYP3NHvHfQnKmde3qQbtuZrJxDF4XyE"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/ecs/USD/current/ecs.json",
+    "retrieved_at": "2026-09-09T14:06:45.832965+00:00",
+    "manifest": {
+      "serviceId": "ecs",
+      "accessType": "publish",
+      "esIndex": "plc-ecs-usd-20260831092155",
+      "hawkFilePublicationDate": "2026-08-31T09:21:55Z",
+      "ETLIngestionTriggerDate": "2026-08-31T09:21:55Z",
+      "currencyCode": "USD",
+      "source": "ecs",
+      "isMapped": "true"
+    },
+    "selected_regions": {
+      "US East (N. Virginia)": {
+        "perGB per hour": {
+          "rateCode": "PBZNQUSEXZUC34C9.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0044450000",
+          "RegionlessRateCode": "1RUXomxlRehJL4_qDYlAegpNhkpLx07JCZTziaBNdeA"
+        },
+        "Storage per GB-Hours": {
+          "rateCode": "7KPDPTDSCT4J3Z64.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0001110000",
+          "RegionlessRateCode": "3sSEqgChxd_G0KiLVZv37vEyeBIbqlsp9draFxofWfU"
+        },
+        "ARM perCPU per hour": {
+          "rateCode": "XSZATS4VYMDC9CYN.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0323800000",
+          "RegionlessRateCode": "WPQ54cIaWTm0R0s3qm0RMQEC-vxqkG0t1jJ-1XVheAQ"
+        },
+        "ARM perGB per hour": {
+          "rateCode": "UNH9KPQP7W7C66C9.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0035600000",
+          "RegionlessRateCode": "iblRIEnj1ApzowkvUt4Fd5qJA2AzXpirnk1gb4WCGRs"
+        },
+        "perCPU per hour": {
+          "rateCode": "8CESGAFWKAJ98PME.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0404800000",
+          "RegionlessRateCode": "wGwRciunxTnOG8YUK-khS9OILkJUIpIejHQKr9hcI84"
+        }
+      },
+      "Africa (Cape Town)": {
+        "perGB per hour": {
+          "rateCode": "HY25SJNMPW9GDQNE.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0060000000",
+          "RegionlessRateCode": "1RUXomxlRehJL4_qDYlAegpNhkpLx07JCZTziaBNdeA"
+        },
+        "Storage per GB-Hours": {
+          "rateCode": "GSG33Q5TGCFJ79QE.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0001450000",
+          "RegionlessRateCode": "3sSEqgChxd_G0KiLVZv37vEyeBIbqlsp9draFxofWfU"
+        },
+        "ARM perCPU per hour": {
+          "rateCode": "J7G77BDQ2FFD3XKT.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0437200000",
+          "RegionlessRateCode": "WPQ54cIaWTm0R0s3qm0RMQEC-vxqkG0t1jJ-1XVheAQ"
+        },
+        "ARM perGB per hour": {
+          "rateCode": "HQTWN8RHZ6MJHKFK.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0048000000",
+          "RegionlessRateCode": "iblRIEnj1ApzowkvUt4Fd5qJA2AzXpirnk1gb4WCGRs"
+        },
+        "perCPU per hour": {
+          "rateCode": "A9BU5A5463SKU9DX.JRTCKXETXF.6YS6EN2CT7",
+          "price": "0.0546000000",
+          "RegionlessRateCode": "wGwRciunxTnOG8YUK-khS9OILkJUIpIejHQKr9hcI84"
+        }
+      }
+    }
+  }
+]
