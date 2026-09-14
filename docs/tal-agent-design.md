@@ -22,15 +22,15 @@ It is not an agent. It cannot answer a question, cannot say anything about a
 game you imported, has no memory, and cannot look at the diagram. Clicking any
 of the other ~600 nodes in a game produces silence.
 
-What *is* worth keeping from that work:
+What _is_ worth keeping from that work:
 
-| Asset | Verdict |
-|-------|---------|
-| `src/fixtures/analysis/*.json` | **Keep.** Seeds IndexedDB so bundled games open in ~3s instead of ~25s. Unrelated to narration and independently valuable |
-| `src/lib/tal.ts` (101 lines) | **Keep and grow.** The payload builder is the foundation of the read tools |
-| `src/lib/san.ts` | **Keep.** UCI to SAN conversion is load-bearing everywhere |
-| `scripts/generate-tal.mjs` | **Repurpose.** Becomes the offline evaluation harness, not a content pipeline |
-| `src/fixtures/tal-narration.json` | **Demote.** See §8 |
+| Asset                             | Verdict                                                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `src/fixtures/analysis/*.json`    | **Keep.** Seeds IndexedDB so bundled games open in ~3s instead of ~25s. Unrelated to narration and independently valuable |
+| `src/lib/tal.ts` (101 lines)      | **Keep and grow.** The payload builder is the foundation of the read tools                                                |
+| `src/lib/san.ts`                  | **Keep.** UCI to SAN conversion is load-bearing everywhere                                                                |
+| `scripts/generate-tal.mjs`        | **Repurpose.** Becomes the offline evaluation harness, not a content pipeline                                             |
+| `src/fixtures/tal-narration.json` | **Demote.** See §8                                                                                                        |
 
 ## 2. What Tal becomes
 
@@ -80,13 +80,13 @@ Four kinds. Names are indicative.
 
 ### Read
 
-| Tool | Returns |
-|------|---------|
-| `getPosition(nodeId)` | FEN, SAN, side to move, check/mate/draw, legal replies, piece placement (see §4.1) |
-| `getAnalysis(nodeId)` | Retained candidates with SAN, rank, score, achieved depth, PV |
-| `getPath(nodeId)` | Moves from the root, in SAN |
+| Tool                  | Returns                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------- |
+| `getPosition(nodeId)` | FEN, SAN, side to move, check/mate/draw, legal replies, piece placement (see §4.1)                       |
+| `getAnalysis(nodeId)` | Retained candidates with SAN, rank, score, achieved depth, PV                                            |
+| `getPath(nodeId)`     | Moves from the root, in SAN                                                                              |
 | `findNodes(criteria)` | Node ids matching: outside-the-shortlist, eval swing above N, checks, shared junctions, branch endpoints |
-| `getGame()` | Headers, result, move count, analysis status |
+| `getGame()`           | Headers, result, move count, analysis status                                                             |
 
 `findNodes` is the tool that makes "where did I go wrong?" answerable. Without
 it Tal can only discuss what the user already clicked.
@@ -136,9 +136,9 @@ chess.js replay. This is cheap and it is a prerequisite, not a nice-to-have.
 
 A chatbot returns a block of text. Tal performs a walkthrough:
 
-> *"Look at move 21."* → **pan** → *"He gives the knight here."* → **arrow** →
-> *"The engine hates it for four plies."* → **circle three nodes** →
-> *"Then it doesn't."*
+> _"Look at move 21."_ → **pan** → _"He gives the knight here."_ → **arrow** →
+> _"The engine hates it for four plies."_ → **circle three nodes** →
+> _"Then it doesn't."_
 
 Text, mark, pause, pan, text: interleaved and **ordered**. That ordering is the
 difference between someone showing you something and someone captioning it.
@@ -193,9 +193,9 @@ surface. This costs little and keeps the principle honest.
 
 Recorded deliberately rather than drifted into. `SPEC.md` §1 "Not goals" lists:
 
-| Non-goal | Status |
-|----------|--------|
-| LLM commentary | **Overridden.** Already overridden by PR #9; this extends it |
+| Non-goal                                    | Status                                                                       |
+| ------------------------------------------- | ---------------------------------------------------------------------------- |
+| LLM commentary                              | **Overridden.** Already overridden by PR #9; this extends it                 |
 | Annotation editing / commenting / authoring | **Overridden** for ephemeral marks; persistent annotation remains a non-goal |
 
 `SPEC.md` §1 also carries the Visual priority rule, which forbids "ornamental
@@ -222,22 +222,22 @@ narrower job.
 `generate-tal.mjs` additionally becomes the **offline evaluation harness**: run
 the agent against known positions and check its claims against the data. That
 matters because the unresolved question from the build day is whether Tal is
-*right* or merely fluent, and only a harness answers it.
+_right_ or merely fluent, and only a harness answers it.
 
 ## 9. Build order
 
 Each slice ends demoable and committed. Gates, not phases.
 
-| Slice | Work | Ends when |
-|-------|------|-----------|
+| Slice  | Work                                                                                                    | Ends when                                                                         |
+| ------ | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | **S1** | `getPosition` with structured piece placement (§4.1), plus read tools over the existing payload builder | Tal answers a question about a selected node with real data, plain text, no marks |
-| **S2** | Agent loop: tool definitions, streaming, conversation state, BYOK key handling in `sessionStorage` | Multi-turn. "Why?" works |
-| **S3** | `findNodes` | "Where did I go wrong?" answered without the user clicking first |
-| **S4** | Mark layer as a **user feature**: arrows, circles, labels over the SVG | A person can mark up their own diagram |
-| **S5** | Timeline player: ordered playback of interleaved text and tool calls, with interrupt | Tal performs a walkthrough |
-| **S6** | View tools and `explore`, with confirmation on spend | Tal drives the app |
-| **S7** | Character: sprite, speech bubble, proactive triggers | Tal has a face |
-| **S8** | Voice, via the Web Speech API for input and output | Tal listens and speaks |
+| **S2** | Agent loop: tool definitions, streaming, conversation state, BYOK key handling in `sessionStorage`      | Multi-turn. "Why?" works                                                          |
+| **S3** | `findNodes`                                                                                             | "Where did I go wrong?" answered without the user clicking first                  |
+| **S4** | Mark layer as a **user feature**: arrows, circles, labels over the SVG                                  | A person can mark up their own diagram                                            |
+| **S5** | Timeline player: ordered playback of interleaved text and tool calls, with interrupt                    | Tal performs a walkthrough                                                        |
+| **S6** | View tools and `explore`, with confirmation on spend                                                    | Tal drives the app                                                                |
+| **S7** | Character: sprite, speech bubble, proactive triggers                                                    | Tal has a face                                                                    |
+| **S8** | Voice, via the Web Speech API for input and output                                                      | Tal listens and speaks                                                            |
 
 S7 can be **authored** in parallel from the start; it merely must not be
 **built into the app** before S5.
@@ -256,9 +256,9 @@ S7 can be **authored** in parallel from the start; it merely must not be
 
 ## 11. Open questions
 
-| # | Question | Why it matters |
-|---|----------|----------------|
-| Q1 | Does Tal live inside the paper aesthetic, or break it? | Decides the sprite, the bubble, the mark styling, and how much of the Visual priority rule is torn up. Unresolved, and it blocks S7, not S1 |
-| Q2 | Direct action or propose-and-confirm? | Leaning: direct for view changes, confirm for `explore`, which spends compute |
-| Q3 | What is in the knowledge layer? | Layer 2 is undesigned. Openings, Tal's own published annotations, pattern vocabulary. Note that the Tal books in `~/Downloads` are pirated copies and are not a usable source for anything published |
-| Q4 | Is Tal right, or fluent? | Still unanswered from the build day. §8's harness is the only way to find out, and it should exist before the character work makes it harder to change his voice |
+| #   | Question                                               | Why it matters                                                                                                                                                                                       |
+| --- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q1  | Does Tal live inside the paper aesthetic, or break it? | Decides the sprite, the bubble, the mark styling, and how much of the Visual priority rule is torn up. Unresolved, and it blocks S7, not S1                                                          |
+| Q2  | Direct action or propose-and-confirm?                  | Leaning: direct for view changes, confirm for `explore`, which spends compute                                                                                                                        |
+| Q3  | What is in the knowledge layer?                        | Layer 2 is undesigned. Openings, Tal's own published annotations, pattern vocabulary. Note that the Tal books in `~/Downloads` are pirated copies and are not a usable source for anything published |
+| Q4  | Is Tal right, or fluent?                               | Still unanswered from the build day. §8's harness is the only way to find out, and it should exist before the character work makes it harder to change his voice                                     |
