@@ -1,41 +1,33 @@
 # Tal: design for an in-app agent
 
-Status: proposed. Nothing here is built beyond the stub described in §1.
-Written 2026-09-14, against `main` at `1845861`.
+Status: proposed, and **substantially corrected** after an adversarial review on
+2026-09-15 that ran a live experiment against the model. Written against `main`
+at `1845861`. Nothing beyond the read tools in PR #14 is built.
 
-This document supersedes the narration feature shipped in PR #9 as a direction,
-not as a criticism of it: that was built inside a seventy-minute window and did
-its job. The evidence behind several decisions here lives in the
-[build-day dossier](https://github.com/jeanluciradukunda/personal-brain)
-(personal vault, `docs/demo-days/2026-09-12-claude-fable-51-cape-town/`).
+The first draft of this document was wrong about how the Messages API works, and
+several of its numbers were wrong. Corrections are marked in §12 rather than
+quietly edited, because the reasoning that produced them is worth not repeating.
 
 ---
 
-## 1. What exists today, stated plainly
+## 1. What exists today
 
-`src/fixtures/tal-narration.json` is **a lookup table of thirty pre-generated
-strings**, keyed by game id then node id, covering ten hand-picked nodes in each
-of three bundled games. `src/components/TalPanel.tsx` (26 lines) renders the
-string for the selected node, or nothing.
+`src/fixtures/tal-narration.json` holds **thirty pre-generated strings**, ten per
+bundled game, all on trunk nodes. `src/components/TalPanel.tsx` (26 lines)
+renders the one matching the selected node, or nothing.
 
-It is not an agent. It cannot answer a question, cannot say anything about a
-game you imported, has no memory, and cannot look at the diagram. Clicking any
-of the other ~600 nodes in a game produces silence.
+It cannot answer a question, cannot speak about an imported game, has no memory,
+and cannot see the diagram.
 
-What _is_ worth keeping from that work:
-
-| Asset                             | Verdict                                                                                                                   |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `src/fixtures/analysis/*.json`    | **Keep.** Seeds IndexedDB so bundled games open in ~3s instead of ~25s. Unrelated to narration and independently valuable |
-| `src/lib/tal.ts` (101 lines)      | **Keep and grow.** The payload builder is the foundation of the read tools                                                |
-| `src/lib/san.ts`                  | **Keep.** UCI to SAN conversion is load-bearing everywhere                                                                |
-| `scripts/generate-tal.mjs`        | **Repurpose.** Becomes the offline evaluation harness, not a content pipeline                                             |
-| `src/fixtures/tal-narration.json` | **Demote.** See §8                                                                                                        |
+| Asset                                         | Verdict                                                                                                                                                                                                                  |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/fixtures/analysis/*.json`                | **Keep**, with a caveat: every one of the 220 bundled searches ran at 400 ms and **219 of 220 failed to reach the requested depth 20** (achieved 10–19). The seed makes bundled games open fast by freezing them shallow |
+| `src/lib/tal.ts`, `src/lib/san.ts`            | **Keep**                                                                                                                                                                                                                 |
+| `src/lib/talTools.ts`, `talAgent.ts` (PR #14) | **Keep, with the fixes in §10**                                                                                                                                                                                          |
+| `scripts/generate-tal.mjs`                    | **Repurpose**, see §8                                                                                                                                                                                                    |
+| `src/fixtures/tal-narration.json`             | **Demote**, see §8                                                                                                                                                                                                       |
 
 ## 2. What Tal becomes
-
-Three layers, built in dependency order. The order is about dependency, not
-importance: the character track can be authored in parallel from day one.
 
 ```mermaid
 flowchart TB
@@ -49,216 +41,227 @@ flowchart TB
   classDef l3 stroke:#8250df,stroke-width:2px,fill:#f5f0ff,color:#111
 ```
 
-Building 3 before 1 produces a puppet: a beautiful animated character reading a
-lookup table. Do not.
+Dependency order, not importance. Building 3 first produces a puppet.
 
-## 3. The design principle
+## 3. The rule (demoted from a principle)
 
-> **Tal's tools are the app's own actions. If a person cannot do it by clicking,
-> Tal cannot do it either.**
+The first draft said: _"Tal's tools are the app's own actions. If a person cannot
+do it by clicking, Tal cannot either."_
 
-He selects nodes, presses Explore, unfolds a branch, steps the replay, pans the
-diagram. Three consequences, each of which resolves a problem that otherwise
-needs solving separately:
+**That is false in this design's own terms.** `findNodes` has no user equivalent,
+and the draft advertised exactly that as its selling point. `explore(nodeId,
+depth)` takes a depth argument no click can express; the UI offers a two-option
+millisecond profile. So the principle was a slogan that generated scope.
 
-**He cannot invent.** A tool call returns real application state or nothing, so
-his claims are anchored to the same data the user can see. This is a far better
-answer to confabulation than prompt rules, which were the previous defence.
+The narrower version is checkable and worth keeping:
 
-**There is no second implementation.** No parallel "Tal rendering" path to drift
-from the real one.
+> **Tal may only reference application state a user can also reach.**
 
-**Watching him is a tutorial.** "Press Explore here, I want to see further"
-teaches the app while he coaches the chess.
-
-The principle has one deliberate consequence, handled in §6: if Tal draws arrows
-on the diagram, then **arrows must become a user feature**, not a Tal power.
+Every move Tal names must correspond to a node in `graph.byId` that is actually
+drawn. §10 makes that a test rather than an aspiration, which is the only
+enforcement it will ever have.
 
 ## 4. The tool surface
 
-Four kinds. Names are indicative.
-
 ### Read
 
-| Tool                  | Returns                                                                                                  |
-| --------------------- | -------------------------------------------------------------------------------------------------------- |
-| `getPosition(nodeId)` | FEN, SAN, side to move, check/mate/draw, legal replies, piece placement (see §4.1)                       |
-| `getAnalysis(nodeId)` | Retained candidates with SAN, rank, score, achieved depth, PV                                            |
-| `getPath(nodeId)`     | Moves from the root, in SAN                                                                              |
-| `findNodes(criteria)` | Node ids matching: outside-the-shortlist, eval swing above N, checks, shared junctions, branch endpoints |
-| `getGame()`           | Headers, result, move count, analysis status                                                             |
-
-`findNodes` is the tool that makes "where did I go wrong?" answerable. Without
-it Tal can only discuss what the user already clicked.
+`getGame`, `getPosition`, `getPath`, `getAnalysis`, `findNodes`.
 
 ### Act
 
-`select(nodeId)`, `replayTo(ply)`, `unfold(nodeId)`, `setCheckMode(mode)`.
+`select`, `replayTo`, `unfold`, `setCheckMode`.
 
 ### View
 
-`panTo(nodeId)`, `zoomTo(region)`, `fitToBranch(nodeId)`.
+`panTo`, `zoomTo`, `fitToBranch`.
 
-Pan and zoom already exist as scroll and drag, so these are wiring rather than
-new capability.
+### Mark (ephemeral)
 
-### Mark (ephemeral, see §5)
-
-`arrow(fromId, toId)`, `circle(nodeId)`, `label(nodeId, text)`,
-`emphasise(nodeIds)`, `clearMarks()`.
-
-Every node carries `x` and `y` from the Graphviz layout, so marks are paths in
-the existing SVG coordinate space.
+`arrow`, `circle`, `label`, `emphasise`, `clearMarks`.
 
 ### Spend
 
-`explore(nodeId, depth)` runs a **deeper engine search**. It is the only tool
-that costs the user compute, and the only one that should ask before acting.
+`explore(nodeId)`. **Depth is not an argument.** It matches the app's own
+profile, because the app has no per-search depth control to expose.
 
-It is also the most interesting tool in the set. Tal asking for a deeper search
-because he does not believe a depth-13 number is completely in character, and it
-is the application's actual answer to the shallow-depth problem that nearly sank
-the demo: rather than arguing from a 400 ms result, he can go and look.
+### 4.1 Piece identity — closed
 
-### 4.1 One real gap
+The app discards `.piece`, `.captured` and `.flags`, keeping only `.san`
+(`src/lib/evolution.ts:62`, and again at `src/lib/san.ts:9`). PR #14 recovers it
+at the read layer by replaying from `game.initialFen` (`talTools.ts:23-28`),
+which is the same pattern `ChessBoard.tsx:61` already uses. Closed.
 
-The app **discards piece identity**. `chess.js` returns `.piece`, `.captured`
-and `.flags`; `src/lib/evolution.ts:62` keeps only `.san`. Piece placement
-survives only inside the raw FEN string.
+### 4.2 Coordinates do not imply a glyph
 
-A commentator can work from SAN. A coach talking about what is happening on the
-squares cannot. `getPosition` must return structured placement, recovered by a
-chess.js replay. This is cheap and it is a prerequisite, not a nice-to-have.
+The first draft claimed marks are trivial because "every node carries x and y".
+Coordinates exist for nodes that are **never drawn**. Three gates decide whether
+a glyph exists: pruning (`evolution.ts:93-94`), the vertex keep set and
+degree-two compression (`evolutionLayout.ts:98-128`), and `visibleAt`
+(`EvolutionMarks.tsx:36-39`). Merged vertices make the rendered `data-position`
+depend on the current selection (`EvolutionMarks.tsx:43-45`).
 
-## 5. Output is a timeline, not a message
+**A mark must therefore resolve to a drawn glyph, not to a node id**, and fail
+visibly when it cannot. The score chart has its own Y space
+(`EvolutionDiagram.tsx:153`) and is not the same coordinate system.
 
-**This is the most important architectural decision in the document.**
+### 4.3 Where marks live
 
-A chatbot returns a block of text. Tal performs a walkthrough:
+Open PR #12 moves the graph to WebGL. An SVG overlay with an identical `viewBox`
+survives in **both** modes, pinned by `src/lib/webgl/viewBox.ts`, with a working
+precedent at `EvolutionDiagram.tsx:125-135`. So marks stay SVG, drawn in graph
+units, with `pointerEvents="none"` or they break the drag guard at `:97`.
 
-> _"Look at move 21."_ → **pan** → _"He gives the knight here."_ → **arrow** →
-> _"The engine hates it for four plies."_ → **circle three nodes** →
-> _"Then it doesn't."_
+Note the naming collision: `src/components/EvolutionMarks.tsx` already exists and
+is the glyph renderer. The mark layer needs a different name.
 
-Text, mark, pause, pan, text: interleaved and **ordered**. That ordering is the
-difference between someone showing you something and someone captioning it.
+## 5. How a walkthrough actually works
+
+**The first draft was wrong here, and this is the correction that matters most.**
+
+It claimed one stream carrying text, then a tool call, then more text, in order.
+The Messages API does not do that. `stop_reason: "tool_use"` **ends the assistant
+turn**; prose after a tool call requires a new request seeded with `tool_result`.
+And multiple `tool_use` blocks in one turn are **parallel calls**, not an ordered
+script.
+
+Confirmed live on `claude-fable-5-1`:
+
+| Observation                    | Result                                                  |
+| ------------------------------ | ------------------------------------------------------- |
+| Tool use works                 | `stop_reason=tool_use`, clean input, 3/3 runs           |
+| Turn 1 for a one-tool question | **Tool only. No text at all**                           |
+| Parallel blocks in one turn    | 2, 3 and 4 observed                                     |
+| Block ordering within a turn   | Strictly nested, never interleaved across indices       |
+| Text with a prompt instruction | Streams progressively over ~926 ms, then the tool calls |
+
+So a walkthrough is **several round trips**, each re-sending the transcript:
 
 ```mermaid
 sequenceDiagram
   participant U as User
-  participant T as Tal agent
-  participant API as Claude
-  participant D as Diagram
-  U->>T: "where did I lose it?"
-  T->>API: stream, tools available
-  API-->>T: text block
-  T-->>U: render text
-  API-->>T: tool_use panTo
-  T->>D: pan
-  API-->>T: text block
-  T-->>U: render text
-  API-->>T: tool_use arrow
-  T->>D: draw arrow
-  Note over T,D: blocks play IN ORDER, paced against the prose
-  U->>T: interrupt
-  T->>D: clearMarks, stop
+  participant App
+  participant API as claude-fable-5-1
+  U->>App: "where did I lose it?"
+  App->>API: request 1
+  API-->>App: text ("let me look at 21 and its forks") + N parallel tool_use
+  Note over API: stop_reason = tool_use, TURN ENDS
+  App->>App: run tools, play marks paced against the text
+  App->>API: request 2, transcript + all tool_result
+  API-->>App: prose, or more tool_use
+  Note over App,API: repeat until stop_reason = end_turn
 ```
 
-The API streams content blocks in order, so the implementation is to **play them
-sequentially**, pacing marks against the prose, rather than collecting the whole
-response and applying every tool call at once.
+Two consequences the first draft missed:
 
-Retrofitting ordering onto a collect-then-apply implementation is painful. Build
-it this way from the start.
+**Interleaving is bought with a prompt, not with architecture.** One system line,
+_"first write one short sentence saying what you are about to look up"_, produces
+text-then-tools instead of tools-only. Without it the first turn is silent.
 
-If voice arrives later, the same timeline drives it, so the arrow lands on the
-word.
+**Streaming does not solve perceived latency.** Measured: 13.1 s, 19.4 s and
+14.1 s to first prose at `effort: "low"`, and the paragraph then arrives in a
+burst over 2–134 ms. The user watches a dead panel, then gets everything. The
+holding state has to be designed, not hand-waved at with "we stream it".
 
-## 6. Marks are ephemeral, and annotation is a user feature
+**Playback must be decoupled from ingestion.** Running tools inside the SSE read
+loop means a paused consumer stops draining the HTTP response. With `explore`
+that is up to a 60 s search plus a Graphviz re-layout while the connection is
+held open. Drain the stream into an ordered queue; play from the queue.
 
-**Ephemeral.** Marks live and die with the walkthrough. They are React state,
-cleared when it ends or the user interrupts. Nothing persists.
+## 6. Marks are ephemeral
 
-This is a deliberate scope decision and it removes a large branch of complexity:
-no data model change, nothing to save, share or migrate, and no coupling into
-the platform design in `docs/platform/`. A walkthrough is a performance, not a
-document.
+Marks live and die with the walkthrough. No persistence, no data model change,
+no coupling to `docs/platform/`.
 
-**But annotation itself ships as a user feature.** Per §3, Tal may not have
-powers the user lacks. So the mark layer is built for people first, and Tal is
-its first power user. Users get to mark up their own game; Tal uses the same
-surface. This costs little and keeps the principle honest.
+**The honest caveat**, which the first draft omitted: ephemerality also conceals
+two real problems. `explore` can delete the very nodes a mark points at
+(`evolution.ts:80`, `:93-94`), and a re-layout moves coordinates. A mark that
+vanishes in ten seconds hides that; a saved one would not.
 
-## 7. What this overrides in SPEC.md
+Annotation as a persistent _user_ feature is therefore **out of scope here**, not
+merely deferred. PGN already has `[%cal]` and `[%csl]` for it, and doing it
+properly means interop, not React state. §9's slice is Tal's marks only.
 
-Recorded deliberately rather than drifted into. `SPEC.md` §1 "Not goals" lists:
+## 7. What this overrides
 
-| Non-goal                                    | Status                                                                       |
-| ------------------------------------------- | ---------------------------------------------------------------------------- |
-| LLM commentary                              | **Overridden.** Already overridden by PR #9; this extends it                 |
-| Annotation editing / commenting / authoring | **Overridden** for ephemeral marks; persistent annotation remains a non-goal |
+| Source                   | Item                                                                             | Status                                                                                                                                                                   |
+| ------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SPEC.md:108`            | "LLM commentary"                                                                 | Overridden, already by PR #9                                                                                                                                             |
+| `SPEC.md:106`            | "Annotation editing / commenting / authoring"                                    | **Not overridden.** Tal's marks are ephemeral, not annotation                                                                                                            |
+| `SPEC.md:125-127`        | Visual priority rule                                                             | **Unresolved.** See Q1                                                                                                                                                   |
+| `artifacts/TAL-BRIEF.md` | "Let the model return node ids to highlight" is its **first** "do not build" row | **Overridden, deliberately.** The brief cut it for a 70-minute window, citing three silent failure modes. §4.2 and §10's test address those; the time constraint is gone |
+| `artifacts/TAL-BRIEF.md` | "Compute the judgement, ask the model to narrate it"                             | **Partially reversed today** by `getAnalysis` shipping raw `scoreCp`. §10 restores it                                                                                    |
 
-`SPEC.md` §1 also carries the Visual priority rule, which forbids "ornamental
-animation that makes the graph less like Figure 5". A floating animated
-character is in obvious tension with it. The tension is **not resolved by this
-document** and is the main open question in §11.
+## 8. The thirty strings, and the harness
 
-## 8. What happens to the thirty strings
+A static string has no tool calls, so it can never produce a walkthrough.
+**Demote, do not delete**: keyless visitors keep the pre-generated line on the
+curated nodes; a key unlocks the agent.
 
-`src/fixtures/tal-narration.json` cannot survive as-is: a static string has no
-tool calls, so it can never produce a walkthrough.
-
-**Decision: demote it to the keyless taster, do not delete it.**
-
-- **With a key**: the agent runs. Real walkthroughs, questions, marks, any game.
-- **Without a key**: the existing panel shows the pre-generated line for the ten
-  curated nodes per bundled game, with a clear "bring a key and Tal will talk
-  about your own games" affordance.
-
-This keeps the public deployment useful to someone who lands on it with no key,
-which is most visitors, and it keeps `scripts/generate-tal.mjs` alive with a
-narrower job.
-
-`generate-tal.mjs` additionally becomes the **offline evaluation harness**: run
-the agent against known positions and check its claims against the data. That
-matters because the unresolved question from the build day is whether Tal is
-_right_ or merely fluent, and only a harness answers it.
+`scripts/generate-tal.mjs` becomes the **scored evaluation harness**, and this is
+a slice (S0b), not a footnote. Its current `ask` mode is not that harness: it
+pre-appends every saved analysis up front, so its context shows roughly 8%
+engine coverage where the running app shows 1.7% at first click. An eval built
+on it would systematically overstate what Tal can see.
 
 ## 9. Build order
 
-Each slice ends demoable and committed. Gates, not phases.
+Every slice names **a component and a user gesture**, not a module. The first
+draft named modules in the Work column and user outcomes in the exit column,
+which is why PR #14 shipped libraries with nothing on screen.
 
-| Slice  | Work                                                                                                    | Ends when                                                                         |
-| ------ | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| **S1** | `getPosition` with structured piece placement (§4.1), plus read tools over the existing payload builder | Tal answers a question about a selected node with real data, plain text, no marks |
-| **S2** | Agent loop: tool definitions, streaming, conversation state, BYOK key handling in `sessionStorage`      | Multi-turn. "Why?" works                                                          |
-| **S3** | `findNodes`                                                                                             | "Where did I go wrong?" answered without the user clicking first                  |
-| **S4** | Mark layer as a **user feature**: arrows, circles, labels over the SVG                                  | A person can mark up their own diagram                                            |
-| **S5** | Timeline player: ordered playback of interleaved text and tool calls, with interrupt                    | Tal performs a walkthrough                                                        |
-| **S6** | View tools and `explore`, with confirmation on spend                                                    | Tal drives the app                                                                |
-| **S7** | Character: sprite, speech bubble, proactive triggers                                                    | Tal has a face                                                                    |
-| **S8** | Voice, via the Web Speech API for input and output                                                      | Tal listens and speaks                                                            |
+| Slice   | Work, including the component                                                                                          | Ends when                                                                    |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **S0a** | Fix `talAgent.ts` per §10. No new feature                                                                              | The failure modes in §10 have tests                                          |
+| **S0b** | Scored harness in `generate-tal.mjs`: run Tal over known positions, check every SAN against `graph.byId`, score claims | **Q4 is answered with a number**                                             |
+| **S1**  | `TalPanel.tsx` gains a question box and a key field (`sessionStorage`); wire `talTools` to live `useAnalysis` state    | A person types a question in the app and Tal answers about the selected node |
+| **S2**  | Transcript view in `TalPanel.tsx`; conversation state                                                                  | "Why?" works in the app                                                      |
+| **S3**  | `findNodes`, surfaced as suggested questions in the panel                                                              | "Where did I go wrong?" answered without clicking first                      |
+| **S4**  | `TalMarkLayer` sibling of `HitMarks` in `EvolutionDiagram.tsx`; resolve ids to drawn glyphs per §4.2                   | Tal's arrow lands on a glyph, and fails visibly when it cannot               |
+| **S5**  | Queue and player; camera lifted out of `EvolutionDiagram`                                                              | Tal performs a walkthrough and can be interrupted safely                     |
+| **S6**  | `explore` with confirmation                                                                                            | Tal spends compute only with a click                                         |
+| **S7**  | Character                                                                                                              | Blocked on Q1                                                                |
+| **S8**  | Voice                                                                                                                  | Chrome-only; verify before scoping                                           |
 
-S7 can be **authored** in parallel from the start; it merely must not be
-**built into the app** before S5.
+**S0a and S0b come before S1.** Q4 cannot be answered after the voice is fixed.
 
-## 10. Notes for implementation
+## 10. Required fixes to PR #14
 
-- Model, browser header, and the parameters that return 400 on Fable 5.1 are
-  recorded in `artifacts/TAL-BRIEF.md` §4. They are verified; do not correct
-  them from memory.
-- Forced `tool_choice` returns 400 on this model. Tools must be `auto`.
-- Voice input and output are free and native via the Web Speech API. No key, no
-  cost. Default synthesis voices are flat, so a real Tal voice needs a third
-  party.
-- The app is browser-only with no backend. BYOK is the only key model, and it is
-  consistent with the README's existing promise that nothing leaves the device.
+Each is a real failure observed or measured, not a style note.
+
+| Fix                                                                                         | Evidence                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Push tool results regardless of `stop_reason`, and drop `tool_use` blocks that never closed | `max_tokens` truncation mid-parallel-call leaves unanswered `tool_use` in history; replaying returns **400 `tool_use` ids were found without `tool_result` blocks`**. Answering only the complete ones still 400s. The conversation is unrecoverable |
+| Raise `max_tokens` well above 2048                                                          | One `effort: "low"` call spent **all 4096 output tokens on thinking** and produced no text. `effort` does not bound thinking                                                                                                                         |
+| Route `repliesFromHere` through `candidates()` (`semantics.ts:5-12`)                        | Measured **80 of 94** analysed nodes hand Tal 8 candidates where the graph draws 4–5. `TAL-BRIEF.md` forbids this in writing                                                                                                                         |
+| Add a test asserting every SAN the tools return resolves to a node in `graph.byId`          | The only mechanical enforcement §3 will ever have                                                                                                                                                                                                    |
+| Never emit UCI in a field named `san`                                                       | `talTools.ts:114` falls back to `line.moves[0]`                                                                                                                                                                                                      |
+| `try`/`catch` around `replay()` and the `JSON.parse` of partial tool input                  | Neither is guarded; both throw out of the generator                                                                                                                                                                                                  |
+| Return `is_error: true` on tool errors                                                      | `{"error":"No node p999"}` is currently indistinguishable from data                                                                                                                                                                                  |
+| Handle `stop_reason` of `refusal` and `max_tokens`                                          | Neither is checked                                                                                                                                                                                                                                   |
+| Emit history on abort                                                                       | Interrupt currently loses the transcript                                                                                                                                                                                                             |
+| Restrict Tal to nodes with engine data                                                      | **92% of addressable ids** return null for both `decision` and `repliesFromHere`. A coach saying "I can't see that" on 92% of clicks is worse than silence                                                                                           |
 
 ## 11. Open questions
 
-| #   | Question                                               | Why it matters                                                                                                                                                                                       |
-| --- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Q1  | Does Tal live inside the paper aesthetic, or break it? | Decides the sprite, the bubble, the mark styling, and how much of the Visual priority rule is torn up. Unresolved, and it blocks S7, not S1                                                          |
-| Q2  | Direct action or propose-and-confirm?                  | Leaning: direct for view changes, confirm for `explore`, which spends compute                                                                                                                        |
-| Q3  | What is in the knowledge layer?                        | Layer 2 is undesigned. Openings, Tal's own published annotations, pattern vocabulary. Note that the Tal books in `~/Downloads` are pirated copies and are not a usable source for anything published |
-| Q4  | Is Tal right, or fluent?                               | Still unanswered from the build day. §8's harness is the only way to find out, and it should exist before the character work makes it harder to change his voice                                     |
+| #   | Question                                                                                                                                                                                                                                                                                                                              | Blocks                                             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Q1  | Does Tal live inside the paper aesthetic or break it?                                                                                                                                                                                                                                                                                 | S7 only                                            |
+| Q2  | Direct action, or propose and confirm?                                                                                                                                                                                                                                                                                                | S5. Leaning direct for view, confirm for `explore` |
+| Q3  | What is in the knowledge layer? No tool returns Tal's games, his annotations, or an opening name, and the prompt forbids saying anything a tool did not return. **As written, "Tal" cannot say anything Tal-shaped**, which leaves two catchphrases                                                                                   | Layer 2 entirely                                   |
+| Q4  | Is Tal right, or fluent?                                                                                                                                                                                                                                                                                                              | **S1 onward.** S0b answers it                      |
+| Q5  | Why `claude-fable-5-1` at $10/$50 per MTok, with no `cache_control` and the full transcript re-sent each turn, for four sentences? Sonnet 5 is $2/$10                                                                                                                                                                                 | S1                                                 |
+| Q6  | Is a coach the right investment at all? The engine reaches depth 10–19 and missed its requested depth in 219 of 220 bundled searches, whilst Lichess cloud eval is free at depth 40+. There is no `_headers` file in any branch; COOP/COEP plus multi-threaded Stockfish is about a day and sits upstream of every claim Tal can make | S5–S8                                              |
+
+## 12. Corrections to the first draft
+
+| Claim                                                                      | Correction                                                                                                                                                                              |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "~600 other nodes"                                                         | Wrong figure and wrong game. 619 is the unbundled control. Bundled games draw 684–1,315 glyphs over 2,568–5,422 addressable ids                                                         |
+| "~3s instead of ~25s"                                                      | Unsourced. Recorded unseeded times are 24.6 / 35.8 / 47.1 s                                                                                                                             |
+| Pan and zoom are "wiring"                                                  | No programmatic API exists. `camera` is private `useState`; a repo-wide grep for `createContext`, `forwardRef`, `useImperativeHandle` and `dispatchEvent` returns zero hits             |
+| §5's single ordered stream                                                 | Wrong about the API. Turns end at `tool_use`; multiple blocks are parallel                                                                                                              |
+| "Retrofitting ordering is painful, build it this way"                      | Advice against a non-problem, and it produced the fused ingest/playback shape that now needs undoing                                                                                    |
+| Marks are trivial because nodes carry x,y                                  | Coordinates exist for undrawn nodes. See §4.2                                                                                                                                           |
+| BYOK "consistent with the README's promise that nothing leaves the device" | `README.md:46` reads "No sign-in, API key or backend… analysis and cached games stay on your device." BYOK contradicts both halves. **The README must change before a key field ships** |
+| Voice is "free and native, no key, no cost"                                | Chrome-only in practice, and Chrome's recognition is server-backed, so speech leaves the device. Verify before S8                                                                       |
+| `generate-tal.mjs` "becomes" the harness                                   | It became an interactive REPL, which is the opposite. Now S0b                                                                                                                           |
