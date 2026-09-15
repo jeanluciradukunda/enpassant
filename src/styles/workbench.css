@@ -1210,3 +1210,54 @@
   display: block;
   font-weight: 500;
 }
+
+.tal-panel .tal-text {
+  margin: 8px 0;
+  line-height: 1.55;
+}
+.tal-panel .tal-step {
+  font-size: 10px;
+  opacity: 0.6;
+  margin: 4px 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tal-key,
+.tal-ask {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 10px 0 0;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.tal-key input,
+.tal-ask textarea {
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: inherit;
+  background: transparent;
+  border: 1px solid #18392340;
+  border-radius: 3px;
+  padding: 6px 8px;
+  resize: vertical;
+}
+.tal-ask button {
+  align-self: flex-start;
+  font: inherit;
+  font-size: 11px;
+  padding: 5px 10px;
+  border: 1px solid #183923;
+  border-radius: 3px;
+  background: #183923;
+  color: #f4f7f0;
+  cursor: pointer;
+}
+.tal-ask button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
