@@ -13,10 +13,19 @@ test('real Stockfish, fixed replay, branch exploration, board and cached reopen'
   const graph = page.getByTestId('evolution-marks');
   expect(await graph.locator('[data-played="false"]').count()).toBeGreaterThan(150);
   await expect(graph.locator('[data-played="true"]')).toHaveCount(42);
-  const bounds = (await page.getByTestId('evolution-graph').getAttribute('viewBox'))!
-    .split(' ')
-    .map(Number);
-  expect(bounds[2] / bounds[3]).toBeGreaterThan(3);
+  // Poll: the graph keeps growing for a beat after the status reads "Game analyzed",
+  // so a single read samples a moving target and lands short on a slow runner.
+  await expect
+    .poll(
+      async () => {
+        const bounds = (await page.getByTestId('evolution-graph').getAttribute('viewBox'))!
+          .split(' ')
+          .map(Number);
+        return bounds[2] / bounds[3];
+      },
+      { timeout: 15_000 },
+    )
+    .toBeGreaterThan(3);
   await expect(page.locator('[data-score-side]')).toHaveCount(2);
   expect(await graph.locator('[data-compressed="true"]').count()).toBeGreaterThan(20);
   await expect(page.getByTestId('live-detail')).toBeVisible();
