@@ -43,7 +43,7 @@
 
 The circles trace the played game. Squares mark alternative positions; dotted paths hold quiet sequences. Earlier branches stay rooted as new ones appear.
 
-**Runs in your browser.** No sign-in, API key or backend. Public imports contact the chess site; analysis and cached games stay on your device.
+**Runs in your browser.** No sign-in or backend. Public imports contact the chess site; analysis and cached games stay on your device. Asking Tal a question is optional and needs your own Anthropic API key, kept in the tab’s session storage and sent only to Anthropic.
 
 ## Start here
 
