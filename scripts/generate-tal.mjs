@@ -1,14 +1,23 @@
 // Tal's narration for the bundled games, generated ahead of time.
 //   node scripts/generate-tal.mjs analyses   # saved quick-profile searches -> src/fixtures/analysis/
 //   node scripts/generate-tal.mjs narrate    # payloads -> Claude -> src/fixtures/tal-narration.json
+//   node scripts/generate-tal.mjs ask botvinnik-tal-1960 p42 "Why give the knight?"
+//                                            # the agent, with its read tools, over saved analysis
 import { readFile, writeFile } from 'node:fs/promises';
 import { gunzipSync } from 'node:zlib';
 import { execFileSync } from 'node:child_process';
+import { setDefaultAutoSelectFamilyAttemptTimeout } from 'node:net';
 import { createServer } from 'vite';
 
+// Node gives each address family 250 ms to connect by default; from Cape Town
+// the API handshake alone can take longer, which surfaces as ETIMEDOUT.
+setDefaultAutoSelectFamilyAttemptTimeout(3000);
+
 const mode = process.argv[2];
-if (!['analyses', 'narrate'].includes(mode)) {
-  console.error('usage: node scripts/generate-tal.mjs <analyses|narrate>');
+if (!['analyses', 'narrate', 'ask'].includes(mode)) {
+  console.error(
+    'usage: node scripts/generate-tal.mjs <analyses|narrate> | ask <game-id> <node-id> "<question>"',
+  );
   process.exit(1);
 }
 
@@ -127,6 +136,32 @@ try {
       await writeFile(output, JSON.stringify(existing, null, 2) + '\n');
     }
     execFileSync('corepack', ['pnpm', 'exec', 'prettier', '--write', output], { stdio: 'inherit' });
+  }
+
+  if (mode === 'ask') {
+    const [, , , gameId, nodeId, question = 'What is happening here?'] = process.argv;
+    const study = saved.get(gameId);
+    if (!study) throw new Error(`Unknown game ${gameId}; one of ${[...saved.keys()].join(', ')}`);
+    const { EvolutionBuilder } = await load('/src/lib/evolution.ts');
+    const { askTal } = await load('/src/lib/talAgent.ts');
+    const { moveLabel } = await load('/src/lib/games.ts');
+    const builder = new EvolutionBuilder(study.game);
+    const analysis = new Map(study.entries);
+    for (const [id, result] of analysis) builder.append(id, result, 20);
+    const node = builder.get(nodeId);
+    if (!node) throw new Error(`No node ${nodeId}`);
+    const ctx = { game: study.game, node: (id) => builder.get(id), analysis };
+    const auth = await credentials();
+    const prompt = `The user has selected node ${nodeId} (${moveLabel(node)}) in ${study.game.headers.White} vs ${study.game.headers.Black}. Question: ${question}`;
+    console.log(`> ${prompt}\n`);
+    for await (const event of askTal(ctx, prompt, { key: auth['x-api-key'] })) {
+      if (event.type === 'text') process.stdout.write(event.text);
+      else if (event.type === 'tool_call')
+        console.log(`\n  [tool] ${event.name}(${JSON.stringify(event.input)})`);
+      else if (event.type === 'tool_result')
+        console.log(`  [result] ${JSON.stringify(event.result).slice(0, 160)}…\n`);
+      else if (event.type === 'done') console.log(`\n\n[${event.stopReason}]`);
+    }
   }
 
   if (mode === 'analyses') {
