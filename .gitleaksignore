@@ -1,0 +1,7 @@
+# Reviewed false positives (git-bundle-backup), one gitleaks fingerprint per line: sha256 digests in research evidence manifests
+76438ac32a7160bbcad0ef5ca962d97c046e7e6f:docs/platform/research/evidence/final-validation.json:generic-api-key:51
+76438ac32a7160bbcad0ef5ca962d97c046e7e6f:docs/platform/research/evidence/r1-input-manifest.json:generic-api-key:12
+76438ac32a7160bbcad0ef5ca962d97c046e7e6f:docs/platform/research/evidence/r1-input-manifest.json:generic-api-key:23
+9a406eeb81f207b9b62c1effe1a77fdc976d04a6:docs/platform/research/evidence/final-validation.json:generic-api-key:51
+9a406eeb81f207b9b62c1effe1a77fdc976d04a6:docs/platform/research/evidence/r1-input-manifest.json:generic-api-key:12
+9a406eeb81f207b9b62c1effe1a77fdc976d04a6:docs/platform/research/evidence/r1-input-manifest.json:generic-api-key:23
