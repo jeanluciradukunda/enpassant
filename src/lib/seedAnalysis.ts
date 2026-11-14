@@ -31,9 +31,14 @@ export function seedEntries(game: Game, saved: SavedAnalysis): [string, Analysis
   });
 }
 
+/** The bundled study this game is. A matching id is only a 32-bit hash, so the normalised PGN must match too. */
+export function bundledStudyFor(game: Game) {
+  return TAL_GAMES.find((study) => parseGame(study.pgn).pgn === game.pgn);
+}
+
 export async function seedBundledAnalysis(game: Game, profile: AnalysisProfile) {
   if (profile !== 'quick') return 0;
-  const study = TAL_GAMES.find((study) => parseGame(study.pgn).id === game.id);
+  const study = bundledStudyFor(game);
   const loader = study && fixtures[study.id];
   if (!loader) return 0;
   let written = 0;
