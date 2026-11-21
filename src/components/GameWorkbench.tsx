@@ -19,7 +19,7 @@ export function GameWorkbench(props: WorkbenchProps) {
   const [profile, setProfile] = useState<AnalysisProfile>('quick');
   return (
     <Workbench
-      key={`${props.game.id}:${profile}`}
+      key={`${profile}:${props.game.pgn}`}
       {...props}
       profile={profile}
       onProfile={setProfile}
