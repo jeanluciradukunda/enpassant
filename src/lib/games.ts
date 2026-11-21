@@ -70,14 +70,25 @@ export function parseGame(pgn: string): Game {
   return { id: (hash >>> 0).toString(36), pgn: normalized, headers, initialFen, positions };
 }
 
+/** Games in a collection start at a tag line that follows move text; no tag is required to come first. */
+function splitGames(pgn: string): string[] {
+  const parts: string[][] = [[]];
+  let inMoves = false;
+  for (const line of pgn.split(/\r?\n/)) {
+    const tag = /^\[\w+\s+".*"\]$/.test(line.trim());
+    if (tag && inMoves) {
+      parts.push([]);
+      inMoves = false;
+    } else if (!tag && line.trim()) inMoves = true;
+    parts.at(-1)!.push(line);
+  }
+  return parts.map((part) => part.join('\n')).filter((part) => part.trim());
+}
+
 export function parseGames(pgn: string): Game[] {
   if (new TextEncoder().encode(pgn).byteLength > MAX_PGN_BYTES)
     throw new Error('Import a PGN file under 2 MB.');
-  // PGN export collections conventionally start each game with an Event tag.
-  const parts = pgn
-    .trim()
-    .split(/(?=^\[Event\s+")/m)
-    .filter((part) => part.trim());
+  const parts = splitGames(pgn);
   if (parts.length > 100) throw new Error('Import a collection of at most 100 games.');
   return (parts.length ? parts : [pgn]).map(parseGame);
 }

@@ -34,6 +34,13 @@ describe('legal game reconstruction', () => {
     expect(() => parseGame('[Variant "Chess960"]\n\n1. e4 *')).toThrow('standard chess');
     expect(parseGames('[Event "One"]\n\n1. e4 *\n\n[Event "Two"]\n\n1. d4 *')).toHaveLength(2);
   });
+  it('reads games whose first tag is not Event, alone or in a collection', () => {
+    expect(parseGames('[Site "Club"]\n[Event "Round 1"]\n\n1. e4 *')).toHaveLength(1);
+    const untitled = (white: string) => `[White "${white}"]\n[Black "B"]\n\n1. e4 e5 1-0`;
+    const games = parseGames(`${untitled('A')}\r\n\r\n${untitled('C')}`);
+    expect(games.map((game) => game.headers.White)).toEqual(['A', 'C']);
+    expect(parseGames('1. e4 {[%clk 0:05:00]} e5\n{\n[%eval 0.3]\n} 2. Nf3 *')).toHaveLength(1);
+  });
 });
 
 describe('engine data and path identity', () => {
