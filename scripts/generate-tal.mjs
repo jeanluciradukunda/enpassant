@@ -1,14 +1,26 @@
 // Tal's narration for the bundled games, generated ahead of time.
 //   node scripts/generate-tal.mjs analyses   # saved quick-profile searches -> src/fixtures/analysis/
 //   node scripts/generate-tal.mjs narrate    # payloads -> Claude -> src/fixtures/tal-narration.json
-import { readFile, writeFile } from 'node:fs/promises';
+//   node scripts/generate-tal.mjs ask botvinnik-tal-1960 p42 "Why give the knight?"
+//                                            # one question, printed as it streams
+//   node scripts/generate-tal.mjs eval [n]   # scored harness: is Tal right, or fluent?
+//                                            # every move/square he names is checked against
+//                                            # what his tools returned; writes artifacts/tal-eval/
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { gunzipSync } from 'node:zlib';
 import { execFileSync } from 'node:child_process';
+import { setDefaultAutoSelectFamilyAttemptTimeout } from 'node:net';
 import { createServer } from 'vite';
 
+// Node gives each address family 250 ms to connect by default; from Cape Town
+// the API handshake alone can take longer, which surfaces as ETIMEDOUT.
+setDefaultAutoSelectFamilyAttemptTimeout(3000);
+
 const mode = process.argv[2];
-if (!['analyses', 'narrate'].includes(mode)) {
-  console.error('usage: node scripts/generate-tal.mjs <analyses|narrate>');
+if (!['analyses', 'narrate', 'ask', 'eval'].includes(mode)) {
+  console.error(
+    'usage: node scripts/generate-tal.mjs <analyses|narrate> | ask <game-id> <node-id> "<question>"',
+  );
   process.exit(1);
 }
 
@@ -129,6 +141,118 @@ try {
     execFileSync('corepack', ['pnpm', 'exec', 'prettier', '--write', output], { stdio: 'inherit' });
   }
 
+  if (mode === 'eval') {
+    const perGame = Number(process.argv[3] ?? 4);
+    const { EvolutionBuilder } = await load('/src/lib/evolution.ts');
+    const { askTal } = await load('/src/lib/talAgent.ts');
+    const { talPayload } = await load('/src/lib/tal.ts');
+    const { moveLabel } = await load('/src/lib/games.ts');
+    const auth = await credentials();
+    const rows = [];
+    for (const study of TAL_GAMES) {
+      const { game, entries } = saved.get(study.id);
+      // The same state the app holds once "Game analyzed" shows: every played
+      // root searched, nothing else. No extra searches are appended.
+      const builder = new EvolutionBuilder(game);
+      const analysis = new Map(entries);
+      for (const [id, result] of analysis) builder.append(id, result, 20);
+      const ctx = { game, node: (id) => builder.get(id), analysis };
+      const payloads = game.positions.slice(1).flatMap((pos) => {
+        const node = builder.get(pos.id);
+        const parent = builder.get(node.parent);
+        const payload = talPayload(game, node, parent, analysis.get(parent.id));
+        return payload ? [{ id: pos.id, payload }] : [];
+      });
+      const chosen = chooseNodes(payloads, `p${study.checkpoint}`, perGame);
+      // One predicted node too: Tal must cope with a position the engine never searched from.
+      const checkpoint = builder.get(`p${study.checkpoint}`);
+      const alternative = [...analysis.get(checkpoint.parent).lines]
+        .map((line) => `${checkpoint.parent}/${line.moves[0]}`)
+        .find((id) => builder.get(id) && !builder.get(id).played);
+      const targets = [...chosen.map((c) => c.id), ...(alternative ? [alternative] : [])];
+      for (const nodeId of targets) {
+        const node = builder.get(nodeId);
+        const prompt = `The user has selected node ${nodeId} (${moveLabel(node)}) in ${game.headers.White} vs ${game.headers.Black}. Question: What happened here, and what does the engine make of it?`;
+        let text = '';
+        const returned = {
+          san: new Set(),
+          squares: new Set(),
+          depths: new Set(),
+          errors: 0,
+          calls: 0,
+        };
+        let stopReason = 'unknown';
+        for await (const event of askTal(ctx, prompt, { key: auth['x-api-key'] })) {
+          if (event.type === 'text') text += event.text;
+          else if (event.type === 'tool_result') {
+            returned.calls++;
+            if (event.isError) returned.errors++;
+            harvest(event.result, returned);
+          } else if (event.type === 'done') stopReason = event.stopReason;
+        }
+        const score = scoreClaims(text, returned, node);
+        rows.push({
+          game: study.id,
+          nodeId,
+          label: moveLabel(node),
+          played: node.played,
+          stopReason,
+          ...score,
+          text,
+        });
+        console.log(
+          `${study.id} ${nodeId} ${moveLabel(node)}: ${score.supportedMoves}/${score.moveClaims} moves, ${score.supportedSquares}/${score.squareClaims} squares, ${score.depthClaims.length ? `depth ${score.depthOk ? 'ok' : 'WRONG'}` : 'no depth claim'}${score.mateClaim ? ', MATE CLAIM' : ''}${score.unsupported.length ? `  unsupported: ${score.unsupported.join(' ')}` : ''}`,
+        );
+      }
+    }
+    const moves = rows.reduce((a, r) => a + r.moveClaims, 0);
+    const okMoves = rows.reduce((a, r) => a + r.supportedMoves, 0);
+    const squares = rows.reduce((a, r) => a + r.squareClaims, 0);
+    const okSquares = rows.reduce((a, r) => a + r.supportedSquares, 0);
+    const summary = {
+      runs: rows.length,
+      moveClaims: moves,
+      supportedMoves: okMoves,
+      moveSupportRate: moves ? okMoves / moves : null,
+      squareClaims: squares,
+      supportedSquares: okSquares,
+      squareSupportRate: squares ? okSquares / squares : null,
+      depthWrong: rows.filter((r) => r.depthClaims.length && !r.depthOk).length,
+      mateClaims: rows.filter((r) => r.mateClaim).length,
+      toolErrors: rows.reduce((a, r) => a + r.toolErrors, 0),
+    };
+    await mkdir('artifacts/tal-eval', { recursive: true });
+    const out = `artifacts/tal-eval/${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+    await writeFile(out, JSON.stringify({ model: MODEL, summary, rows }, null, 2));
+    console.log('\n' + JSON.stringify(summary, null, 2) + `\n→ ${out}`);
+  }
+
+  if (mode === 'ask') {
+    const [, , , gameId, nodeId, question = 'What is happening here?'] = process.argv;
+    const study = saved.get(gameId);
+    if (!study) throw new Error(`Unknown game ${gameId}; one of ${[...saved.keys()].join(', ')}`);
+    const { EvolutionBuilder } = await load('/src/lib/evolution.ts');
+    const { askTal } = await load('/src/lib/talAgent.ts');
+    const { moveLabel } = await load('/src/lib/games.ts');
+    const builder = new EvolutionBuilder(study.game);
+    const analysis = new Map(study.entries);
+    for (const [id, result] of analysis) builder.append(id, result, 20);
+    const node = builder.get(nodeId);
+    if (!node) throw new Error(`No node ${nodeId}`);
+    const ctx = { game: study.game, node: (id) => builder.get(id), analysis };
+    const auth = await credentials();
+    const prompt = `The user has selected node ${nodeId} (${moveLabel(node)}) in ${study.game.headers.White} vs ${study.game.headers.Black}. Question: ${question}`;
+    console.log(`> ${prompt}\n`);
+    for await (const event of askTal(ctx, prompt, { key: auth['x-api-key'] })) {
+      if (event.type === 'text') process.stdout.write(event.text);
+      else if (event.type === 'tool_call')
+        console.log(`\n  [tool] ${event.name}(${JSON.stringify(event.input)})`);
+      else if (event.type === 'tool_result')
+        console.log(`  [result] ${JSON.stringify(event.result).slice(0, 160)}…\n`);
+      else if (event.type === 'done') console.log(`\n\n[${event.stopReason}]`);
+    }
+  }
+
   if (mode === 'analyses') {
     const written = [];
     for (const [id, { game, entries }] of saved) {
@@ -216,4 +340,85 @@ async function withRetries(task, attempts = 4) {
       await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
     }
   }
+}
+
+// Collect every SAN, square and depth a tool handed back, so a claim can be
+// checked against what Tal was actually shown. A returned move also vouches for
+// its destination square ("the check on a1" after Qa1+).
+function addSan(san, into) {
+  const bare = san.replace(/[+#]$/, '');
+  into.san.add(bare);
+  const target = bare.replace(/=[QRBN]$/, '').match(/([a-h][1-8])$/);
+  if (target) into.squares.add(target[1]);
+}
+function harvest(value, into) {
+  if (value === null || typeof value !== 'object') return;
+  if (Array.isArray(value)) return value.forEach((v) => harvest(v, into));
+  for (const [key, v] of Object.entries(value)) {
+    if (key === 'san' && typeof v === 'string') addSan(v, into);
+    else if ((key === 'lineSan' || key === 'movesSan') && Array.isArray(v))
+      v.forEach((m) => addSan(String(m), into));
+    else if ((key === 'square' || key === 'from' || key === 'to') && typeof v === 'string')
+      into.squares.add(v);
+    else if ((key === 'depth' || key === 'requestedDepth') && typeof v === 'number')
+      into.depths.add(v);
+    else harvest(v, into);
+  }
+}
+
+function scoreClaims(text, returned, node) {
+  const MOVE_TOKEN =
+    /(?<![\w/])(O-O(?:-O)?|[KQRBN][a-h]?[1-8]?x?[a-h][1-8]|[a-h]x[a-h][1-8](?:=[QRBN])?|[a-h][1-8]=[QRBN])(?:[+#])?(?![\w/])/g;
+  const SQUARE_TOKEN = /(?<![\w/=.-])([a-h][1-8])(?![\w/])/g;
+  const words = (w) => {
+    const n = [
+      'ten',
+      'eleven',
+      'twelve',
+      'thirteen',
+      'fourteen',
+      'fifteen',
+      'sixteen',
+      'seventeen',
+      'eighteen',
+      'nineteen',
+      'twenty',
+    ].indexOf(w.toLowerCase());
+    return n >= 0 ? n + 10 : Number(w);
+  };
+
+  const clean = text.replace(/[…]/g, ' ');
+  const moveClaims = [...clean.matchAll(MOVE_TOKEN)].map((m) => m[1]);
+  const supported = moveClaims.filter((m) => returned.san.has(m));
+  const unsupported = moveClaims.filter((m) => !returned.san.has(m));
+  // Bare squares: "the knight on f4". Pawn moves like "e5" are ambiguous with squares,
+  // so a bare token counts as supported if it is a square shown OR a pawn move returned.
+  const squareClaims = [...clean.matchAll(SQUARE_TOKEN)].map((m) => m[1]);
+  const supportedSquares = squareClaims.filter(
+    (sq) => returned.squares.has(sq) || returned.san.has(sq),
+  );
+  const depthClaims = [
+    ...clean.matchAll(
+      /depth\s+(?:of\s+)?(\d{1,2}|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)/gi,
+    ),
+  ].map((m) => words(m[1]));
+  const depthOk = depthClaims.every((d) => returned.depths.has(d));
+  const mateClaim = /\b(checkmate|mates? in|mated)\b/i.test(clean) && !node.mate;
+  return {
+    moveClaims: moveClaims.length,
+    supportedMoves: supported.length,
+    unsupported: [
+      ...new Set([
+        ...unsupported,
+        ...squareClaims.filter((sq) => !returned.squares.has(sq) && !returned.san.has(sq)),
+      ]),
+    ],
+    squareClaims: squareClaims.length,
+    supportedSquares: supportedSquares.length,
+    depthClaims,
+    depthOk,
+    mateClaim,
+    toolErrors: returned.errors,
+    toolCalls: returned.calls,
+  };
 }

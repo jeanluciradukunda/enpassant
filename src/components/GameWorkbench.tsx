@@ -508,7 +508,7 @@ function Workbench({
               </span>
             </div>
           </div>
-          <TalPanel gameId={game.id} nodeId={selected.id} />
+          <TalPanel game={game} graph={graph} analysis={analysis} selected={selected} />
           {selected.legalReplies !== undefined && selected.legalReplies > 0 && !selected.draw && (
             <p className="branch-help">
               {selected.legalReplies === 1
