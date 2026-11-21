@@ -126,7 +126,13 @@ export async function nextArchive(
   while (remaining.length) {
     const url = remaining.shift()!;
     progress(`Reading games · ${url.split('/').slice(-2).join('/')}`);
-    const games = (await monthGames(url, signal)).map((game) => parseGame(game.pgn));
+    const games = (await monthGames(url, signal)).flatMap((game) => {
+      try {
+        return [parseGame(game.pgn)];
+      } catch {
+        return [];
+      }
+    });
     if (games.length) return { games, remaining };
   }
   return { games: [], remaining };
