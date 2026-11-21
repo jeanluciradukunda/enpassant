@@ -71,7 +71,7 @@ export function parseGame(pgn: string): Game {
 }
 
 /** Games in a collection start at a tag line that follows move text; no tag is required to come first.
- *  A tag-shaped line inside a brace comment is comment text. */
+ *  A tag-shaped line inside a brace comment is comment text; `;` comments end with their line. */
 function splitGames(pgn: string): string[] {
   const parts: string[][] = [[]];
   let inMoves = false;
@@ -84,8 +84,10 @@ function splitGames(pgn: string): string[] {
     } else if (!tag && line.trim()) inMoves = true;
     if (!tag)
       for (const char of line) {
-        if (char === '{') inComment = true;
-        else if (char === '}') inComment = false;
+        if (char === '}') inComment = false;
+        else if (inComment) continue;
+        else if (char === ';') break;
+        else if (char === '{') inComment = true;
       }
     parts.at(-1)!.push(line);
   }

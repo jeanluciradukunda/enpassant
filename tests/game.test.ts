@@ -42,6 +42,9 @@ describe('legal game reconstruction', () => {
     expect(parseGames('1. e4 {[%clk 0:05:00]} e5\n{\n[%eval 0.3]\n} 2. Nf3 *')).toHaveLength(1);
     expect(parseGames('1. e4 e5 {note\n[Event "Fake"]\nend} 2. Nf3 *')).toHaveLength(1);
     expect(
+      parseGames('[Event "One"]\n\n1. e4 ; note { here\n1... e5 *\n\n[Event "Two"]\n\n1. d4 *'),
+    ).toHaveLength(2);
+    expect(
       parseGames('1. e4 {a} e5 {b\n} *\n\n[Event "Two"]\n\n1. d4 *').map(
         (game) => game.positions.length,
       ),
