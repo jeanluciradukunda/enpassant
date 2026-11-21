@@ -77,7 +77,7 @@ function splitGames(pgn: string): string[] {
   let inMoves = false;
   let inComment = false;
   for (const line of pgn.split(/\r?\n/)) {
-    const tag = !inComment && /^\[\w+\s+".*"\]$/.test(line.trim());
+    const tag = !inComment && /^\[\s*\w+\s+".*"\s*\]$/.test(line.trim());
     if (tag && inMoves) {
       parts.push([]);
       inMoves = false;
