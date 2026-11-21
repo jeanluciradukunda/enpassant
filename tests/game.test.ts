@@ -3,7 +3,7 @@ import { Chess } from 'chess.js';
 import { parseGame, parseGames, moveLabel } from '../src/lib/games';
 import { cacheKey, parseInfo } from '../src/lib/engine';
 import { EvolutionBuilder, visibleAt } from '../src/lib/evolution';
-import { identifyInput, importLink } from '../src/lib/importers';
+import { identifyInput, importLink, nextArchive } from '../src/lib/importers';
 import type { Analysis } from '../src/types/game';
 
 describe('legal game reconstruction', () => {
@@ -163,6 +163,32 @@ describe('import boundaries', () => {
       'https://api.chess.com/pub/player/tester/games/archives',
       url,
     ]);
+  });
+  it('lists the readable games of a month that also holds one it cannot read', async () => {
+    const month = 'https://api.chess.com/pub/player/tester/games/2026/08';
+    const game = (pgn: string, end_time: number) => ({
+      rules: 'chess',
+      pgn,
+      url: `https://www.chess.com/game/live/${end_time}`,
+      end_time,
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              games: [
+                game('[Event "Live Chess"]\n\n1. e4 e5 1-0', 2),
+                game('[Event "Live Chess"]\n[Termination "abandoned"]\n\n0-1', 1),
+              ],
+            }),
+          ),
+      ),
+    );
+    const page = await nextArchive([month], new AbortController().signal, () => {});
+    expect(page.games).toHaveLength(1);
+    expect(page.games[0].positions).toHaveLength(3);
   });
   it('reports rate limiting as recoverable without consuming private data', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 429 })));
