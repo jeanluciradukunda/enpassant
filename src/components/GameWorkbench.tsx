@@ -5,6 +5,7 @@ import { unfoldGraph } from '../lib/unfold';
 import type { AnalysisProfile } from '../lib/engine';
 import { candidates } from '../lib/semantics';
 import type { CheckMode } from '../lib/diagramStyle';
+import { bundledStudyFor } from '../lib/seedAnalysis';
 import { useAnalysis } from '../lib/useAnalysis';
 import { moveLabel, scoreLabel } from '../lib/games';
 import { toSan } from '../lib/san';
@@ -19,7 +20,7 @@ export function GameWorkbench(props: WorkbenchProps) {
   const [profile, setProfile] = useState<AnalysisProfile>('quick');
   return (
     <Workbench
-      key={`${props.game.id}:${profile}`}
+      key={`${profile}:${props.game.pgn}`}
       {...props}
       profile={profile}
       onProfile={setProfile}
@@ -158,6 +159,7 @@ function Workbench({
       setExploringPly(null);
     }
   }
+  const bundled = useMemo(() => !!bundledStudyFor(game), [game]);
   const share = game.headers.Link || game.headers.Site;
   const sourceLink =
     share && /^https:\/\/(?:www\.)?(?:chess\.com|lichess\.org)\//.test(share) ? share : undefined;
@@ -508,7 +510,7 @@ function Workbench({
               </span>
             </div>
           </div>
-          <TalPanel gameId={game.id} nodeId={selected.id} />
+          {bundled && <TalPanel gameId={game.id} nodeId={selected.id} />}
           {selected.legalReplies !== undefined && selected.legalReplies > 0 && !selected.draw && (
             <p className="branch-help">
               {selected.legalReplies === 1

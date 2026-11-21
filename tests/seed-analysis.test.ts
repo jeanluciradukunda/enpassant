@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { cacheKey, QUICK_MS } from '../src/lib/engine';
 import { parseGame } from '../src/lib/games';
-import { seedEntries } from '../src/lib/seedAnalysis';
+import { bundledStudyFor, seedEntries } from '../src/lib/seedAnalysis';
+import { TAL_GAMES } from '../src/lib/studyGames';
 import type { Analysis } from '../src/types/game';
 
 const analysis: Analysis = { lines: [], depth: 13, milliseconds: 400 };
@@ -27,5 +28,13 @@ describe('bundled analysis seeding', () => {
     const game = parseGame('1. e4 *');
     expect(seedEntries(game, { gameId: 'other', entries: [['p0', analysis]] })).toEqual([]);
     expect(seedEntries(game, { gameId: game.id, entries: [['p9', analysis]] })).toEqual([]);
+  });
+  it('matches a bundled study only for that exact game, not for another game with the same id', () => {
+    for (const study of TAL_GAMES) {
+      const bundled = parseGame(study.pgn);
+      expect(bundledStudyFor(bundled)?.id).toBe(study.id);
+      const other = parseGame('1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 *');
+      expect(bundledStudyFor({ ...other, id: bundled.id })).toBeUndefined();
+    }
   });
 });

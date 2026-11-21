@@ -55,7 +55,7 @@ export function App() {
   return (
     <>
       {game ? (
-        <GameWorkbench key={game.id} game={game} onImport={() => setImporting(true)} />
+        <GameWorkbench key={game.pgn} game={game} onImport={() => setImporting(true)} />
       ) : (
         <main className="app-loading">
           <span className="wordmark">enpassant.</span>
