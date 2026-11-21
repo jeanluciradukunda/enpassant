@@ -70,16 +70,23 @@ export function parseGame(pgn: string): Game {
   return { id: (hash >>> 0).toString(36), pgn: normalized, headers, initialFen, positions };
 }
 
-/** Games in a collection start at a tag line that follows move text; no tag is required to come first. */
+/** Games in a collection start at a tag line that follows move text; no tag is required to come first.
+ *  A tag-shaped line inside a brace comment is comment text. */
 function splitGames(pgn: string): string[] {
   const parts: string[][] = [[]];
   let inMoves = false;
+  let inComment = false;
   for (const line of pgn.split(/\r?\n/)) {
-    const tag = /^\[\w+\s+".*"\]$/.test(line.trim());
+    const tag = !inComment && /^\[\w+\s+".*"\]$/.test(line.trim());
     if (tag && inMoves) {
       parts.push([]);
       inMoves = false;
     } else if (!tag && line.trim()) inMoves = true;
+    if (!tag)
+      for (const char of line) {
+        if (char === '{') inComment = true;
+        else if (char === '}') inComment = false;
+      }
     parts.at(-1)!.push(line);
   }
   return parts.map((part) => part.join('\n')).filter((part) => part.trim());

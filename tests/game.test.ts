@@ -40,6 +40,12 @@ describe('legal game reconstruction', () => {
     const games = parseGames(`${untitled('A')}\r\n\r\n${untitled('C')}`);
     expect(games.map((game) => game.headers.White)).toEqual(['A', 'C']);
     expect(parseGames('1. e4 {[%clk 0:05:00]} e5\n{\n[%eval 0.3]\n} 2. Nf3 *')).toHaveLength(1);
+    expect(parseGames('1. e4 e5 {note\n[Event "Fake"]\nend} 2. Nf3 *')).toHaveLength(1);
+    expect(
+      parseGames('1. e4 {a} e5 {b\n} *\n\n[Event "Two"]\n\n1. d4 *').map(
+        (game) => game.positions.length,
+      ),
+    ).toEqual([3, 2]);
   });
 });
 
